@@ -1,0 +1,12 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      dotnet: 3.1
+    commands:
+      - dotnet tool install -g Amazon.Lambda.Tools
+  build:
+    commands:
+      - cd ParkingService
+      - dotnet lambda deploy-function --function-name $FUNCTION_NAME
