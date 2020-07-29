@@ -13,9 +13,5 @@
     "function-runtime" : "dotnetcore3.1",
     "function-memory-size" : 256,
     "function-timeout"     : 30,
-    "function-handler"     : "ParkingService::ParkingService.LambdaEntryPoint::RunTasks",
-    "function-name"        : "ParkingService-prod",
-    "function-role"        : "arn:aws:iam::059500287549:role/lambda_exec_ParkingService-prod",
-    "tracing-mode"         : "PassThrough",
-    "environment-variables" : ""
+    "function-handler"     : "ParkingService::ParkingService.LambdaEntryPoint::RunTasks"
 }
