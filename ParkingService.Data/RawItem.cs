@@ -7,7 +7,7 @@
     using Amazon.DynamoDBv2.DocumentModel;
 
     [DynamoDBTable("override-this-per-environment")]
-    public class Item
+    public class RawItem
     {
         [DynamoDBHashKey]
         [DynamoDBGlobalSecondaryIndexRangeKey("SK-PK-index")]
