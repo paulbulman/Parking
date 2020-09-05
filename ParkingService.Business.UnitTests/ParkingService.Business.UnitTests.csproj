@@ -9,7 +9,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
     <PackageReference Include="Moq" Version="4.14.5" />
-    <PackageReference Include="NodaTime" Version="3.0.0" />
     <PackageReference Include="NodaTime.Testing" Version="3.0.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
@@ -23,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ParkingService.Data\ParkingService.Data.csproj" />
+    <ProjectReference Include="..\ParkingService.Business\ParkingService.Business.csproj" />
   </ItemGroup>
 
 </Project>

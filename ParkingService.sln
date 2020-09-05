@@ -9,7 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParkingService.Model", "Par
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParkingService.Data", "ParkingService.Data\ParkingService.Data.csproj", "{AE6525F7-C857-421B-B456-22D37EB4EEF6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParkingService.Data.UnitTests", "ParkingService.Data.UnitTests\ParkingService.Data.UnitTests.csproj", "{F0FD8E0D-B85F-4B59-A56B-628C4A64FC1E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParkingService.Data.UnitTests", "ParkingService.Data.UnitTests\ParkingService.Data.UnitTests.csproj", "{F0FD8E0D-B85F-4B59-A56B-628C4A64FC1E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParkingService.Business", "ParkingService.Business\ParkingService.Business.csproj", "{1397F3EF-B300-4BBE-8518-6D8DAAA38970}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParkingService.Business.UnitTests", "ParkingService.Business.UnitTests\ParkingService.Business.UnitTests.csproj", "{91C28322-C932-4EAE-96CF-A9C7F6E4DDE7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,14 @@ Global
 		{F0FD8E0D-B85F-4B59-A56B-628C4A64FC1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F0FD8E0D-B85F-4B59-A56B-628C4A64FC1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F0FD8E0D-B85F-4B59-A56B-628C4A64FC1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1397F3EF-B300-4BBE-8518-6D8DAAA38970}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1397F3EF-B300-4BBE-8518-6D8DAAA38970}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1397F3EF-B300-4BBE-8518-6D8DAAA38970}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1397F3EF-B300-4BBE-8518-6D8DAAA38970}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91C28322-C932-4EAE-96CF-A9C7F6E4DDE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91C28322-C932-4EAE-96CF-A9C7F6E4DDE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91C28322-C932-4EAE-96CF-A9C7F6E4DDE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91C28322-C932-4EAE-96CF-A9C7F6E4DDE7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
