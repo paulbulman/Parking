@@ -28,18 +28,9 @@
 
         public async Task<IReadOnlyCollection<RawItem>> GetRequests(YearMonth yearMonth)
         {
-            using var context = new DynamoDBContext(client);
-
-            var config = new DynamoDBOperationConfig
-            {
-                IndexName = "SK-PK-index",
-                OverrideTableName = TableName
-            };
-
             var hashKeyValue = $"REQUESTS#{YearMonthPattern.Iso.Format(yearMonth)}";
-            var query = context.QueryAsync<RawItem>(hashKeyValue, config);
 
-            return await query.GetRemainingAsync();
+            return await QuerySecondaryIndex(hashKeyValue);
         }
 
         public async Task<IReadOnlyCollection<RawItem>> GetReservations(YearMonth yearMonth)
@@ -60,16 +51,24 @@
 
         public async Task<IReadOnlyCollection<RawItem>> GetUsers()
         {
+            const string HashKeyValue = "PROFILE";
+
+            return await QuerySecondaryIndex(HashKeyValue);
+        }
+
+        private async Task<IReadOnlyCollection<RawItem>> QuerySecondaryIndex(string hashKeyValue)
+        {
+            const string SecondaryIndexName = "SK-PK-index";
+
             using var context = new DynamoDBContext(client);
 
             var config = new DynamoDBOperationConfig
             {
-                IndexName = "SK-PK-index",
+                IndexName = SecondaryIndexName,
                 OverrideTableName = TableName
             };
 
-            const string HashKeyValue = "PROFILE";
-            var query = context.QueryAsync<RawItem>(HashKeyValue, config);
+            var query = context.QueryAsync<RawItem>(hashKeyValue, config);
 
             return await query.GetRemainingAsync();
         }
