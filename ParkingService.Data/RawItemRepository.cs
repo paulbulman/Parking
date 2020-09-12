@@ -14,6 +14,8 @@
         Task<IReadOnlyCollection<RawItem>> GetRequests(YearMonth yearMonth);
 
         Task<IReadOnlyCollection<RawItem>> GetReservations(YearMonth yearMonth);
+
+        Task<IReadOnlyCollection<RawItem>> GetUsers();
     }
 
     public class RawItemRepository : IRawItemRepository
@@ -53,6 +55,22 @@
             var conditionValue = $"RESERVATIONS#{YearMonthPattern.Iso.Format(yearMonth)}";
             var query = context.QueryAsync<RawItem>(HashKeyValue, QueryOperator.Equal, new[] {conditionValue}, config);
             
+            return await query.GetRemainingAsync();
+        }
+
+        public async Task<IReadOnlyCollection<RawItem>> GetUsers()
+        {
+            using var context = new DynamoDBContext(client);
+
+            var config = new DynamoDBOperationConfig
+            {
+                IndexName = "SK-PK-index",
+                OverrideTableName = TableName
+            };
+
+            const string HashKeyValue = "PROFILE";
+            var query = context.QueryAsync<RawItem>(HashKeyValue, config);
+
             return await query.GetRemainingAsync();
         }
     }
