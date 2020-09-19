@@ -14,6 +14,8 @@
 
     public interface IRawItemRepository
     {
+        Task<string> GetConfiguration();
+
         Task<IReadOnlyCollection<RawItem>> GetRequests(YearMonth yearMonth);
 
         Task<IReadOnlyCollection<RawItem>> GetReservations(YearMonth yearMonth);

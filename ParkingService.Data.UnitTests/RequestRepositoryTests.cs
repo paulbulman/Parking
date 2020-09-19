@@ -77,7 +77,7 @@ namespace ParkingService.Data.UnitTests
                 .Setup(r => r.GetRequests(yearMonth))
                 .Returns(Task.FromResult((IReadOnlyCollection<RawItem>)mockResult));
 
-        public static RawItem CreateRawItem(
+        private static RawItem CreateRawItem(
             string userId,
             string monthKey,
             params KeyValuePair<string, string>[] requestData) =>

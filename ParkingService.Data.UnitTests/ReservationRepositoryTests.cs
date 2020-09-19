@@ -69,7 +69,7 @@ namespace ParkingService.Data.UnitTests
                 .Setup(r => r.GetReservations(yearMonth))
                 .Returns(Task.FromResult((IReadOnlyCollection<RawItem>)mockResult));
 
-        public static RawItem CreateRawItem(
+        private static RawItem CreateRawItem(
             string monthKey,
             params KeyValuePair<string, List<string>>[] reservationData) =>
             new RawItem
