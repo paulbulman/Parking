@@ -2,10 +2,13 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Threading.Tasks;
     using Amazon.DynamoDBv2;
     using Amazon.DynamoDBv2.DataModel;
     using Amazon.DynamoDBv2.DocumentModel;
+    using Amazon.S3;
+    using Amazon.S3.Model;
     using NodaTime;
     using NodaTime.Text;
 
@@ -20,11 +23,38 @@
 
     public class RawItemRepository : IRawItemRepository
     {
-        private readonly IAmazonDynamoDB client;
+        private readonly IAmazonDynamoDB dynamoDbClient;
 
-        public RawItemRepository(IAmazonDynamoDB client) => this.client = client;
+        private readonly IAmazonS3 s3Client;
+
+        public RawItemRepository(IAmazonDynamoDB dynamoDbClient, IAmazonS3 s3Client)
+        {
+            this.dynamoDbClient = dynamoDbClient;
+            this.s3Client = s3Client;
+        }
+
+        private static string BucketName => Environment.GetEnvironmentVariable("BUCKET_NAME");
 
         private static string TableName => Environment.GetEnvironmentVariable("TABLE_NAME");
+
+        public async Task<string> GetConfiguration()
+        {
+            const string ObjectKey = "configuration.json";
+
+            var request = new GetObjectRequest
+            {
+                BucketName = BucketName,
+                Key = ObjectKey
+            };
+
+            using var response = await s3Client.GetObjectAsync(request);
+
+            await using var responseStream = response.ResponseStream;
+
+            using var reader = new StreamReader(responseStream);
+
+            return await reader.ReadToEndAsync();
+        }
 
         public async Task<IReadOnlyCollection<RawItem>> GetRequests(YearMonth yearMonth)
         {
@@ -35,7 +65,7 @@
 
         public async Task<IReadOnlyCollection<RawItem>> GetReservations(YearMonth yearMonth)
         {
-            using var context = new DynamoDBContext(client);
+            using var context = new DynamoDBContext(dynamoDbClient);
 
             var config = new DynamoDBOperationConfig
             {
@@ -44,8 +74,8 @@
 
             const string HashKeyValue = "GLOBAL";
             var conditionValue = $"RESERVATIONS#{YearMonthPattern.Iso.Format(yearMonth)}";
-            var query = context.QueryAsync<RawItem>(HashKeyValue, QueryOperator.Equal, new[] {conditionValue}, config);
-            
+            var query = context.QueryAsync<RawItem>(HashKeyValue, QueryOperator.Equal, new[] { conditionValue }, config);
+
             return await query.GetRemainingAsync();
         }
 
@@ -60,7 +90,7 @@
         {
             const string SecondaryIndexName = "SK-PK-index";
 
-            using var context = new DynamoDBContext(client);
+            using var context = new DynamoDBContext(dynamoDbClient);
 
             var config = new DynamoDBOperationConfig
             {
