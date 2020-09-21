@@ -9,10 +9,10 @@ namespace ParkingService.Data.UnitTests
     using NodaTime.Testing.Extensions;
     using Xunit;
 
-    public class RequestRepositoryTests
+    public static class RequestRepositoryTests
     {
         [Fact]
-        public async void Converts_raw_items_to_requests()
+        public static async void Converts_raw_items_to_requests()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
 
@@ -51,7 +51,7 @@ namespace ParkingService.Data.UnitTests
         }
 
         [Fact]
-        public async void Filters_requests_outside_specified_date_range()
+        public static async void Filters_requests_outside_specified_date_range()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
 

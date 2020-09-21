@@ -3,10 +3,10 @@
     using Moq;
     using Xunit;
 
-    public class ConfigurationRepositoryTests
+    public static class ConfigurationRepositoryTests
     {
         [Fact]
-        public async void Converts_raw_data_to_configuration()
+        public static async void Converts_raw_data_to_configuration()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
 
@@ -20,7 +20,7 @@
             Assert.NotNull(result);
 
             Assert.Equal(3.5m, result.NearbyDistance);
-            Assert.Equal(2, result.ReservableSpaces);
+            Assert.Equal(2, result.ShortLeadTimeSpaces);
             Assert.Equal(9, result.TotalSpaces);
         }
     }

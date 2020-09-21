@@ -9,12 +9,12 @@ namespace ParkingService.Business.UnitTests
     using Model;
     using Xunit;
 
-    public class DateCalculatorTests
+    public static class DateCalculatorTests
     {
         private static readonly DateTimeZone LondonTimeZone = DateTimeZoneProviders.Tzdb["Europe/London"];
 
         [Fact]
-        public void GetActiveDates_returns_current_date_first()
+        public static void GetActiveDates_returns_current_date_first()
         {
             var currentDate = 28.August(2020);
             var result = CreateDateCalculator(currentDate).GetActiveDates();
@@ -22,14 +22,14 @@ namespace ParkingService.Business.UnitTests
         }
 
         [Fact]
-        public void GetActiveDates_returns_last_day_of_next_month_last()
+        public static void GetActiveDates_returns_last_day_of_next_month_last()
         {
             var result = CreateDateCalculator(28.August(2020)).GetActiveDates();
             Assert.Equal(30.September(2020), result.Last());
         }
 
         [Fact]
-        public void GetActiveDates_excludes_weekends()
+        public static void GetActiveDates_excludes_weekends()
         {
             var result = CreateDateCalculator(28.August(2020)).GetActiveDates();
             Assert.DoesNotContain(29.August(2020), result);
@@ -37,7 +37,7 @@ namespace ParkingService.Business.UnitTests
         }
 
         [Fact]
-        public void GetActiveDates_excludes_bank_holidays()
+        public static void GetActiveDates_excludes_bank_holidays()
         {
             var bankHoliday = 31.August(2020);
             var result = CreateDateCalculator(28.August(2020), bankHoliday).GetActiveDates();
@@ -45,7 +45,7 @@ namespace ParkingService.Business.UnitTests
         }
 
         [Fact]
-        public void GetActiveDates_uses_London_time_zone()
+        public static void GetActiveDates_uses_London_time_zone()
         {
             var winterInstant = 31.January(2020).At(23, 0, 0).Utc();
             var winterResult = CreateDateCalculator(winterInstant).GetActiveDates();
@@ -57,7 +57,7 @@ namespace ParkingService.Business.UnitTests
         }
 
         [Fact]
-        public void GetShortLeadTimeAllocationDates_returns_current_working_day_if_called_before_11_am()
+        public static void GetShortLeadTimeAllocationDates_returns_current_working_day_if_called_before_11_am()
         {
             var instant = 4.September(2020).At(10, 59, 59).InZoneStrictly(LondonTimeZone).ToInstant();
             
@@ -68,7 +68,7 @@ namespace ParkingService.Business.UnitTests
         }
 
         [Fact]
-        public void GetShortLeadTimeAllocationDates_returns_current_and_next_working_days_if_called_after_11_am()
+        public static void GetShortLeadTimeAllocationDates_returns_current_and_next_working_days_if_called_after_11_am()
         {
             var instant = 4.September(2020).At(11, 0, 0).InZoneStrictly(LondonTimeZone).ToInstant(); 
 
@@ -80,7 +80,7 @@ namespace ParkingService.Business.UnitTests
         }
 
         [Fact]
-        public void GetShortLeadTimeAllocationDates_uses_London_time_zone()
+        public static void GetShortLeadTimeAllocationDates_uses_London_time_zone()
         {
             var winterInstant = 31.January(2020).At(10, 0, 0).Utc();
             var winterResult = CreateDateCalculator(winterInstant).GetShortLeadTimeAllocationDates();
@@ -92,7 +92,7 @@ namespace ParkingService.Business.UnitTests
         }
 
         [Fact]
-        public void GetShortLeadTimeAllocationDates_returns_next_working_day_if_called_at_weekend()
+        public static void GetShortLeadTimeAllocationDates_returns_next_working_day_if_called_at_weekend()
         {
             var instant = 5.September(2020).At(11, 0, 0).InZoneStrictly(LondonTimeZone).ToInstant();
 
@@ -103,7 +103,7 @@ namespace ParkingService.Business.UnitTests
         }
 
         [Fact]
-        public void GetShortLeadTimeAllocationDates_returns_next_working_day_if_called_on_bank_holiday()
+        public static void GetShortLeadTimeAllocationDates_returns_next_working_day_if_called_on_bank_holiday()
         {
             var bankHoliday = 31.August(2020);
             var instant = bankHoliday.At(11, 0, 0).InZoneStrictly(LondonTimeZone).ToInstant();
@@ -115,21 +115,21 @@ namespace ParkingService.Business.UnitTests
         }
 
         [Fact]
-        public void GetLongLeadTimeAllocationDates_returns_date_after_short_lead_time_period_first()
+        public static void GetLongLeadTimeAllocationDates_returns_date_after_short_lead_time_period_first()
         {
             var result = CreateDateCalculator(7.September(2020)).GetLongLeadTimeAllocationDates();
             Assert.Equal(8.September(2020), result.First());
         }
 
         [Fact]
-        public void GetLongLeadTimeAllocationDates_returns_date_at_end_of_next_week_last()
+        public static void GetLongLeadTimeAllocationDates_returns_date_at_end_of_next_week_last()
         {
             var result = CreateDateCalculator(7.September(2020)).GetLongLeadTimeAllocationDates();
             Assert.Equal(18.September(2020), result.Last());
         }
 
         [Fact]
-        public void GetLongLeadTimeAllocationDates_rolls_over_to_new_week_on_Thursdays()
+        public static void GetLongLeadTimeAllocationDates_rolls_over_to_new_week_on_Thursdays()
         {
             // On a Wednesday, the last date should be the Friday 9 days later.
             var wednesdayResult = CreateDateCalculator(9.September(2020)).GetLongLeadTimeAllocationDates();
@@ -143,7 +143,7 @@ namespace ParkingService.Business.UnitTests
         }
 
         [Fact]
-        public void GetLongLeadTimeAllocationDates_uses_London_time_zone()
+        public static void GetLongLeadTimeAllocationDates_uses_London_time_zone()
         {
             // This is still Wednesday local time, so should only includes the current and next weeks.
             var winterInstant = 1.January(2020).At(23, 0, 0).Utc();

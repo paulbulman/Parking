@@ -6,10 +6,10 @@ using Xunit;
 
 namespace ParkingService.Data.UnitTests
 {
-    public class UserRepositoryTests
+    public static class UserRepositoryTests
     {
         [Fact]
-        public async void Converts_raw_items_to_users()
+        public static async void Converts_raw_items_to_users()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
 

@@ -2,16 +2,16 @@
 {
     public class Configuration
     {
-        public Configuration(decimal nearbyDistance, int reservableSpaces, int totalSpaces)
+        public Configuration(decimal nearbyDistance, int shortLeadTimeSpaces, int totalSpaces)
         {
             NearbyDistance = nearbyDistance;
-            ReservableSpaces = reservableSpaces;
+            ShortLeadTimeSpaces = shortLeadTimeSpaces;
             TotalSpaces = totalSpaces;
         }
 
         public decimal NearbyDistance { get; }
         
-        public int ReservableSpaces { get; }
+        public int ShortLeadTimeSpaces { get; }
         
         public int TotalSpaces { get; }
     }
