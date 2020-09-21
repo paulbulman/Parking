@@ -16,7 +16,8 @@ namespace ParkingService.Data.UnitTests
             var rawItems = new[]
             {
                 new RawItem { PrimaryKey = "USER#Id1", SortKey = "PROFILE", CommuteDistance = 1.23m },
-                new RawItem { PrimaryKey = "USER#Id2", SortKey = "PROFILE", CommuteDistance = 2.34m }
+                new RawItem { PrimaryKey = "USER#Id2", SortKey = "PROFILE", CommuteDistance = 2.34m },
+                new RawItem { PrimaryKey = "USER#Id3", SortKey = "PROFILE" }
             };
             mockRawItemRepository.Setup(r => r.GetUsers()).ReturnsAsync(rawItems);
 
@@ -26,16 +27,17 @@ namespace ParkingService.Data.UnitTests
             
             Assert.NotNull(result);
             
-            Assert.Equal(2, result.Count);
+            Assert.Equal(rawItems.Length, result.Count);
 
             CheckUser(result, "Id1", 1.23m);
             CheckUser(result, "Id2", 2.34m);
+            CheckUser(result, "Id3", null);
         }
 
         private static void CheckUser(
             IEnumerable<User> result,
             string expectedUserId,
-            decimal expectedCommuteDistance)
+            decimal? expectedCommuteDistance)
         {
             var actual = result.Where(u => 
                 u.UserId == expectedUserId && 

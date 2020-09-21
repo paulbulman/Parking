@@ -26,7 +26,7 @@
         public Dictionary<string, List<string>> Reservations { get; set; }
 
         [DynamoDBProperty("commuteDistance")]
-        public decimal CommuteDistance { get; set; }
+        public decimal? CommuteDistance { get; set; }
     }
 
     public class ReservationsConverter : IPropertyConverter
