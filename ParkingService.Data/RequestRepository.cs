@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
     using Model;
@@ -32,6 +33,24 @@
             }
 
             return matchingRequests;
+        }
+
+        public async Task SaveRequests(IReadOnlyCollection<Request> requests)
+        {
+            var rawItems = new List<RawItem>();
+
+            foreach (var userRequests in requests.GroupBy(r => r.UserId))
+            {
+                var userId = userRequests.Key;
+
+                var userMonthRequests = userRequests
+                    .GroupBy(request => request.Date.ToYearMonth())
+                    .Select(yearMonthRequests => CreateRawItem(userId, yearMonthRequests));
+                
+                rawItems.AddRange(userMonthRequests);
+            }
+
+            await rawItemRepository.SaveItems(rawItems);
         }
 
         private static IEnumerable<Request> CreateWholeMonthRequests(
@@ -67,5 +86,27 @@
 
         private static LocalDate CreateLocalDate(YearMonth yearMonth, string dayKey) =>
             new LocalDate(yearMonth.Year, yearMonth.Month, int.Parse(dayKey));
+
+        private static RawItem CreateRawItem(string userId, IGrouping<YearMonth, Request> yearMonthRequests)
+        {
+            return new RawItem
+            {
+                PrimaryKey = $"USER#{userId}",
+                SortKey = $"REQUESTS#{yearMonthRequests.Key.ToString("yyyy-MM", CultureInfo.InvariantCulture)}",
+                Requests = yearMonthRequests.ToDictionary(CreateRawRequestDayKey, CreateRawRequestStatus)
+            };
+        }
+
+        private static string CreateRawRequestDayKey(Request request) =>
+            request.Date.Day.ToString("D2", CultureInfo.InvariantCulture);
+
+        private static string CreateRawRequestStatus(Request request) =>
+            request.Status switch
+            {
+                RequestStatus.Requested => "REQUESTED",
+                RequestStatus.Allocated => "ALLOCATED",
+                RequestStatus.Cancelled => "CANCELLED",
+                _ => throw new ArgumentOutOfRangeException(nameof(request))
+            };
     }
 }

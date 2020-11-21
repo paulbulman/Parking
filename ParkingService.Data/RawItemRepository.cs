@@ -21,6 +21,8 @@
         Task<IReadOnlyCollection<RawItem>> GetReservations(YearMonth yearMonth);
 
         Task<IReadOnlyCollection<RawItem>> GetUsers();
+
+        Task SaveItems(IEnumerable<RawItem> rawItems);
     }
 
     public class RawItemRepository : IRawItemRepository
@@ -86,6 +88,21 @@
             const string HashKeyValue = "PROFILE";
 
             return await QuerySecondaryIndex(HashKeyValue);
+        }
+
+        public async Task SaveItems(IEnumerable<RawItem> rawItems)
+        {
+            using var context = new DynamoDBContext(dynamoDbClient);
+
+            var config = new DynamoDBOperationConfig
+            {
+                OverrideTableName = TableName
+            };
+
+            foreach (var rawItem in rawItems)
+            {
+                await context.SaveAsync(rawItem, config);
+            }
         }
 
         private async Task<IReadOnlyCollection<RawItem>> QuerySecondaryIndex(string hashKeyValue)

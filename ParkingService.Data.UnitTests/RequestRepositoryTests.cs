@@ -1,5 +1,6 @@
 namespace ParkingService.Data.UnitTests
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -69,6 +70,46 @@ namespace ParkingService.Data.UnitTests
             Assert.Empty(result);
         }
 
+        [Fact]
+        public static async void Converts_requests_to_raw_items()
+        {
+            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+            mockRawItemRepository
+                .Setup(r => r.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
+                .Returns(Task.CompletedTask);
+
+            var requestRepository = new RequestRepository(mockRawItemRepository.Object);
+            await requestRepository.SaveRequests(
+                new[]
+                {
+                    new Request("User1", 1.September(2020), RequestStatus.Allocated),
+                    new Request("User1", 2.September(2020), RequestStatus.Cancelled),
+                    new Request("User1", 3.October(2020), RequestStatus.Requested),
+                    new Request("User2", 4.October(2020), RequestStatus.Requested)
+                });
+
+            var expectedRawItems = new[]
+            {
+                CreateRawItem(
+                    "User1",
+                    "2020-09",
+                    KeyValuePair.Create("01", "ALLOCATED"),
+                    KeyValuePair.Create("02", "CANCELLED")),
+                CreateRawItem(
+                    "User1",
+                    "2020-10",
+                    KeyValuePair.Create("03", "REQUESTED")),
+                CreateRawItem(
+                    "User2",
+                    "2020-10",
+                    KeyValuePair.Create("04", "REQUESTED")),
+            };
+
+            mockRawItemRepository.Verify(r => r.SaveItems(
+                It.Is<IEnumerable<RawItem>>(actual => CheckRawItems(expectedRawItems, actual.ToList()))),
+                Times.Once);
+        }
+
         private static void SetupMockRepository(
             Mock<IRawItemRepository> mockRawItemRepository,
             YearMonth yearMonth,
@@ -100,6 +141,28 @@ namespace ParkingService.Data.UnitTests
                 r.Status == expectedStatus);
 
             Assert.Single(actual);
+        }
+
+        private static bool CheckRawItems(
+            IReadOnlyCollection<RawItem> expected,
+            IReadOnlyCollection<RawItem> actual) =>
+            actual.Count == expected.Count && expected.All(e => actual.Contains(e, new RawRequestsComparer()));
+
+        private class RawRequestsComparer : IEqualityComparer<RawItem>
+        {
+            public bool Equals(RawItem first, RawItem second) =>
+                first != null &&
+                second != null &&
+                first.PrimaryKey == second.PrimaryKey &&
+                first.SortKey == second.SortKey &&
+                CompareRequests(first.Requests, second.Requests);
+
+            private static bool CompareRequests(IDictionary<string, string> first, IDictionary<string, string> second) =>
+                first != null &&
+                second != null &&
+                first.Keys.ToList().All(key => second.ContainsKey(key) && second[key] == first[key]);
+
+            public int GetHashCode(RawItem rawItem) => HashCode.Combine(rawItem.PrimaryKey, rawItem.SortKey, rawItem.Requests);
         }
     }
 }
