@@ -37,6 +37,31 @@
 
         public async Task SaveRequests(IReadOnlyCollection<Request> requests)
         {
+            if (!requests.Any())
+            {
+                return;
+            }
+
+            var orderedRequests = requests.OrderBy(r => r.Date).ToList();
+
+            var firstDate = orderedRequests.First().Date.With(DateAdjusters.StartOfMonth);
+            var lastDate = orderedRequests.Last().Date.With(DateAdjusters.EndOfMonth);
+            
+            var existingRequests = await GetRequests(firstDate, lastDate);
+
+            var combinedRequests = existingRequests
+                .Where(existingRequest => !IsOverwritten(existingRequest, requests))
+                .Concat(requests)
+                .ToList();
+
+            await SaveCombinedRequests(combinedRequests);
+        }
+
+        private static bool IsOverwritten(Request existingRequest, IEnumerable<Request> newRequests) =>
+            newRequests.Any(r => r.UserId == existingRequest.UserId && r.Date == existingRequest.Date);
+
+        private async Task SaveCombinedRequests(IReadOnlyCollection<Request> requests)
+        {
             var rawItems = new List<RawItem>();
 
             foreach (var userRequests in requests.GroupBy(r => r.UserId))

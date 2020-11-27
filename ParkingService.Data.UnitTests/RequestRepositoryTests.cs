@@ -13,7 +13,7 @@ namespace ParkingService.Data.UnitTests
     public static class RequestRepositoryTests
     {
         [Fact]
-        public static async void Converts_raw_items_to_requests()
+        public static async void GetRequests_converts_raw_items_to_requests()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
 
@@ -52,7 +52,7 @@ namespace ParkingService.Data.UnitTests
         }
 
         [Fact]
-        public static async void Filters_requests_outside_specified_date_range()
+        public static async void GetRequests_filters_requests_outside_specified_date_range()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
 
@@ -71,9 +71,12 @@ namespace ParkingService.Data.UnitTests
         }
 
         [Fact]
-        public static async void Converts_requests_to_raw_items()
+        public static async void SaveRequests_converts_requests_to_raw_items()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+            mockRawItemRepository
+                .Setup(r => r.GetRequests(It.IsAny<YearMonth>()))
+                .ReturnsAsync(new List<RawItem>());
             mockRawItemRepository
                 .Setup(r => r.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
                 .Returns(Task.CompletedTask);
@@ -107,6 +110,76 @@ namespace ParkingService.Data.UnitTests
 
             mockRawItemRepository.Verify(r => r.SaveItems(
                 It.Is<IEnumerable<RawItem>>(actual => CheckRawItems(expectedRawItems, actual.ToList()))),
+                Times.Once);
+        }
+        
+        [Fact]
+        public static async void SaveRequests_combines_new_and_existing_requests()
+        {
+            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+            mockRawItemRepository
+                .Setup(r => r.GetRequests(new YearMonth(2020, 9)))
+                .ReturnsAsync(new []
+                {
+                    CreateRawItem(
+                        "User1", 
+                        "2020-09", 
+                        KeyValuePair.Create("01", "ALLOCATED"),
+                        KeyValuePair.Create("02", "REQUESTED")),
+                    CreateRawItem(
+                        "User2",
+                        "2020-09",
+                        KeyValuePair.Create("03", "ALLOCATED"))
+                });
+            mockRawItemRepository
+                .Setup(r => r.GetRequests(new YearMonth(2020, 10)))
+                .ReturnsAsync(new[]
+                {
+                    CreateRawItem(
+                        "User1",
+                        "2020-10",
+                        KeyValuePair.Create("03", "REQUESTED"))
+                });
+            mockRawItemRepository
+                .Setup(r => r.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
+                .Returns(Task.CompletedTask);
+
+            var requestRepository = new RequestRepository(mockRawItemRepository.Object);
+            await requestRepository.SaveRequests(
+                new[]
+                {
+                    new Request("User1", 2.September(2020), RequestStatus.Allocated),
+                    new Request("User1", 3.September(2020), RequestStatus.Requested),
+                    new Request("User2", 3.October(2020), RequestStatus.Cancelled),
+                    new Request("User2", 4.October(2020), RequestStatus.Requested)
+                });
+
+            var expectedRawItems = new[]
+            {
+                CreateRawItem(
+                    "User1",
+                    "2020-09",
+                    KeyValuePair.Create("01", "ALLOCATED"),
+                    KeyValuePair.Create("02", "ALLOCATED"),
+                    KeyValuePair.Create("03", "REQUESTED")),
+                CreateRawItem(
+                    "User2",
+                    "2020-09",
+                    KeyValuePair.Create("03", "ALLOCATED")),
+                CreateRawItem(
+                    "User1",
+                    "2020-10",
+                    KeyValuePair.Create("03", "REQUESTED")),
+                CreateRawItem(
+                    "User2",
+                    "2020-10",
+                    KeyValuePair.Create("03", "CANCELLED"),
+                    KeyValuePair.Create("04", "REQUESTED")),
+                
+            };
+
+            mockRawItemRepository.Verify(r => r.SaveItems(
+                    It.Is<IEnumerable<RawItem>>(actual => CheckRawItems(expectedRawItems, actual.ToList()))),
                 Times.Once);
         }
 

@@ -23,9 +23,10 @@
         {
             var currentDate = this.GetCurrentDate();
 
-            var firstDayOfThisMonth = new LocalDate(currentDate.Year, currentDate.Month, 1);
-            var firstDayOfSubsequentMonth = firstDayOfThisMonth.PlusMonths(2);
-            var lastDayOfNextMonth = firstDayOfSubsequentMonth.PlusDays(-1);
+            var lastDayOfNextMonth = currentDate
+                .With(DateAdjusters.StartOfMonth)
+                .PlusMonths(1)
+                .With(DateAdjusters.EndOfMonth);
 
             return this.WorkingDatesBetween(currentDate, lastDayOfNextMonth);
         }
