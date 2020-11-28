@@ -6,7 +6,17 @@
     using Model;
     using NodaTime;
 
-    public class RequestSorter
+    public interface IRequestSorter
+    {
+        IReadOnlyCollection<Request> Sort(
+            LocalDate date,
+            IReadOnlyCollection<Request> requests,
+            IReadOnlyCollection<Reservation> reservations,
+            IReadOnlyCollection<User> users,
+            decimal nearbyDistance);
+    }
+
+    public class RequestSorter : IRequestSorter
     {
         private readonly Random random;
 
