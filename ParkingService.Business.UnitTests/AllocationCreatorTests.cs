@@ -35,7 +35,7 @@ namespace ParkingService.Business.UnitTests
             var existingRequests = new List<Request>();
 
             var actual = CreateAllocationCreator(existingRequests)
-                .Create(AllocationDate, existingRequests, Reservations, Users, Configuration, shortLeadTime: true)
+                .Create(AllocationDate, existingRequests, Reservations, Users, Configuration, LeadTimeType.Short)
                 .ToList();
 
             var expected = RequestSorterResult.ToList();
@@ -50,7 +50,7 @@ namespace ParkingService.Business.UnitTests
             var existingRequests = new List<Request>();
 
             var actual = CreateAllocationCreator(existingRequests)
-                .Create(AllocationDate, existingRequests, Reservations, Users, Configuration, shortLeadTime: false)
+                .Create(AllocationDate, existingRequests, Reservations, Users, Configuration, LeadTimeType.Long)
                 .ToList();
 
             var expected = RequestSorterResult.Take(2).ToList();
@@ -70,7 +70,7 @@ namespace ParkingService.Business.UnitTests
             };
 
             var actual = CreateAllocationCreator(existingRequests)
-                .Create(AllocationDate, existingRequests, Reservations, Users, Configuration, shortLeadTime: true)
+                .Create(AllocationDate, existingRequests, Reservations, Users, Configuration, LeadTimeType.Short)
                 .ToList();
 
             var expected = RequestSorterResult.Take(1).ToList();
@@ -90,7 +90,7 @@ namespace ParkingService.Business.UnitTests
             };
 
             var actual = CreateAllocationCreator(existingRequests)
-                .Create(AllocationDate, existingRequests, Reservations, Users, Configuration, shortLeadTime: true)
+                .Create(AllocationDate, existingRequests, Reservations, Users, Configuration, LeadTimeType.Short)
                 .ToList();
 
             var expected = RequestSorterResult.Take(1).ToList();

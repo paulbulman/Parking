@@ -5,7 +5,16 @@
     using Data;
     using NodaTime;
 
-    public class DateCalculator
+    public interface IDateCalculator
+    {
+        IReadOnlyCollection<LocalDate> GetActiveDates();
+
+        IReadOnlyCollection<LocalDate> GetShortLeadTimeAllocationDates();
+
+        IReadOnlyCollection<LocalDate> GetLongLeadTimeAllocationDates();
+    }
+
+    public class DateCalculator : IDateCalculator
     {
         private static readonly DateTimeZone LondonTimeZone = DateTimeZoneProviders.Tzdb["Europe/London"];
 

@@ -3,10 +3,11 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Business.Data;
     using Model;
     using NodaTime;
 
-    public class ReservationRepository
+    public class ReservationRepository : IReservationRepository
     {
         private readonly IRawItemRepository rawItemRepository;
 

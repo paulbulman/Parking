@@ -2,9 +2,10 @@
 {
     using System.Text.Json;
     using System.Threading.Tasks;
+    using Business.Data;
     using Model;
 
-    public class ConfigurationRepository
+    public class ConfigurationRepository : IConfigurationRepository
     {
         private readonly IRawItemRepository rawItemRepository;
 

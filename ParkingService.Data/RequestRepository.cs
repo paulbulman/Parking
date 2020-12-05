@@ -5,10 +5,11 @@
     using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
+    using Business.Data;
     using Model;
     using NodaTime;
 
-    public class RequestRepository
+    public class RequestRepository : IRequestRepository
     {
         private readonly IRawItemRepository rawItemRepository;
 
@@ -46,7 +47,7 @@
 
             var firstDate = orderedRequests.First().Date.With(DateAdjusters.StartOfMonth);
             var lastDate = orderedRequests.Last().Date.With(DateAdjusters.EndOfMonth);
-            
+
             var existingRequests = await GetRequests(firstDate, lastDate);
 
             var combinedRequests = existingRequests
@@ -71,7 +72,7 @@
                 var userMonthRequests = userRequests
                     .GroupBy(request => request.Date.ToYearMonth())
                     .Select(yearMonthRequests => CreateRawItem(userId, yearMonthRequests));
-                
+
                 rawItems.AddRange(userMonthRequests);
             }
 

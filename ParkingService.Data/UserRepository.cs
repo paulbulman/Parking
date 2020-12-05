@@ -3,9 +3,10 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Business.Data;
     using Model;
 
-    public class UserRepository
+    public class UserRepository : IUserRepository
     {
         private readonly IRawItemRepository rawItemRepository;
 

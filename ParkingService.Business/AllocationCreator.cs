@@ -6,7 +6,18 @@
     using Model;
     using NodaTime;
 
-    public class AllocationCreator
+    public interface IAllocationCreator
+    {
+        IReadOnlyCollection<Request> Create(
+            LocalDate date,
+            IReadOnlyCollection<Request> requests,
+            IReadOnlyCollection<Reservation> reservations,
+            IReadOnlyCollection<User> users,
+            Configuration configuration,
+            LeadTimeType leadTimeType);
+    }
+
+    public class AllocationCreator : IAllocationCreator
     {
         private readonly IRequestSorter requestSorter;
 
@@ -18,9 +29,9 @@
             IReadOnlyCollection<Reservation> reservations,
             IReadOnlyCollection<User> users,
             Configuration configuration,
-            bool shortLeadTime)
+            LeadTimeType leadTimeType)
         {
-            var spacesToReserve = shortLeadTime ? 0 : configuration.ShortLeadTimeSpaces;
+            var spacesToReserve = leadTimeType == LeadTimeType.Short ? 0 : configuration.ShortLeadTimeSpaces;
             var allocatableSpaces = configuration.TotalSpaces - spacesToReserve;
             var alreadyAllocatedSpaces = requests.Count(r => r.Date == date && r.Status == RequestStatus.Allocated);
             var freeSpaces = allocatableSpaces - alreadyAllocatedSpaces;

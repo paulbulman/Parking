@@ -1,11 +1,11 @@
 namespace ParkingService.Business.UnitTests
 {
     using System.Linq;
+    using Data;
     using Moq;
     using NodaTime;
     using NodaTime.Testing;
     using NodaTime.Testing.Extensions;
-    using Data;
     using Model;
     using Xunit;
 
