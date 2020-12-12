@@ -20,13 +20,19 @@
 
         Task<IReadOnlyCollection<RawItem>> GetReservations(YearMonth yearMonth);
 
+        Task<string> GetScheduledTasks();
+
         Task<IReadOnlyCollection<RawItem>> GetUsers();
 
         Task SaveItems(IEnumerable<RawItem> rawItems);
+
+        Task SaveScheduledTasks(string rawData);
     }
 
     public class RawItemRepository : IRawItemRepository
     {
+        private const string ScheduledTasksObjectKey = "scheduledTasks.json";
+
         private readonly IAmazonDynamoDB dynamoDbClient;
 
         private readonly IAmazonS3 s3Client;
@@ -41,24 +47,7 @@
 
         private static string TableName => Environment.GetEnvironmentVariable("TABLE_NAME");
 
-        public async Task<string> GetConfiguration()
-        {
-            const string ObjectKey = "configuration.json";
-
-            var request = new GetObjectRequest
-            {
-                BucketName = BucketName,
-                Key = ObjectKey
-            };
-
-            using var response = await s3Client.GetObjectAsync(request);
-
-            await using var responseStream = response.ResponseStream;
-
-            using var reader = new StreamReader(responseStream);
-
-            return await reader.ReadToEndAsync();
-        }
+        public async Task<string> GetConfiguration() => await GetBucketData("configuration.json");
 
         public async Task<IReadOnlyCollection<RawItem>> GetRequests(YearMonth yearMonth)
         {
@@ -83,6 +72,8 @@
             return await query.GetRemainingAsync();
         }
 
+        public async Task<string> GetScheduledTasks() => await GetBucketData(ScheduledTasksObjectKey);
+
         public async Task<IReadOnlyCollection<RawItem>> GetUsers()
         {
             const string HashKeyValue = "PROFILE";
@@ -104,6 +95,33 @@
                 await context.SaveAsync(rawItem, config);
             }
         }
+
+        public async Task SaveScheduledTasks(string rawData) => await SaveBucketData(ScheduledTasksObjectKey, rawData);
+
+        private async Task<string> GetBucketData(string objectKey)
+        {
+            var request = new GetObjectRequest
+            {
+                BucketName = BucketName,
+                Key = objectKey
+            };
+
+            using var response = await s3Client.GetObjectAsync(request);
+
+            await using var responseStream = response.ResponseStream;
+
+            using var reader = new StreamReader(responseStream);
+
+            return await reader.ReadToEndAsync();
+        }
+
+        private async Task SaveBucketData(string objectKey, string rawData) =>
+            await s3Client.PutObjectAsync(new PutObjectRequest
+            {
+                BucketName = BucketName,
+                Key = objectKey,
+                ContentBody = rawData
+            });
 
         private async Task<IReadOnlyCollection<RawItem>> QuerySecondaryIndex(string hashKeyValue)
         {
