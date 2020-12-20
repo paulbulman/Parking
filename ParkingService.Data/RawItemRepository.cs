@@ -27,6 +27,8 @@
         Task SaveItems(IEnumerable<RawItem> rawItems);
 
         Task SaveScheduledTasks(string rawData);
+        
+        Task SendEmail(string rawData);
     }
 
     public class RawItemRepository : IRawItemRepository
@@ -43,11 +45,13 @@
             this.s3Client = s3Client;
         }
 
-        private static string BucketName => Environment.GetEnvironmentVariable("BUCKET_NAME");
+        private static string DataBucketName => Environment.GetEnvironmentVariable("DATA_BUCKET_NAME");
+
+        private static string EmailBucketName => Environment.GetEnvironmentVariable("EMAIL_BUCKET_NAME");
 
         private static string TableName => Environment.GetEnvironmentVariable("TABLE_NAME");
 
-        public async Task<string> GetConfiguration() => await GetBucketData("configuration.json");
+        public async Task<string> GetConfiguration() => await GetBucketData(DataBucketName, "configuration.json");
 
         public async Task<IReadOnlyCollection<RawItem>> GetRequests(YearMonth yearMonth)
         {
@@ -72,7 +76,7 @@
             return await query.GetRemainingAsync();
         }
 
-        public async Task<string> GetScheduledTasks() => await GetBucketData(ScheduledTasksObjectKey);
+        public async Task<string> GetScheduledTasks() => await GetBucketData(DataBucketName, ScheduledTasksObjectKey);
 
         public async Task<IReadOnlyCollection<RawItem>> GetUsers()
         {
@@ -96,13 +100,17 @@
             }
         }
 
-        public async Task SaveScheduledTasks(string rawData) => await SaveBucketData(ScheduledTasksObjectKey, rawData);
+        public async Task SaveScheduledTasks(string rawData) =>
+            await SaveBucketData(DataBucketName, ScheduledTasksObjectKey, rawData);
 
-        private async Task<string> GetBucketData(string objectKey)
+        public async Task SendEmail(string rawData) =>
+            await SaveBucketData(EmailBucketName, Guid.NewGuid().ToString(), rawData);
+
+        private async Task<string> GetBucketData(string bucketName, string objectKey)
         {
             var request = new GetObjectRequest
             {
-                BucketName = BucketName,
+                BucketName = bucketName,
                 Key = objectKey
             };
 
@@ -115,10 +123,10 @@
             return await reader.ReadToEndAsync();
         }
 
-        private async Task SaveBucketData(string objectKey, string rawData) =>
+        private async Task SaveBucketData(string bucketName, string objectKey, string rawData) =>
             await s3Client.PutObjectAsync(new PutObjectRequest
             {
-                BucketName = BucketName,
+                BucketName = bucketName,
                 Key = objectKey,
                 ContentBody = rawData
             });

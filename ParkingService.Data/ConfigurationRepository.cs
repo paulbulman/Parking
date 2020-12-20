@@ -17,24 +17,21 @@
 
             var data = JsonSerializer.Deserialize<ConfigurationData>(rawData);
 
-            return new Configuration(data.nearbyDistance, data.shortLeadTimeSpaces, data.totalSpaces);
+            return new Configuration(data.NearbyDistance, data.ShortLeadTimeSpaces, data.TotalSpaces);
         }
 
-        // Various suppressions needed to use with JsonSerializer.Deserialize
+        // Class used with JsonSerializer.Deserialize
         // ReSharper disable once ClassNeverInstantiated.Local
         private class ConfigurationData
         {
-            // ReSharper disable once InconsistentNaming
             // ReSharper disable once UnusedAutoPropertyAccessor.Local
-            public decimal nearbyDistance { get; set; }
+            public decimal NearbyDistance { get; set; }
 
-            // ReSharper disable once InconsistentNaming
             // ReSharper disable once UnusedAutoPropertyAccessor.Local
-            public int shortLeadTimeSpaces { get; set; }
+            public int ShortLeadTimeSpaces { get; set; }
 
-            // ReSharper disable once InconsistentNaming
             // ReSharper disable once UnusedAutoPropertyAccessor.Local
-            public int totalSpaces { get; set; }
+            public int TotalSpaces { get; set; }
         }
 
     }
