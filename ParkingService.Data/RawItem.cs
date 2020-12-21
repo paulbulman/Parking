@@ -19,14 +19,17 @@
         [DynamoDBProperty("SK")]
         public string SortKey { get; set; }
 
+        [DynamoDBProperty("commuteDistance")]
+        public decimal? CommuteDistance { get; set; }
+
+        [DynamoDBProperty("emailAddress")]
+        public string EmailAddress { get; set; }
+
         [DynamoDBProperty("requests")]
         public Dictionary<string, string> Requests { get; set; }
 
         [DynamoDBProperty("reservations", typeof(ReservationsConverter))]
         public Dictionary<string, List<string>> Reservations { get; set; }
-
-        [DynamoDBProperty("commuteDistance")]
-        public decimal? CommuteDistance { get; set; }
     }
 
     public class ReservationsConverter : IPropertyConverter

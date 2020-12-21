@@ -20,9 +20,9 @@
 
         private static readonly IReadOnlyCollection<User> DefaultUsers = new List<User>
         {
-            new User("user1", NearbyDistance),
-            new User("user2", NearbyDistance),
-            new User("user3", NearbyDistance)
+            CreateUser("user1", NearbyDistance),
+            CreateUser("user2", NearbyDistance),
+            CreateUser("user3", NearbyDistance)
         };
 
         [Fact]
@@ -202,8 +202,8 @@
         {
             var users = new[]
             {
-                new User("user1", NearbyDistance),
-                new User("user2", NearbyDistance + 0.01m)
+                CreateUser("user1", NearbyDistance),
+                CreateUser("user2", NearbyDistance + 0.01m)
             };
 
             var requests = new[]
@@ -224,8 +224,8 @@
         {
             var users = new[]
             {
-                new User("user1", NearbyDistance),
-                new User("user2", null)
+                CreateUser("user1", NearbyDistance),
+                CreateUser("user2", null)
             };
 
             var requests = new[]
@@ -246,8 +246,8 @@
         {
             var users = new[]
             {
-                new User("user1", NearbyDistance + 1),
-                new User("user2", NearbyDistance)
+                CreateUser("user1", NearbyDistance + 1),
+                CreateUser("user2", NearbyDistance)
             };
 
             var requests = new[]
@@ -267,6 +267,9 @@
 
             CheckOrder(new[] { "user2", "user1" }, result);
         }
+
+        private static User CreateUser(string userId, decimal? commuteDistance) =>
+            new User(userId, commuteDistance, null);
 
         private static IEnumerable<Request> SortRequests(
             IReadOnlyCollection<Request> requests,

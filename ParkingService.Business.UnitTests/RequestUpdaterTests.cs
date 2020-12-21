@@ -171,7 +171,7 @@
                 .Setup(r => r.GetReservations(EarliestConsideredDate, LastConsideredDate))
                 .ReturnsAsync(reservations);
 
-            var arbitraryUser = new User("user1", 1);
+            var arbitraryUser = new User("user1", 1, "1@abc.com");
             var users = new[] { arbitraryUser };
 
             var mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);

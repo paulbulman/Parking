@@ -10,7 +10,7 @@
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
 
-            var rawData = "{\r\n  \"nearbyDistance\": 3.5,\r\n  \"shortLeadTimeSpaces\": 2,\r\n  \"totalSpaces\": 9\r\n}";
+            var rawData = "{\r\n  \"NearbyDistance\": 3.5,\r\n  \"ShortLeadTimeSpaces\": 2,\r\n  \"TotalSpaces\": 9\r\n}";
             mockRawItemRepository.Setup(r => r.GetConfiguration()).ReturnsAsync(rawData);
             
             var configurationRepository = new ConfigurationRepository(mockRawItemRepository.Object);

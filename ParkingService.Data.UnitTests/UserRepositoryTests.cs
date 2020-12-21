@@ -15,9 +15,9 @@ namespace ParkingService.Data.UnitTests
 
             var rawItems = new[]
             {
-                new RawItem { PrimaryKey = "USER#Id1", SortKey = "PROFILE", CommuteDistance = 1.23m },
-                new RawItem { PrimaryKey = "USER#Id2", SortKey = "PROFILE", CommuteDistance = 2.34m },
-                new RawItem { PrimaryKey = "USER#Id3", SortKey = "PROFILE" }
+                new RawItem { PrimaryKey = "USER#Id1", SortKey = "PROFILE", CommuteDistance = 1.23m, EmailAddress = "1@abc.com" },
+                new RawItem { PrimaryKey = "USER#Id2", SortKey = "PROFILE", CommuteDistance = 2.34m, EmailAddress = "2@abc.com" },
+                new RawItem { PrimaryKey = "USER#Id3", SortKey = "PROFILE", EmailAddress = "3@xyz.co.uk" }
             };
             mockRawItemRepository.Setup(r => r.GetUsers()).ReturnsAsync(rawItems);
 
@@ -29,19 +29,21 @@ namespace ParkingService.Data.UnitTests
             
             Assert.Equal(rawItems.Length, result.Count);
 
-            CheckUser(result, "Id1", 1.23m);
-            CheckUser(result, "Id2", 2.34m);
-            CheckUser(result, "Id3", null);
+            CheckUser(result, "Id1", 1.23m, "1@abc.com");
+            CheckUser(result, "Id2", 2.34m, "2@abc.com");
+            CheckUser(result, "Id3", null, "3@xyz.co.uk");
         }
 
         private static void CheckUser(
             IEnumerable<User> result,
             string expectedUserId,
-            decimal? expectedCommuteDistance)
+            decimal? expectedCommuteDistance,
+            string expectedEmailAddress)
         {
             var actual = result.Where(u => 
-                u.UserId == expectedUserId && 
-                u.CommuteDistance == expectedCommuteDistance);
+                u.UserId == expectedUserId &&
+                u.CommuteDistance == expectedCommuteDistance &&
+                u.EmailAddress == expectedEmailAddress);
 
             Assert.Single(actual);
         }
