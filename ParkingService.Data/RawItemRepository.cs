@@ -3,7 +3,10 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Threading.Tasks;
+    using Amazon.CognitoIdentityProvider;
+    using Amazon.CognitoIdentityProvider.Model;
     using Amazon.DynamoDBv2;
     using Amazon.DynamoDBv2.DataModel;
     using Amazon.DynamoDBv2.DocumentModel;
@@ -24,6 +27,8 @@
 
         Task<IReadOnlyCollection<RawItem>> GetUsers();
 
+        Task<IReadOnlyCollection<string>> GetUserIdsInGroup(string groupName);
+
         Task SaveItems(IEnumerable<RawItem> rawItems);
 
         Task SaveScheduledTasks(string rawData);
@@ -35,12 +40,18 @@
     {
         private const string ScheduledTasksObjectKey = "scheduledTasks.json";
 
+        private readonly IAmazonCognitoIdentityProvider cognitoIdentityProvider;
+        
         private readonly IAmazonDynamoDB dynamoDbClient;
 
         private readonly IAmazonS3 s3Client;
 
-        public RawItemRepository(IAmazonDynamoDB dynamoDbClient, IAmazonS3 s3Client)
+        public RawItemRepository(
+            IAmazonCognitoIdentityProvider cognitoIdentityProvider,
+            IAmazonDynamoDB dynamoDbClient,
+            IAmazonS3 s3Client)
         {
+            this.cognitoIdentityProvider = cognitoIdentityProvider;
             this.dynamoDbClient = dynamoDbClient;
             this.s3Client = s3Client;
         }
@@ -50,6 +61,8 @@
         private static string EmailBucketName => Environment.GetEnvironmentVariable("EMAIL_BUCKET_NAME");
 
         private static string TableName => Environment.GetEnvironmentVariable("TABLE_NAME");
+        
+        private static string UserPoolId => Environment.GetEnvironmentVariable("USER_POOL_ID");
 
         public async Task<string> GetConfiguration() => await GetBucketData(DataBucketName, "configuration.json");
 
@@ -83,6 +96,22 @@
             const string HashKeyValue = "PROFILE";
 
             return await QuerySecondaryIndex(HashKeyValue);
+        }
+
+        public async Task<IReadOnlyCollection<string>> GetUserIdsInGroup(string groupName)
+        {
+            var request = new ListUsersInGroupRequest
+            {
+                GroupName = groupName,
+                UserPoolId = UserPoolId
+            };
+            
+            var response = await this.cognitoIdentityProvider.ListUsersInGroupAsync(request);
+
+            return response
+                .Users
+                .Select(u => u.Username)
+                .ToArray();
         }
 
         public async Task SaveItems(IEnumerable<RawItem> rawItems)

@@ -21,6 +21,19 @@
                 .ToArray();
         }
 
+        public async Task<IReadOnlyCollection<User>> GetTeamLeaderUsers()
+        {
+            const string TeamLeaderGroupName = "TeamLeader";
+
+            var allUsers = await this.GetUsers();
+
+            var teamLeaderUserIds = await this.rawItemRepository.GetUserIdsInGroup(TeamLeaderGroupName);
+
+            return allUsers
+                .Where(u => teamLeaderUserIds.Contains(u.UserId))
+                .ToArray();
+        }
+
         private static string GetUserId(string primaryKey) => primaryKey.Split('#')[1];
     }
 }
