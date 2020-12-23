@@ -23,8 +23,8 @@
         }
 
         [Theory]
-        [InlineData(3, 2, "Parking status for Mon 02 Mar: allocated")]
-        [InlineData(4, 1, "Parking status for Wed 01 Apr: allocated")]
+        [InlineData(3, 2, "Parking status for Mon 02 Mar: Allocated")]
+        [InlineData(4, 1, "Parking status for Wed 01 Apr: Allocated")]
         public static void Subject_contains_requests_date(int month, int day, string expectedSubject)
         {
             var user = new User("user1", null, "1@abc.com");
@@ -41,7 +41,7 @@
         }
 
         [Theory]
-        [InlineData(RequestStatus.Allocated, "Parking status for Wed 01 Apr: allocated")]
+        [InlineData(RequestStatus.Allocated, "Parking status for Wed 01 Apr: Allocated")]
         [InlineData(RequestStatus.Requested, "Parking status for Wed 01 Apr: INTERRUPTED")]
         public static void Subject_contains_request_status(RequestStatus requestStatus, string expectedSubject)
         {

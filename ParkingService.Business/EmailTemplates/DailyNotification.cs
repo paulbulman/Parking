@@ -35,7 +35,7 @@
             .Status;
 
         private string FormattedRequestStatus =>
-            this.UserRequestStatus == RequestStatus.Allocated ? "allocated" : "INTERRUPTED";
+            this.UserRequestStatus == RequestStatus.Allocated ? "Allocated" : "INTERRUPTED";
 
         private IReadOnlyCollection<string> BodyLines
         {

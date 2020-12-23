@@ -1,5 +1,6 @@
 ﻿namespace ParkingService.Business.UnitTests
 {
+    using Model;
     using NodaTime;
     using Xunit;
 
@@ -39,6 +40,17 @@
 
             var actual = dateInterval.ToEmailDisplayString();
 
+            Assert.Equal(expectedResult, actual);
+        }
+
+        [Theory]
+        [InlineData(RequestStatus.Requested, true)]
+        [InlineData(RequestStatus.Allocated, true)]
+        [InlineData(RequestStatus.Cancelled, false)]
+        public static void IsActive_returns_true_for_requested_and_allocated_statuses(RequestStatus requestStatus, bool expectedResult)
+        {
+            var actual = requestStatus.IsActive();
+            
             Assert.Equal(expectedResult, actual);
         }
     }

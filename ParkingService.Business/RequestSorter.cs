@@ -82,8 +82,7 @@
             var userPreviousAllocatedRequestCount = userPreviousRequests.Count(r =>
                 r.Status == RequestStatus.Allocated);
 
-            var userPreviousTotalRequestCount = userPreviousRequests.Count(r =>
-                new[] { RequestStatus.Allocated, RequestStatus.Requested }.Contains(r.Status));
+            var userPreviousTotalRequestCount = userPreviousRequests.Count(r => r.Status.IsActive());
 
             return userPreviousTotalRequestCount == 0 ? (decimal?)null : (decimal)userPreviousAllocatedRequestCount / userPreviousTotalRequestCount;
         }

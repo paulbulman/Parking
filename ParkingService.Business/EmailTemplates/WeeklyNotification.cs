@@ -71,7 +71,7 @@
         private bool UserIsActiveOnDate(LocalDate localDate) => requests.Any(r =>
             r.UserId == this.user.UserId &&
             r.Date == localDate &&
-            new[] { RequestStatus.Requested, RequestStatus.Allocated }.Contains(r.Status));
+            r.Status.IsActive());
 
         private RequestStatus UserRequestStatus(LocalDate localDate) =>
             this.requests
