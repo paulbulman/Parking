@@ -1,7 +1,7 @@
 ﻿namespace ParkingService.Data.UnitTests
 {
     using System.Threading.Tasks;
-    using Model;
+    using Business.EmailTemplates;
     using Moq;
     using Xunit;
 
@@ -15,9 +15,13 @@
             var emailRepository = new EmailRepository(mockRawItemRepository.Object);
 
             await emailRepository.Send(
-                new Email("someone@example.com", "Test subject", "Test plain text body", "Test HTML body"));
+                Mock.Of<IEmailTemplate>(e =>
+                    e.To == "someone@example.com" &&
+                    e.Subject == "Test subject" &&
+                    e.PlainTextBody == "Test plain text body" &&
+                    e.HtmlBody == "Test HTML body"));
 
-            const string ExpectedJson = 
+            const string ExpectedJson =
                 "{" +
                 "\"To\":\"someone@example.com\"," +
                 "\"Subject\":\"Test subject\"," +

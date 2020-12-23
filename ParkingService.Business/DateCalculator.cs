@@ -12,6 +12,8 @@
         IReadOnlyCollection<LocalDate> GetShortLeadTimeAllocationDates();
 
         IReadOnlyCollection<LocalDate> GetLongLeadTimeAllocationDates();
+
+        LocalDate GetNextWorkingDate();
     }
 
     public class DateCalculator : IDateCalculator
@@ -63,6 +65,8 @@
 
             return this.WorkingDatesBetween(firstDate, lastDate);
         }
+
+        public LocalDate GetNextWorkingDate() => GetNextWorkingDayStrictlyAfter(this.GetCurrentDate());
 
         private LocalDate GetNextWorkingDayIncluding(LocalDate localDate)
         {

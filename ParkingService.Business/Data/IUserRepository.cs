@@ -7,5 +7,7 @@
     public interface IUserRepository
     {
         Task<IReadOnlyCollection<User>> GetUsers();
+
+        Task<IReadOnlyCollection<User>> GetTeamLeaderUsers();
     }
 }

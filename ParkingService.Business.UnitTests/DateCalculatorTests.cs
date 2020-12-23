@@ -156,6 +156,46 @@ namespace ParkingService.Business.UnitTests
             Assert.Equal(19.June(2020), summerResult.Last());
         }
 
+        [Fact]
+        public static void GetNextWorkingDate_returns_next_working_date_when_called_on_working_date()
+        {
+            var instant = 23.December(2020).At(10, 0, 0).Utc();
+            var result = CreateDateCalculator(instant).GetNextWorkingDate();
+            Assert.Equal(24.December(2020), result);
+        }
+
+        [Fact]
+        public static void GetNextWorkingDate_returns_next_working_date_when_called_at_weekend()
+        {
+            var instant = 19.December(2020).At(10, 0, 0).Utc();
+            var result = CreateDateCalculator(instant).GetNextWorkingDate();
+            Assert.Equal(21.December(2020), result);
+        }
+
+        [Fact]
+        public static void GetNextWorkingDate_returns_next_working_date_when_called_on_bank_holiday()
+        {
+            var bankHolidays = new[] {25.December(2020), 28.December(2020)};
+            
+            var instant = 25.December(2020).At(10, 0, 0).Utc();
+            var result = CreateDateCalculator(instant, bankHolidays).GetNextWorkingDate();
+            Assert.Equal(29.December(2020), result);
+        }
+
+        [Fact]
+        public static void GetNextWorkingDate_uses_London_time_zone()
+        {
+            // This is still Wednesday local time, so should return the Thursday.
+            var winterInstant = 1.January(2020).At(23, 0, 0).Utc();
+            var winterResult = CreateDateCalculator(winterInstant).GetNextWorkingDate();
+            Assert.Equal(2.January(2020), winterResult);
+
+            // This is Thursday local time, so should return the Friday.
+            var summerInstant = 3.June(2020).At(23, 0, 0).Utc();
+            var summerResult = CreateDateCalculator(summerInstant).GetNextWorkingDate();
+            Assert.Equal(5.June(2020), summerResult);
+        }
+
         private static DateCalculator CreateDateCalculator(LocalDate londonDate, params LocalDate[] bankHolidayDates)
         {
             var londonMidnight = londonDate.AtMidnight().InZoneStrictly(LondonTimeZone).ToInstant();
