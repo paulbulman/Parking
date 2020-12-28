@@ -11,7 +11,7 @@
 
         private readonly User user;
 
-        private readonly DateInterval dateInterval;
+        private readonly IReadOnlyCollection<LocalDate> notificationDates;
 
         private readonly IEnumerable<string> postAmbleLines = new[]
         {
@@ -19,19 +19,19 @@
             "Further spaces are released for each date on the preceding working day."
         };
 
-        public WeeklyNotification(IReadOnlyCollection<Request> requests, User user, DateInterval dateInterval)
+        public WeeklyNotification(IReadOnlyCollection<Request> requests, User user, IReadOnlyCollection<LocalDate> notificationDates)
         {
             this.requests = requests;
             this.user = user;
-            this.dateInterval = dateInterval;
+            this.notificationDates = notificationDates;
         }
 
         public string To => this.user.EmailAddress;
 
-        public string Subject => $"Provisional parking status for {this.dateInterval.ToEmailDisplayString()}";
+        public string Subject => $"Provisional parking status for {this.notificationDates.ToEmailDisplayString()}";
 
         public string PlainTextBody =>
-            $"You have been allocated parking spaces for the period {this.dateInterval.ToEmailDisplayString()} as follows:\r\n\r\n" +
+            $"You have been allocated parking spaces for the period {this.notificationDates.ToEmailDisplayString()} as follows:\r\n\r\n" +
             string.Join("\r\n", this.UserActiveDates.Select(FormattedPlainTextStatus)) +
             PlainTextPostAmble;
 
@@ -47,7 +47,7 @@
                 : $"INTERRUPTED ({this.OtherInterruptedUsersCount(localDate)})");
 
         public string HtmlBody =>
-            $"<p>You have been allocated parking spaces for the period {this.dateInterval.ToEmailDisplayString()} as follows:</p>\r\n" +
+            $"<p>You have been allocated parking spaces for the period {this.notificationDates.ToEmailDisplayString()} as follows:</p>\r\n" +
             "<ul>\r\n" + string.Join("\r\n", this.UserActiveDates.Select(FormattedHtmlStatus)) + "\r\n</ul>" +
             HtmlPostAmble;
 
@@ -66,7 +66,7 @@
 
         private bool UserHasInterruptions => UserActiveDates.Any(d => UserRequestStatus(d) == RequestStatus.Requested);
 
-        private IEnumerable<LocalDate> UserActiveDates => this.dateInterval.Where(UserIsActiveOnDate);
+        private IEnumerable<LocalDate> UserActiveDates => this.notificationDates.Where(UserIsActiveOnDate);
 
         private bool UserIsActiveOnDate(LocalDate localDate) => requests.Any(r =>
             r.UserId == this.user.UserId &&

@@ -5,7 +5,7 @@
     using Data;
     using Model;
 
-    public class DailyNotification : IScheduledTask
+    public class WeeklyNotification : IScheduledTask
     {
         private readonly IDateCalculator dateCalculator;
         
@@ -15,7 +15,7 @@
         
         private readonly IUserRepository userRepository;
 
-        public DailyNotification(
+        public WeeklyNotification(
             IDateCalculator dateCalculator,
             IEmailRepository emailRepository,
             IRequestRepository requestRepository,
@@ -26,23 +26,23 @@
             this.requestRepository = requestRepository;
             this.userRepository = userRepository;
         }
-        
-        public ScheduledTaskType ScheduledTaskType => ScheduledTaskType.DailyNotification;
-        
+
+        public ScheduledTaskType ScheduledTaskType => ScheduledTaskType.WeeklyNotification;
+
         public async Task Run()
         {
-            var nextWorkingDate = dateCalculator.GetNextWorkingDate();
+            var notificationDates = dateCalculator.GetWeeklyNotificationDates();
 
-            var requests = await requestRepository.GetRequests(nextWorkingDate, nextWorkingDate);
+            var requests = await requestRepository.GetRequests(notificationDates.First(), notificationDates.Last());
 
             var users = await userRepository.GetUsers();
 
-            foreach (var userId in requests.Where(r => r.Status.IsActive()).Select(r => r.UserId))
+            foreach (var userId in requests.Where(r => r.Status.IsActive()).Select(r => r.UserId).Distinct())
             {
                 var user = users.Single(u => u.UserId == userId);
 
-                await emailRepository.Send(
-                    new EmailTemplates.DailyNotification(requests, user, nextWorkingDate));
+                await this.emailRepository.Send(
+                    new EmailTemplates.WeeklyNotification(requests, user, notificationDates));
             }
         }
     }

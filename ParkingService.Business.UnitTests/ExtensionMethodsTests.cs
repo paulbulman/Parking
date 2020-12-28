@@ -1,5 +1,6 @@
 ﻿namespace ParkingService.Business.UnitTests
 {
+    using System.Linq;
     using Model;
     using NodaTime;
     using Xunit;
@@ -38,9 +39,8 @@
                 new LocalDate(startYear, startMonth, startDay),
                 new LocalDate(endYear, endMonth, endDay));
 
-            var actual = dateInterval.ToEmailDisplayString();
-
-            Assert.Equal(expectedResult, actual);
+            Assert.Equal(expectedResult, dateInterval.ToEmailDisplayString());
+            Assert.Equal(expectedResult, dateInterval.Reverse().ToEmailDisplayString());
         }
 
         [Theory]

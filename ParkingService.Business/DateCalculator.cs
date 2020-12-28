@@ -13,6 +13,8 @@
 
         IReadOnlyCollection<LocalDate> GetLongLeadTimeAllocationDates();
 
+        IReadOnlyCollection<LocalDate> GetWeeklyNotificationDates();
+
         LocalDate GetNextWorkingDate();
     }
 
@@ -62,6 +64,15 @@
             var firstDate = this.GetNextWorkingDayStrictlyAfter(lastShortLeadTimeAllocationDate);
 
             var lastDate = GetCurrentDate().Next(IsoDayOfWeek.Thursday).PlusWeeks(1).PlusDays(1);
+
+            return this.WorkingDatesBetween(firstDate, lastDate);
+        }
+
+        public IReadOnlyCollection<LocalDate> GetWeeklyNotificationDates()
+        {
+            var lastDate = GetLongLeadTimeAllocationDates().Last();
+
+            var firstDate = lastDate.Previous(IsoDayOfWeek.Monday);
 
             return this.WorkingDatesBetween(firstDate, lastDate);
         }

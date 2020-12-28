@@ -4,7 +4,7 @@
     {
         ReservationReminder,
         RequestReminder,
-        DailySummary,
-        WeeklySummary
+        DailyNotification,
+        WeeklyNotification
     }
 }

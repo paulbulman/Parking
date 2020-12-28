@@ -15,10 +15,10 @@
         {
             var rawData =
                 "{" +
-                "\"DAILY_SUMMARY\":\"2020-12-14T11:00:00Z\"," +
+                "\"DAILY_NOTIFICATION\":\"2020-12-14T11:00:00Z\"," +
                 "\"REQUEST_REMINDER\":\"2020-12-16T00:00:00Z\"," +
                 "\"RESERVATION_REMINDER\":\"2020-12-14T10:00:00Z\"," +
-                "\"WEEKLY_SUMMARY\":\"2020-12-17T00:00:00Z\"" +
+                "\"WEEKLY_NOTIFICATION\":\"2020-12-17T00:00:00Z\"" +
                 "}";
 
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
@@ -33,10 +33,10 @@
 
             var expected = new[]
             {
-                new ScheduledTask(ScheduledTaskType.DailySummary, 14.December(2020).At(11, 0, 0).Utc()),
+                new ScheduledTask(ScheduledTaskType.DailyNotification, 14.December(2020).At(11, 0, 0).Utc()),
                 new ScheduledTask(ScheduledTaskType.RequestReminder, 16.December(2020).AtMidnight().Utc()),
                 new ScheduledTask(ScheduledTaskType.ReservationReminder, 14.December(2020).At(10, 0, 0).Utc()),
-                new ScheduledTask(ScheduledTaskType.WeeklySummary, 17.December(2020).AtMidnight().Utc())
+                new ScheduledTask(ScheduledTaskType.WeeklyNotification, 17.December(2020).AtMidnight().Utc())
             };
 
             Assert.NotNull(result);
@@ -58,18 +58,18 @@
         {
             var initialRawData =
                 "{" +
-                "\"DAILY_SUMMARY\":\"2020-12-14T11:00:00Z\"," +
+                "\"DAILY_NOTIFICATION\":\"2020-12-14T11:00:00Z\"," +
                 "\"REQUEST_REMINDER\":\"2020-12-16T00:00:00Z\"," +
                 "\"RESERVATION_REMINDER\":\"2020-12-14T10:00:00Z\"," +
-                "\"WEEKLY_SUMMARY\":\"2020-12-17T00:00:00Z\"" +
+                "\"WEEKLY_NOTIFICATION\":\"2020-12-17T00:00:00Z\"" +
                 "}";
 
             var expectedUpdatedRawData =
                 "{" +
-                "\"DAILY_SUMMARY\":\"2020-12-14T11:00:00Z\"," +
+                "\"DAILY_NOTIFICATION\":\"2020-12-14T11:00:00Z\"," +
                 "\"REQUEST_REMINDER\":\"2020-12-16T00:00:00Z\"," +
                 "\"RESERVATION_REMINDER\":\"2020-12-15T10:00:00Z\"," +
-                "\"WEEKLY_SUMMARY\":\"2020-12-17T00:00:00Z\"" +
+                "\"WEEKLY_NOTIFICATION\":\"2020-12-17T00:00:00Z\"" +
                 "}";
 
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);

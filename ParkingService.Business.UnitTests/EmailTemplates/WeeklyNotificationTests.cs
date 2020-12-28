@@ -1,6 +1,7 @@
 ﻿namespace ParkingService.Business.UnitTests.EmailTemplates
 {
     using System.Collections.Generic;
+    using System.Linq;
     using Business.EmailTemplates;
     using Model;
     using NodaTime;
@@ -17,7 +18,7 @@
             var template = new WeeklyNotification(
                 new List<Request>(),
                 new User("user1", null, emailAddress),
-                new DateInterval(21.December(2020), 24.December(2020)));
+                new DateInterval(21.December(2020), 24.December(2020)).ToArray());
 
             Assert.Equal(emailAddress, template.To);
         }
@@ -33,8 +34,9 @@
             string expectedSubject)
         {
             var dateInterval = new DateInterval(
-                new LocalDate(2020, firstMonth, firstDay),
-                new LocalDate(2020, lastMonth, lastDay));
+                    new LocalDate(2020, firstMonth, firstDay),
+                    new LocalDate(2020, lastMonth, lastDay))
+                .ToArray();
 
             var template = new WeeklyNotification(
                 new List<Request>(),
@@ -60,7 +62,7 @@
             var template = new WeeklyNotification(
                 requests,
                 user,
-                new DateInterval(21.December(2020), 24.December(2020)));
+                new DateInterval(21.December(2020), 24.December(2020)).ToArray());
 
             const string ExpectedPlainTextBody =
                 "You have been allocated parking spaces for the period Mon 21 Dec - Thu 24 Dec as follows:\r\n\r\n" +
@@ -107,7 +109,7 @@
             var template = new WeeklyNotification(
                 requests,
                 user,
-                new DateInterval(21.December(2020), 23.December(2020)));
+                new DateInterval(21.December(2020), 23.December(2020)).ToArray());
 
             const string ExpectedPlainTextBody =
                 "You have been allocated parking spaces for the period Mon 21 Dec - Wed 23 Dec as follows:\r\n\r\n" +
@@ -140,7 +142,7 @@
             var template = new WeeklyNotification(
                 requests,
                 user,
-                new DateInterval(21.December(2020), 22.December(2020)));
+                new DateInterval(21.December(2020), 22.December(2020)).ToArray());
 
             const string ExpectedPlainTextBody =
                 "You have been allocated parking spaces for the period Mon 21 Dec - Tue 22 Dec as follows:\r\n\r\n" +
@@ -167,7 +169,7 @@
             var template = new WeeklyNotification(
                 requests,
                 user,
-                new DateInterval(21.December(2020), 22.December(2020)));
+                new DateInterval(21.December(2020), 22.December(2020)).ToArray());
 
             const string ExpectedPlainTextBody =
                 "You have been allocated parking spaces for the period Mon 21 Dec - Tue 22 Dec as follows:\r\n\r\n" +

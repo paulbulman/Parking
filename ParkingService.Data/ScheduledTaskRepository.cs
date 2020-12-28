@@ -15,10 +15,10 @@
         private static IDictionary<ScheduledTaskType, string> RawScheduledTaskTypes =>
             new Dictionary<ScheduledTaskType, string>
             {
-                {ScheduledTaskType.DailySummary, "DAILY_SUMMARY"},
+                {ScheduledTaskType.DailyNotification, "DAILY_NOTIFICATION"},
                 {ScheduledTaskType.RequestReminder, "REQUEST_REMINDER"},
                 {ScheduledTaskType.ReservationReminder, "RESERVATION_REMINDER"},
-                {ScheduledTaskType.WeeklySummary, "WEEKLY_SUMMARY"}
+                {ScheduledTaskType.WeeklyNotification, "WEEKLY_NOTIFICATION"}
             };
 
         public ScheduledTaskRepository(IRawItemRepository rawItemRepository)
