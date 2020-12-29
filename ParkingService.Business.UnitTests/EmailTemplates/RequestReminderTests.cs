@@ -1,5 +1,6 @@
 ﻿namespace ParkingService.Business.UnitTests.EmailTemplates
 {
+    using System.Linq;
     using Business.EmailTemplates;
     using Model;
     using NodaTime;
@@ -15,7 +16,7 @@
         {
             var template = new RequestReminder(
                 new User("user1", null, emailAddress),
-                new DateInterval(21.December(2020), 24.December(2020)));
+                new DateInterval(21.December(2020), 24.December(2020)).ToArray());
 
             Assert.Equal(emailAddress, template.To);
         }
@@ -36,7 +37,7 @@
                 user,
                 new DateInterval(
                     new LocalDate(2020, firstMonth, firstDay),
-                    new LocalDate(2020, lastMonth, lastDay)));
+                    new LocalDate(2020, lastMonth, lastDay)).ToArray());
 
             Assert.Equal(expectedSubject, template.Subject);
         }
@@ -46,7 +47,7 @@
         {
             var template = new RequestReminder(
                 new User("user1", null, "1@abc.com"),
-                new DateInterval(21.December(2020), 24.December(2020)));
+                new DateInterval(21.December(2020), 24.December(2020)).ToArray());
 
             const string ExpectedPlainTextBody =
                 "No requests have yet been entered for Mon 21 Dec - Thu 24 Dec.\r\n\r\n" +

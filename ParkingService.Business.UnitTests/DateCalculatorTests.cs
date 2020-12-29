@@ -14,49 +14,6 @@ namespace ParkingService.Business.UnitTests
         private static readonly DateTimeZone LondonTimeZone = DateTimeZoneProviders.Tzdb["Europe/London"];
 
         [Fact]
-        public static void GetActiveDates_returns_current_date_first()
-        {
-            var currentDate = 28.August(2020);
-            var result = CreateDateCalculator(currentDate).GetActiveDates();
-            Assert.Equal(currentDate, result.First());
-        }
-
-        [Fact]
-        public static void GetActiveDates_returns_last_day_of_next_month_last()
-        {
-            var result = CreateDateCalculator(28.August(2020)).GetActiveDates();
-            Assert.Equal(30.September(2020), result.Last());
-        }
-
-        [Fact]
-        public static void GetActiveDates_excludes_weekends()
-        {
-            var result = CreateDateCalculator(28.August(2020)).GetActiveDates();
-            Assert.DoesNotContain(29.August(2020), result);
-            Assert.DoesNotContain(30.August(2020), result);
-        }
-
-        [Fact]
-        public static void GetActiveDates_excludes_bank_holidays()
-        {
-            var bankHoliday = 31.August(2020);
-            var result = CreateDateCalculator(28.August(2020), bankHoliday).GetActiveDates();
-            Assert.DoesNotContain(bankHoliday, result);
-        }
-
-        [Fact]
-        public static void GetActiveDates_uses_London_time_zone()
-        {
-            var winterInstant = 31.January(2020).At(23, 0, 0).Utc();
-            var winterResult = CreateDateCalculator(winterInstant).GetActiveDates();
-            Assert.Equal(31.January(2020), winterResult.First());
-
-            var summerInstant = 30.June(2020).At(23, 0, 0).Utc();
-            var summerResult = CreateDateCalculator(summerInstant).GetActiveDates();
-            Assert.Equal(1.July(2020), summerResult.First());
-        }
-
-        [Fact]
         public static void GetShortLeadTimeAllocationDates_returns_current_working_day_if_called_before_11_am()
         {
             var instant = 4.September(2020).At(10, 59, 59).InZoneStrictly(LondonTimeZone).ToInstant();
@@ -160,11 +117,11 @@ namespace ParkingService.Business.UnitTests
         public static void GetWeeklyNotificationDates_returns_ordered_dates_from_next_week()
         {
             var result = CreateDateCalculator(7.September(2020)).GetWeeklyNotificationDates();
-            
+
             Assert.Equal(5, result.Count);
-            
+
             Assert.Equal(result.OrderBy(d => d), result);
-            
+
             Assert.Equal(14.September(2020), result.First());
             Assert.Equal(18.September(2020), result.Last());
         }
@@ -197,6 +154,49 @@ namespace ParkingService.Business.UnitTests
             var summerResult = CreateDateCalculator(summerInstant).GetWeeklyNotificationDates();
             Assert.Equal(15.June(2020), summerResult.First());
             Assert.Equal(19.June(2020), summerResult.Last());
+        }
+
+        [Fact]
+        public static void GetNextWeeklyNotificationDates_returns_ordered_dates_from_next_but_one_week()
+        {
+            var result = CreateDateCalculator(7.September(2020)).GetNextWeeklyNotificationDates();
+
+            Assert.Equal(5, result.Count);
+
+            Assert.Equal(result.OrderBy(d => d), result);
+
+            Assert.Equal(21.September(2020), result.First());
+            Assert.Equal(25.September(2020), result.Last());
+        }
+
+        [Fact]
+        public static void GetNextWeeklyNotificationDates_rolls_over_to_new_week_on_Thursdays()
+        {
+            // On a Wednesday, the last date should be the Friday 16 days later.
+            var wednesdayResult = CreateDateCalculator(9.September(2020)).GetNextWeeklyNotificationDates();
+            Assert.Equal(21.September(2020), wednesdayResult.First());
+            Assert.Equal(25.September(2020), wednesdayResult.Last());
+
+            // On a Thursday, the last date should be the Friday 22 days later.
+            var thursdayResult = CreateDateCalculator(10.September(2020)).GetNextWeeklyNotificationDates();
+            Assert.Equal(28.September(2020), thursdayResult.First());
+            Assert.Equal(2.October(2020), thursdayResult.Last());
+        }
+
+        [Fact]
+        public static void GetNextWeeklyNotificationDates_uses_London_time_zone()
+        {
+            // This is still Wednesday local time, so should return the next-but-one week.
+            var winterInstant = 1.January(2020).At(23, 0, 0).Utc();
+            var winterResult = CreateDateCalculator(winterInstant).GetNextWeeklyNotificationDates();
+            Assert.Equal(13.January(2020), winterResult.First());
+            Assert.Equal(17.January(2020), winterResult.Last());
+
+            // This is Thursday local time, so should return the subsequent week.
+            var summerInstant = 3.June(2020).At(23, 0, 0).Utc();
+            var summerResult = CreateDateCalculator(summerInstant).GetNextWeeklyNotificationDates();
+            Assert.Equal(22.June(2020), summerResult.First());
+            Assert.Equal(26.June(2020), summerResult.Last());
         }
 
         [Fact]

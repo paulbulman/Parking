@@ -7,13 +7,13 @@
 
     public interface IDateCalculator
     {
-        IReadOnlyCollection<LocalDate> GetActiveDates();
-
         IReadOnlyCollection<LocalDate> GetShortLeadTimeAllocationDates();
 
         IReadOnlyCollection<LocalDate> GetLongLeadTimeAllocationDates();
 
         IReadOnlyCollection<LocalDate> GetWeeklyNotificationDates();
+
+        IReadOnlyCollection<LocalDate> GetNextWeeklyNotificationDates();
 
         LocalDate GetNextWorkingDate();
     }
@@ -31,18 +31,6 @@
         }
 
         private Instant CurrentInstant { get; }
-
-        public IReadOnlyCollection<LocalDate> GetActiveDates()
-        {
-            var currentDate = this.GetCurrentDate();
-
-            var lastDayOfNextMonth = currentDate
-                .With(DateAdjusters.StartOfMonth)
-                .PlusMonths(1)
-                .With(DateAdjusters.EndOfMonth);
-
-            return this.WorkingDatesBetween(currentDate, lastDayOfNextMonth);
-        }
 
         public IReadOnlyCollection<LocalDate> GetShortLeadTimeAllocationDates()
         {
@@ -73,6 +61,15 @@
             var lastDate = GetLongLeadTimeAllocationDates().Last();
 
             var firstDate = lastDate.Previous(IsoDayOfWeek.Monday);
+
+            return this.WorkingDatesBetween(firstDate, lastDate);
+        }
+
+        public IReadOnlyCollection<LocalDate> GetNextWeeklyNotificationDates()
+        {
+            var firstDate = GetWeeklyNotificationDates().Last().Next(IsoDayOfWeek.Monday);
+
+            var lastDate = firstDate.Next(IsoDayOfWeek.Friday);
 
             return this.WorkingDatesBetween(firstDate, lastDate);
         }
