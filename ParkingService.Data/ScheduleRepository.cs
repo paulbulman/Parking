@@ -4,11 +4,12 @@
     using System.Linq;
     using System.Text.Json;
     using System.Threading.Tasks;
+    using Business.Data;
     using Model;
     using NodaTime;
     using NodaTime.Text;
 
-    public class ScheduledTaskRepository
+    public class ScheduleRepository : IScheduleRepository
     {
         private readonly IRawItemRepository rawItemRepository;
 
@@ -21,31 +22,31 @@
                 {ScheduledTaskType.WeeklyNotification, "WEEKLY_NOTIFICATION"}
             };
 
-        public ScheduledTaskRepository(IRawItemRepository rawItemRepository)
+        public ScheduleRepository(IRawItemRepository rawItemRepository)
         {
             this.rawItemRepository = rawItemRepository;
         }
 
-        public async Task<IReadOnlyCollection<ScheduledTask>> GetScheduledTasks()
+        public async Task<IReadOnlyCollection<Schedule>> GetSchedules()
         {
-            var rawData = await this.rawItemRepository.GetScheduledTasks();
+            var rawData = await this.rawItemRepository.GetSchedules();
 
             var data = JsonSerializer.Deserialize<IDictionary<string, string>>(rawData);
 
             return data
-                .Select(ParseScheduledTask)
+                .Select(ParseSchedule)
                 .ToArray();
         }
 
-        public async Task UpdateScheduledTask(ScheduledTask scheduledTask)
+        public async Task UpdateSchedule(Schedule schedule)
         {
-            var existing = await this.GetScheduledTasks();
+            var existing = await this.GetSchedules();
 
-            var unchanged = existing.Where(t => t.ScheduledTaskType != scheduledTask.ScheduledTaskType);
+            var unchanged = existing.Where(t => t.ScheduledTaskType != schedule.ScheduledTaskType);
 
-            var updated = new List<ScheduledTask>(unchanged)
+            var updated = new List<Schedule>(unchanged)
             {
-                scheduledTask
+                schedule
             };
 
             var data = updated
@@ -56,11 +57,11 @@
 
             var rawData = JsonSerializer.Serialize(data);
 
-            await rawItemRepository.SaveScheduledTasks(rawData);
+            await rawItemRepository.SaveSchedules(rawData);
         }
 
-        private static ScheduledTask ParseScheduledTask(KeyValuePair<string, string> rawData) =>
-            new ScheduledTask(
+        private static Schedule ParseSchedule(KeyValuePair<string, string> rawData) =>
+            new Schedule(
                 ParseScheduledTaskType(rawData.Key),
                 ParseNextRunTime(rawData.Value));
 

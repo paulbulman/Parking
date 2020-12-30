@@ -23,7 +23,7 @@
 
         Task<IReadOnlyCollection<RawItem>> GetReservations(YearMonth yearMonth);
 
-        Task<string> GetScheduledTasks();
+        Task<string> GetSchedules();
 
         Task<IReadOnlyCollection<RawItem>> GetUsers();
 
@@ -31,14 +31,14 @@
 
         Task SaveItems(IEnumerable<RawItem> rawItems);
 
-        Task SaveScheduledTasks(string rawData);
+        Task SaveSchedules(string rawData);
         
         Task SendEmail(string rawData);
     }
 
     public class RawItemRepository : IRawItemRepository
     {
-        private const string ScheduledTasksObjectKey = "scheduledTasks.json";
+        private const string SchedulesObjectKey = "schedules.json";
 
         private readonly IAmazonCognitoIdentityProvider cognitoIdentityProvider;
         
@@ -89,7 +89,7 @@
             return await query.GetRemainingAsync();
         }
 
-        public async Task<string> GetScheduledTasks() => await GetBucketData(DataBucketName, ScheduledTasksObjectKey);
+        public async Task<string> GetSchedules() => await GetBucketData(DataBucketName, SchedulesObjectKey);
 
         public async Task<IReadOnlyCollection<RawItem>> GetUsers()
         {
@@ -129,8 +129,8 @@
             }
         }
 
-        public async Task SaveScheduledTasks(string rawData) =>
-            await SaveBucketData(DataBucketName, ScheduledTasksObjectKey, rawData);
+        public async Task SaveSchedules(string rawData) =>
+            await SaveBucketData(DataBucketName, SchedulesObjectKey, rawData);
 
         public async Task SendEmail(string rawData) =>
             await SaveBucketData(EmailBucketName, Guid.NewGuid().ToString(), rawData);

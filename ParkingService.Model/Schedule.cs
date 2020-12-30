@@ -2,9 +2,9 @@
 {
     using NodaTime;
 
-    public class ScheduledTask
+    public class Schedule
     {
-        public ScheduledTask(ScheduledTaskType scheduledTaskType, Instant nextRunTime)
+        public Schedule(ScheduledTaskType scheduledTaskType, Instant nextRunTime)
         {
             ScheduledTaskType = scheduledTaskType;
             NextRunTime = nextRunTime;

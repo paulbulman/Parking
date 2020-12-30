@@ -7,6 +7,8 @@
 
     public interface IDateCalculator
     {
+        Instant InitialInstant { get; }
+
         IReadOnlyCollection<LocalDate> GetShortLeadTimeAllocationDates();
 
         IReadOnlyCollection<LocalDate> GetLongLeadTimeAllocationDates();
@@ -27,18 +29,18 @@
         public DateCalculator(IClock clock, IBankHolidayRepository bankHolidayRepository)
         {
             this.bankHolidayRepository = bankHolidayRepository;
-            this.CurrentInstant = clock.GetCurrentInstant();
+            this.InitialInstant = clock.GetCurrentInstant();
         }
 
-        private Instant CurrentInstant { get; }
+        public Instant InitialInstant { get; }
 
         public IReadOnlyCollection<LocalDate> GetShortLeadTimeAllocationDates()
         {
-            var currentTime = this.GetCurrentTime();
+            var initialTime = this.GetInitialTime();
 
-            var firstDate = this.GetNextWorkingDayIncluding(currentTime.Date);
+            var firstDate = this.GetNextWorkingDayIncluding(initialTime.Date);
 
-            var lastDate = firstDate == currentTime.Date && currentTime.Hour >= 11 ?
+            var lastDate = firstDate == initialTime.Date && initialTime.Hour >= 11 ?
                 this.GetNextWorkingDayStrictlyAfter(firstDate) :
                 firstDate;
 
@@ -51,7 +53,7 @@
 
             var firstDate = this.GetNextWorkingDayStrictlyAfter(lastShortLeadTimeAllocationDate);
 
-            var lastDate = GetCurrentDate().Next(IsoDayOfWeek.Thursday).PlusWeeks(1).PlusDays(1);
+            var lastDate = GetInitialDate().Next(IsoDayOfWeek.Thursday).PlusWeeks(1).PlusDays(1);
 
             return this.WorkingDatesBetween(firstDate, lastDate);
         }
@@ -74,7 +76,7 @@
             return this.WorkingDatesBetween(firstDate, lastDate);
         }
 
-        public LocalDate GetNextWorkingDate() => GetNextWorkingDayStrictlyAfter(this.GetCurrentDate());
+        public LocalDate GetNextWorkingDate() => GetNextWorkingDayStrictlyAfter(this.GetInitialDate());
 
         private LocalDate GetNextWorkingDayIncluding(LocalDate localDate)
         {
@@ -89,9 +91,9 @@
         private LocalDate GetNextWorkingDayStrictlyAfter(LocalDate localDate) =>
             this.GetNextWorkingDayIncluding(localDate.PlusDays(1));
 
-        private LocalDate GetCurrentDate() => this.GetCurrentTime().Date;
+        private LocalDate GetInitialDate() => this.GetInitialTime().Date;
 
-        private ZonedDateTime GetCurrentTime() => this.CurrentInstant.InZone(LondonTimeZone);
+        private ZonedDateTime GetInitialTime() => this.InitialInstant.InZone(LondonTimeZone);
 
         private IReadOnlyCollection<LocalDate> WorkingDatesBetween(LocalDate firstDate, LocalDate lastDate) =>
             Enumerable.Range(0, Period.Between(firstDate, lastDate, PeriodUnits.Days).Days + 1)

@@ -14,6 +14,22 @@ namespace ParkingService.Business.UnitTests
         private static readonly DateTimeZone LondonTimeZone = DateTimeZoneProviders.Tzdb["Europe/London"];
 
         [Fact]
+        public static void InitialInstant_returns_same_instant_for_successive_calls()
+        {
+            var initialInstant = 30.December(2020).At(11, 58, 33).Utc();
+            var autoAdvance = 10.Seconds();
+            
+            var fakeClock = new FakeClock(initialInstant, autoAdvance);
+
+            var dateCalculator = new DateCalculator(fakeClock, Mock.Of<IBankHolidayRepository>());
+
+            var firstResult = dateCalculator.InitialInstant;
+            var subsequentResult = dateCalculator.InitialInstant;
+
+            Assert.Equal(firstResult, subsequentResult);
+        }
+
+        [Fact]
         public static void GetShortLeadTimeAllocationDates_returns_current_working_day_if_called_before_11_am()
         {
             var instant = 4.September(2020).At(10, 59, 59).InZoneStrictly(LondonTimeZone).ToInstant();

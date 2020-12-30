@@ -24,32 +24,32 @@
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
 
             mockRawItemRepository
-                .Setup(r => r.GetScheduledTasks())
+                .Setup(r => r.GetSchedules())
                 .ReturnsAsync(rawData);
 
-            var scheduledTaskRepository = new ScheduledTaskRepository(mockRawItemRepository.Object);
+            var scheduleRepository = new ScheduleRepository(mockRawItemRepository.Object);
 
-            var result = await scheduledTaskRepository.GetScheduledTasks();
+            var result = await scheduleRepository.GetSchedules();
 
-            var expected = new[]
+            var expectedSchedules = new[]
             {
-                new ScheduledTask(ScheduledTaskType.DailyNotification, 14.December(2020).At(11, 0, 0).Utc()),
-                new ScheduledTask(ScheduledTaskType.RequestReminder, 16.December(2020).AtMidnight().Utc()),
-                new ScheduledTask(ScheduledTaskType.ReservationReminder, 14.December(2020).At(10, 0, 0).Utc()),
-                new ScheduledTask(ScheduledTaskType.WeeklyNotification, 17.December(2020).AtMidnight().Utc())
+                new Schedule(ScheduledTaskType.DailyNotification, 14.December(2020).At(11, 0, 0).Utc()),
+                new Schedule(ScheduledTaskType.RequestReminder, 16.December(2020).AtMidnight().Utc()),
+                new Schedule(ScheduledTaskType.ReservationReminder, 14.December(2020).At(10, 0, 0).Utc()),
+                new Schedule(ScheduledTaskType.WeeklyNotification, 17.December(2020).AtMidnight().Utc())
             };
 
             Assert.NotNull(result);
 
-            Assert.Equal(expected.Length, result.Count);
+            Assert.Equal(expectedSchedules.Length, result.Count);
 
-            foreach (var expectedTask in expected)
+            foreach (var expected in expectedSchedules)
             {
-                Assert.Single(result, t => t.ScheduledTaskType == expectedTask.ScheduledTaskType);
+                Assert.Single(result, t => t.ScheduledTaskType == expected.ScheduledTaskType);
 
-                var actual = result.Single(t => t.ScheduledTaskType == expectedTask.ScheduledTaskType);
+                var actual = result.Single(t => t.ScheduledTaskType == expected.ScheduledTaskType);
 
-                Assert.Equal(expectedTask.NextRunTime, actual.NextRunTime);
+                Assert.Equal(expected.NextRunTime, actual.NextRunTime);
             }
         }
 
@@ -75,19 +75,19 @@
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
 
             mockRawItemRepository
-                .Setup(r => r.GetScheduledTasks())
+                .Setup(r => r.GetSchedules())
                 .ReturnsAsync(initialRawData);
             mockRawItemRepository
-                .Setup(r => r.SaveScheduledTasks(expectedUpdatedRawData))
+                .Setup(r => r.SaveSchedules(expectedUpdatedRawData))
                 .Returns(Task.CompletedTask);
 
-            var scheduledTaskRepository = new ScheduledTaskRepository(mockRawItemRepository.Object);
+            var scheduleRepository = new ScheduleRepository(mockRawItemRepository.Object);
 
-            var updatedTask = new ScheduledTask(
+            var updatedSchedule = new Schedule(
                 ScheduledTaskType.ReservationReminder,
                 15.December(2020).At(10, 0, 0).Utc());
 
-            await scheduledTaskRepository.UpdateScheduledTask(updatedTask);
+            await scheduleRepository.UpdateSchedule(updatedSchedule);
 
             mockRawItemRepository.VerifyAll();
         }
