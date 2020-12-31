@@ -255,14 +255,7 @@ namespace ParkingService.Business.UnitTests
             Assert.Equal(5.June(2020), summerResult);
         }
 
-        private static DateCalculator CreateDateCalculator(LocalDate londonDate, params LocalDate[] bankHolidayDates)
-        {
-            var londonMidnight = londonDate.AtMidnight().InZoneStrictly(LondonTimeZone).ToInstant();
-
-            return CreateDateCalculator(londonMidnight, bankHolidayDates);
-        }
-
-        private static DateCalculator CreateDateCalculator(Instant instant, params LocalDate[] bankHolidayDates)
+        public static DateCalculator CreateDateCalculator(Instant instant, params LocalDate[] bankHolidayDates)
         {
             var mockBankHolidayRepository = new Mock<IBankHolidayRepository>();
             mockBankHolidayRepository
@@ -270,6 +263,13 @@ namespace ParkingService.Business.UnitTests
                 .Returns(bankHolidayDates.Select(d => new BankHoliday(d)).ToArray());
 
             return new DateCalculator(new FakeClock(instant), mockBankHolidayRepository.Object);
+        }
+
+        private static DateCalculator CreateDateCalculator(LocalDate londonDate, params LocalDate[] bankHolidayDates)
+        {
+            var londonMidnight = londonDate.AtMidnight().InZoneStrictly(LondonTimeZone).ToInstant();
+
+            return CreateDateCalculator(londonMidnight, bankHolidayDates);
         }
     }
 }

@@ -50,6 +50,15 @@
             }
         }
 
+        public Instant GetNextRunTime() =>
+            this.dateCalculator.InitialInstant
+                .InZone(DateCalculator.LondonTimeZone)
+                .Date
+                .Next(IsoDayOfWeek.Wednesday)
+                .AtMidnight()
+                .InZoneStrictly(DateCalculator.LondonTimeZone)
+                .ToInstant();
+
         private static bool IsActive(User user, IReadOnlyCollection<Request> requests) =>
             requests.Any(r =>
                 r.Status.IsActive() && 

@@ -22,7 +22,7 @@
 
     public class DateCalculator : IDateCalculator
     {
-        private static readonly DateTimeZone LondonTimeZone = DateTimeZoneProviders.Tzdb["Europe/London"];
+        public static readonly DateTimeZone LondonTimeZone = DateTimeZoneProviders.Tzdb["Europe/London"];
 
         private readonly IBankHolidayRepository bankHolidayRepository;
 

@@ -18,8 +18,8 @@
             var mockDateCalculator = new Mock<IDateCalculator>(MockBehavior.Strict);
             mockDateCalculator.SetupGet(c => c.InitialInstant).Returns(currentInstant);
 
-            var dueTime = currentInstant.Plus(-10.Seconds());
-            var notDueTime = currentInstant.Plus(10.Seconds());
+            var dueTime = currentInstant;
+            var notDueTime = currentInstant.Plus(1.Seconds());
 
             var schedules = new[]
             {

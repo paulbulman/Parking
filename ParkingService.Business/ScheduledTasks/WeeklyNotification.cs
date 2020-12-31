@@ -4,6 +4,7 @@
     using System.Threading.Tasks;
     using Data;
     using Model;
+    using NodaTime;
 
     public class WeeklyNotification : IScheduledTask
     {
@@ -45,5 +46,14 @@
                     new EmailTemplates.WeeklyNotification(requests, user, notificationDates));
             }
         }
+
+        public Instant GetNextRunTime() =>
+            this.dateCalculator.InitialInstant
+                .InZone(DateCalculator.LondonTimeZone)
+                .Date
+                .Next(IsoDayOfWeek.Thursday)
+                .AtMidnight()
+                .InZoneStrictly(DateCalculator.LondonTimeZone)
+                .ToInstant();
     }
 }

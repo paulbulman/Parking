@@ -4,6 +4,7 @@
     using System.Threading.Tasks;
     using Data;
     using Model;
+    using NodaTime;
 
     public class ReservationReminder : IScheduledTask
     {
@@ -46,5 +47,11 @@
                 }
             }
         }
+
+        public Instant GetNextRunTime() =>
+            this.dateCalculator.GetNextWorkingDate()
+                .At(new LocalTime(10, 0, 0))
+                .InZoneStrictly(DateCalculator.LondonTimeZone)
+                .ToInstant();
     }
 }

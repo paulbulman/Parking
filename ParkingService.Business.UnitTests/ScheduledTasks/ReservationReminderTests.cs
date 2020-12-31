@@ -9,6 +9,7 @@
     using NodaTime.Testing.Extensions;
     using Xunit;
     using IEmailTemplate = Business.EmailTemplates.IEmailTemplate;
+    using static DateCalculatorTests;
 
     public static class ReservationReminderTests
     {
@@ -90,7 +91,7 @@
         }
 
         [Fact]
-        public static void Returns_reservation_reminder_for_task_type()
+        public static void ScheduledTaskType_returns_ReservationReminder()
         {
             var reservationReminder = new ReservationReminder(
                 Mock.Of<IDateCalculator>(),
@@ -99,6 +100,42 @@
                 Mock.Of<IUserRepository>());
             
             Assert.Equal(ScheduledTaskType.ReservationReminder, reservationReminder.ScheduledTaskType);
+        }
+
+        [Theory]
+        [InlineData(21, 22)]
+        [InlineData(24, 29)]
+        public static void GetNextRunTime_returns_10_am_on_next_working_day(int currentDay, int expectedNextDay)
+        {
+            var bankHolidays = new[] { 25.December(2020), 28.December(2020) };
+
+            var dateCalculator = CreateDateCalculator(currentDay.December(2020).At(10, 0, 0).Utc(), bankHolidays);
+
+            var actual = new ReservationReminder(
+                dateCalculator,
+                Mock.Of<IEmailRepository>(),
+                Mock.Of<IReservationRepository>(),
+                Mock.Of<IUserRepository>()).GetNextRunTime();
+
+            var expected = expectedNextDay.December(2020).At(10, 0, 0).Utc();
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public static void GetNextRunTime_uses_London_time_zone()
+        {
+            var dateCalculator = CreateDateCalculator(27.March(2020).At(10, 0, 0).Utc());
+
+            var actual = new ReservationReminder(
+                dateCalculator,
+                Mock.Of<IEmailRepository>(),
+                Mock.Of<IReservationRepository>(),
+                Mock.Of<IUserRepository>()).GetNextRunTime();
+
+            var expected = 30.March(2020).At(9, 0, 0).Utc();
+
+            Assert.Equal(expected, actual);
         }
     }
 }

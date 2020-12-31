@@ -8,6 +8,7 @@
     using NodaTime.Testing.Extensions;
     using Xunit;
     using IEmailTemplate = Business.EmailTemplates.IEmailTemplate;
+    using static DateCalculatorTests;
 
     public static class RequestReminderTests
     {
@@ -143,7 +144,7 @@
         }
 
         [Fact]
-        public static void Returns_request_reminder_for_task_type()
+        public static void ScheduledTaskType_returns_RequestReminder()
         {
             var requestReminder = new RequestReminder(
                 Mock.Of<IDateCalculator>(),
@@ -152,6 +153,40 @@
                 Mock.Of<IUserRepository>());
 
             Assert.Equal(ScheduledTaskType.RequestReminder, requestReminder.ScheduledTaskType);
+        }
+
+        [Theory]
+        [InlineData(22, 23)]
+        [InlineData(23, 30)]
+        public static void GetNextRunTime_returns_midnight_on_next_Wednesday(int currentDay, int expectedNextDay)
+        {
+            var dateCalculator = CreateDateCalculator(currentDay.December(2020).AtMidnight().Utc());
+
+            var actual = new RequestReminder(
+                dateCalculator,
+                Mock.Of<IEmailRepository>(),
+                Mock.Of<IRequestRepository>(),
+                Mock.Of<IUserRepository>()).GetNextRunTime();
+
+            var expected = expectedNextDay.December(2020).AtMidnight().Utc();
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public static void GetNextRunTime_uses_London_time_zone()
+        {
+            var dateCalculator = CreateDateCalculator(26.March(2020).AtMidnight().Utc());
+
+            var actual = new RequestReminder(
+                dateCalculator,
+                Mock.Of<IEmailRepository>(),
+                Mock.Of<IRequestRepository>(),
+                Mock.Of<IUserRepository>()).GetNextRunTime();
+
+            var expected = 31.March(2020).At(23, 0, 0).Utc();
+
+            Assert.Equal(expected, actual);
         }
     }
 }
