@@ -28,14 +28,24 @@
         {
             var schedules = await this.scheduleRepository.GetSchedules();
 
-            foreach (var schedule in schedules.Where(ScheduleIsDue))
-            {
-                var scheduledTask = this.scheduledTasks.Single(t => t.ScheduledTaskType == schedule.ScheduledTaskType);
+            var dueTasks = schedules
+                .Where(ScheduleIsDue)
+                .Select(GetScheduledTask)
+                .ToArray();
 
-                await scheduledTask.Run();
+            foreach (var dueTask in dueTasks)
+            {
+                await dueTask.Run();
+                
+                var updatedSchedule = new Schedule(dueTask.ScheduledTaskType, dueTask.GetNextRunTime());
+                
+                await this.scheduleRepository.UpdateSchedule(updatedSchedule);
             }
         }
 
         private bool ScheduleIsDue(Schedule schedule) => schedule.NextRunTime <= this.dateCalculator.InitialInstant;
+        
+        private IScheduledTask GetScheduledTask(Schedule schedule) =>
+            this.scheduledTasks.Single(task => task.ScheduledTaskType == schedule.ScheduledTaskType);
     }
 }

@@ -15,8 +15,7 @@
         {
             var currentInstant = 30.December(2020).At(12, 07, 26).Utc();
 
-            var mockDateCalculator = new Mock<IDateCalculator>(MockBehavior.Strict);
-            mockDateCalculator.SetupGet(c => c.InitialInstant).Returns(currentInstant);
+            var dateCalculator = Mock.Of<IDateCalculator>(d => d.InitialInstant == currentInstant);
 
             var dueTime = currentInstant;
             var notDueTime = currentInstant.Plus(1.Seconds());
@@ -25,33 +24,26 @@
             {
                 new Schedule(ScheduledTaskType.DailyNotification, dueTime),
                 new Schedule(ScheduledTaskType.RequestReminder, notDueTime),
-                new Schedule(ScheduledTaskType.ReservationReminder, notDueTime),
                 new Schedule(ScheduledTaskType.WeeklyNotification, dueTime)
             };
 
             var mockScheduleRepository = new Mock<IScheduleRepository>(MockBehavior.Strict);
             mockScheduleRepository.Setup(r => r.GetSchedules()).ReturnsAsync(schedules);
+            mockScheduleRepository.Setup(r => r.UpdateSchedule(It.IsAny<Schedule>())).Returns(Task.CompletedTask);
 
-            var mockDailyNotification = new Mock<IScheduledTask>();
-            var mockRequestReminder = new Mock<IScheduledTask>();
-            var mockReservationReminder = new Mock<IScheduledTask>();
-            var mockWeeklyNotification = new Mock<IScheduledTask>();
-
-            mockDailyNotification.SetupGet(s => s.ScheduledTaskType).Returns(ScheduledTaskType.DailyNotification);
-            mockRequestReminder.SetupGet(s => s.ScheduledTaskType).Returns(ScheduledTaskType.RequestReminder);
-            mockReservationReminder.SetupGet(s => s.ScheduledTaskType).Returns(ScheduledTaskType.ReservationReminder);
-            mockWeeklyNotification.SetupGet(s => s.ScheduledTaskType).Returns(ScheduledTaskType.WeeklyNotification);
+            var mockDailyNotification = CreateMockScheduledTask(ScheduledTaskType.DailyNotification);
+            var mockRequestReminder = CreateMockScheduledTask(ScheduledTaskType.RequestReminder);
+            var mockWeeklyNotification = CreateMockScheduledTask(ScheduledTaskType.WeeklyNotification);
 
             var scheduledTasks = new[]
             {
                 mockDailyNotification.Object,
                 mockRequestReminder.Object,
-                mockReservationReminder.Object,
                 mockWeeklyNotification.Object
             };
 
             var scheduledTaskRunner = new ScheduledTaskRunner(
-                mockDateCalculator.Object,
+                dateCalculator,
                 scheduledTasks,
                 mockScheduleRepository.Object);
 
@@ -59,8 +51,74 @@
 
             mockDailyNotification.Verify(s => s.Run(), Times.Once);
             mockRequestReminder.Verify(s => s.Run(), Times.Never);
-            mockReservationReminder.Verify(s => s.Run(), Times.Never);
             mockWeeklyNotification.Verify(s => s.Run(), Times.Once);
+        }
+
+        [Fact]
+        public static async Task Updates_schedules_for_tasks_that_are_run()
+        {
+            var currentInstant = 30.December(2020).At(12, 07, 26).Utc();
+
+            var dateCalculator = Mock.Of<IDateCalculator>(d => d.InitialInstant == currentInstant);
+
+            var dueTime = currentInstant;
+            var notDueTime = currentInstant.Plus(1.Seconds());
+
+            var schedules = new[]
+            {
+                new Schedule(ScheduledTaskType.DailyNotification, dueTime),
+                new Schedule(ScheduledTaskType.RequestReminder, notDueTime),
+                new Schedule(ScheduledTaskType.WeeklyNotification, dueTime)
+            };
+
+            var mockScheduleRepository = new Mock<IScheduleRepository>();
+            mockScheduleRepository.Setup(r => r.GetSchedules()).ReturnsAsync(schedules);
+
+            var mockDailyNotification = CreateMockScheduledTask(ScheduledTaskType.DailyNotification);
+            var mockRequestReminder = CreateMockScheduledTask(ScheduledTaskType.RequestReminder);
+            var mockWeeklyNotification = CreateMockScheduledTask(ScheduledTaskType.WeeklyNotification);
+
+            var dailyNotificationNextRunTime = 31.December(2020).At(11, 0, 0).Utc();
+            var weeklyNotificationNextRunTime = 31.December(2020).AtMidnight().Utc();
+
+            mockDailyNotification.Setup(s => s.GetNextRunTime()).Returns(dailyNotificationNextRunTime);
+            mockWeeklyNotification.Setup(s => s.GetNextRunTime()).Returns(weeklyNotificationNextRunTime);
+
+            var scheduledTasks = new[]
+            {
+                mockDailyNotification.Object,
+                mockRequestReminder.Object,
+                mockWeeklyNotification.Object
+            };
+
+            var scheduledTaskRunner = new ScheduledTaskRunner(
+                dateCalculator,
+                scheduledTasks,
+                mockScheduleRepository.Object);
+
+            await scheduledTaskRunner.RunScheduledTasks();
+
+            mockScheduleRepository.Verify(r => r.GetSchedules(), Times.Once);
+            mockScheduleRepository.Verify(
+                r => r.UpdateSchedule(It.Is<Schedule>(s =>
+                    s.ScheduledTaskType == ScheduledTaskType.DailyNotification &&
+                    s.NextRunTime == dailyNotificationNextRunTime)), 
+                Times.Once);
+            mockScheduleRepository.Verify(
+                r => r.UpdateSchedule(It.Is<Schedule>(s =>
+                    s.ScheduledTaskType == ScheduledTaskType.WeeklyNotification &&
+                    s.NextRunTime == weeklyNotificationNextRunTime)),
+                Times.Once);
+            mockScheduleRepository.VerifyNoOtherCalls();
+        }
+
+        private static Mock<IScheduledTask> CreateMockScheduledTask(ScheduledTaskType scheduledTaskType)
+        {
+            var mockScheduledTask = new Mock<IScheduledTask>();
+
+            mockScheduledTask.SetupGet(s => s.ScheduledTaskType).Returns(scheduledTaskType);
+
+            return mockScheduledTask;
         }
     }
 }
