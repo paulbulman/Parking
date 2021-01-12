@@ -29,7 +29,7 @@
             var schedules = await this.scheduleRepository.GetSchedules();
 
             var dueTasks = schedules
-                .Where(ScheduleIsDue)
+                .Where(this.dateCalculator.ScheduleIsDue)
                 .Select(GetScheduledTask)
                 .ToArray();
 
@@ -43,8 +43,6 @@
             }
         }
 
-        private bool ScheduleIsDue(Schedule schedule) => schedule.NextRunTime <= this.dateCalculator.InitialInstant;
-        
         private IScheduledTask GetScheduledTask(Schedule schedule) =>
             this.scheduledTasks.Single(task => task.ScheduledTaskType == schedule.ScheduledTaskType);
     }

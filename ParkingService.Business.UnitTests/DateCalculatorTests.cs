@@ -255,6 +255,30 @@ namespace ParkingService.Business.UnitTests
             Assert.Equal(5.June(2020), summerResult);
         }
 
+        [Fact]
+        public static void ScheduleIsDue_returns_true_when_due_time_is_in_the_past()
+        {
+            var currentInstant = 12.January(2021).At(16, 48, 16).Utc();
+
+            var schedule = new Schedule(ScheduledTaskType.DailyNotification, currentInstant.Plus(-1.Seconds()));
+
+            var result = CreateDateCalculator(currentInstant).ScheduleIsDue(schedule);
+
+            Assert.True(result);
+        }
+
+        [Fact]
+        public static void ScheduleIsDue_returns_false_when_due_time_is_in_the_future()
+        {
+            var currentInstant = 12.January(2021).At(16, 48, 16).Utc();
+
+            var schedule = new Schedule(ScheduledTaskType.DailyNotification, currentInstant.Plus(1.Seconds()));
+
+            var result = CreateDateCalculator(currentInstant).ScheduleIsDue(schedule);
+
+            Assert.False(result);
+        }
+
         public static DateCalculator CreateDateCalculator(Instant instant, params LocalDate[] bankHolidayDates)
         {
             var mockBankHolidayRepository = new Mock<IBankHolidayRepository>();

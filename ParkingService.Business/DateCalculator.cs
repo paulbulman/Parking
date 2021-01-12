@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using Data;
+    using Model;
     using NodaTime;
 
     public interface IDateCalculator
@@ -18,6 +19,8 @@
         IReadOnlyCollection<LocalDate> GetNextWeeklyNotificationDates();
 
         LocalDate GetNextWorkingDate();
+
+        bool ScheduleIsDue(Schedule schedule);
     }
 
     public class DateCalculator : IDateCalculator
@@ -77,6 +80,8 @@
         }
 
         public LocalDate GetNextWorkingDate() => GetNextWorkingDayStrictlyAfter(this.GetInitialDate());
+
+        public bool ScheduleIsDue(Schedule schedule) => schedule.NextRunTime <= this.InitialInstant;
 
         private LocalDate GetNextWorkingDayIncluding(LocalDate localDate)
         {
