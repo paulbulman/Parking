@@ -71,6 +71,18 @@ namespace ParkingService.Data.UnitTests
         }
 
         [Fact]
+        public static async void SaveRequests_handles_empty_list()
+        {
+            var mockRawItemRepository = new Mock<IRawItemRepository>();
+
+            var requestRepository = new RequestRepository(mockRawItemRepository.Object);
+
+            await requestRepository.SaveRequests(new List<Request>());
+
+            mockRawItemRepository.VerifyNoOtherCalls();
+        }
+
+        [Fact]
         public static async void SaveRequests_converts_requests_to_raw_items()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
@@ -233,6 +245,7 @@ namespace ParkingService.Data.UnitTests
             private static bool CompareRequests(IDictionary<string, string> first, IDictionary<string, string> second) =>
                 first != null &&
                 second != null &&
+                first.Keys.Count == second.Keys.Count &&
                 first.Keys.ToList().All(key => second.ContainsKey(key) && second[key] == first[key]);
 
             public int GetHashCode(RawItem rawItem) => HashCode.Combine(rawItem.PrimaryKey, rawItem.SortKey, rawItem.Requests);
