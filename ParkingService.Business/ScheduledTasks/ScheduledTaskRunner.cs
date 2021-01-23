@@ -10,13 +10,13 @@
     {
         private readonly IDateCalculator dateCalculator;
         
-        private readonly IReadOnlyCollection<IScheduledTask> scheduledTasks;
+        private readonly IEnumerable<IScheduledTask> scheduledTasks;
         
         private readonly IScheduleRepository scheduleRepository;
 
         public ScheduledTaskRunner(
             IDateCalculator dateCalculator,
-            IReadOnlyCollection<IScheduledTask> scheduledTasks,
+            IEnumerable<IScheduledTask> scheduledTasks,
             IScheduleRepository scheduleRepository)
         {
             this.dateCalculator = dateCalculator;
