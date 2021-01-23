@@ -17,7 +17,7 @@
         private readonly IRequestRepository requestRepository;
 
         private readonly IReservationRepository reservationRepository;
-        
+
         private readonly IUserRepository userRepository;
 
         public RequestUpdater(
@@ -60,10 +60,7 @@
 
                 updatedRequests.AddRange(allocatedRequests);
 
-                foreach (var allocatedRequest in allocatedRequests)
-                {
-                    ReplaceStaleRequest(cumulativeRequests, allocatedRequest);
-                }
+                ReplaceStaleRequests(cumulativeRequests, allocatedRequests);
             }
 
             foreach (var allocationDate in longLeadTimeAllocationDates)
@@ -73,10 +70,7 @@
 
                 updatedRequests.AddRange(allocatedRequests);
 
-                foreach (var allocatedRequest in allocatedRequests)
-                {
-                    ReplaceStaleRequest(cumulativeRequests, allocatedRequest);
-                }
+                ReplaceStaleRequests(cumulativeRequests, allocatedRequests);
             }
 
             await this.requestRepository.SaveRequests(updatedRequests);
@@ -84,13 +78,18 @@
             return updatedRequests;
         }
 
-        private static void ReplaceStaleRequest(ICollection<Request> cumulativeRequests, Request allocatedRequest)
+        private static void ReplaceStaleRequests(
+            ICollection<Request> cumulativeRequests,
+            IEnumerable<Request> allocatedRequests)
         {
-            var previousExistingRequest = cumulativeRequests.Single(r =>
-                r.UserId == allocatedRequest.UserId && r.Date == allocatedRequest.Date);
+            foreach (var allocatedRequest in allocatedRequests)
+            {
+                var previousExistingRequest = cumulativeRequests.Single(r =>
+                    r.UserId == allocatedRequest.UserId && r.Date == allocatedRequest.Date);
 
-            cumulativeRequests.Remove(previousExistingRequest);
-            cumulativeRequests.Add(allocatedRequest);
+                cumulativeRequests.Remove(previousExistingRequest);
+                cumulativeRequests.Add(allocatedRequest);
+            }
         }
     }
 }
