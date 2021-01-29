@@ -17,6 +17,8 @@
 
     public interface IRawItemRepository
     {
+        Task DeleteTriggerFiles(IEnumerable<string> keys);
+
         Task<string> GetConfiguration();
 
         Task<IReadOnlyCollection<RawItem>> GetRequests(YearMonth yearMonth);
@@ -24,6 +26,8 @@
         Task<IReadOnlyCollection<RawItem>> GetReservations(YearMonth yearMonth);
 
         Task<string> GetSchedules();
+
+        Task<IReadOnlyCollection<string>> GetTriggerFileKeys();
 
         Task<IReadOnlyCollection<RawItem>> GetUsers();
 
@@ -59,10 +63,20 @@
         private static string DataBucketName => Environment.GetEnvironmentVariable("DATA_BUCKET_NAME");
 
         private static string EmailBucketName => Environment.GetEnvironmentVariable("EMAIL_BUCKET_NAME");
+        
+        private static string TriggerBucketName => Environment.GetEnvironmentVariable("TRIGGER_BUCKET_NAME");
 
         private static string TableName => Environment.GetEnvironmentVariable("TABLE_NAME");
         
         private static string UserPoolId => Environment.GetEnvironmentVariable("USER_POOL_ID");
+
+        public async Task DeleteTriggerFiles(IEnumerable<string> keys)
+        {
+            foreach (var key in keys)
+            {
+                await s3Client.DeleteObjectAsync(TriggerBucketName, key);
+            }
+        }
 
         public async Task<string> GetConfiguration() => await GetBucketData(DataBucketName, "configuration.json");
 
@@ -90,6 +104,18 @@
         }
 
         public async Task<string> GetSchedules() => await GetBucketData(DataBucketName, SchedulesObjectKey);
+
+        public async Task<IReadOnlyCollection<string>> GetTriggerFileKeys()
+        {
+            var request = new ListObjectsV2Request
+            {
+                BucketName = TriggerBucketName
+            };
+
+            var objects = await s3Client.ListObjectsV2Async(request);
+
+            return objects.S3Objects.Select(s => s.Key).ToArray();
+        }
 
         public async Task<IReadOnlyCollection<RawItem>> GetUsers()
         {

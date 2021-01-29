@@ -22,14 +22,21 @@
         {
             using var scope = this.serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
 
-            var requestUpdater = scope.ServiceProvider.GetRequiredService<RequestUpdater>();
-            var allocatedRequests = await requestUpdater.Update();
+            var triggerManager = scope.ServiceProvider.GetRequiredService<TriggerManager>();
 
-            var allocationNotifier = scope.ServiceProvider.GetRequiredService<AllocationNotifier>();
-            await allocationNotifier.Notify(allocatedRequests);
+            if (await triggerManager.ShouldRun())
+            {
+                var requestUpdater = scope.ServiceProvider.GetRequiredService<RequestUpdater>();
+                var allocatedRequests = await requestUpdater.Update();
 
-            var scheduledTaskRunner = scope.ServiceProvider.GetRequiredService<ScheduledTaskRunner>();
-            await scheduledTaskRunner.RunScheduledTasks();
+                var allocationNotifier = scope.ServiceProvider.GetRequiredService<AllocationNotifier>();
+                await allocationNotifier.Notify(allocatedRequests);
+
+                var scheduledTaskRunner = scope.ServiceProvider.GetRequiredService<ScheduledTaskRunner>();
+                await scheduledTaskRunner.RunScheduledTasks();
+            }
+
+            await triggerManager.MarkComplete();
         }
 
         private static ServiceProvider BuildServiceProvider()
@@ -56,6 +63,8 @@
             services.AddScoped<IReservationRepository, ReservationRepository>();
             services.AddScoped<IScheduleRepository, ScheduleRepository>();
             services.AddScoped<ScheduledTaskRunner>();
+            services.AddScoped<TriggerManager>();
+            services.AddScoped<ITriggerRepository, TriggerRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
 
             services.AddScoped<IScheduledTask, DailyNotification>();
