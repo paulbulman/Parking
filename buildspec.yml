@@ -8,5 +8,7 @@ phases:
       - dotnet tool install -g Amazon.Lambda.Tools
   build:
     commands:
-      - cd ParkingService
-      - dotnet lambda deploy-function --function-name $FUNCTION_NAME
+      - cd Parking.Service
+      - dotnet lambda deploy-function --function-name $SERVICE_FUNCTION_NAME
+      - cd ../Parking.Api
+      - dotnet lambda deploy-function --function-name $API_FUNCTION_NAME
