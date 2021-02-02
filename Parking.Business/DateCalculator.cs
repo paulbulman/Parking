@@ -10,6 +10,8 @@
     {
         Instant InitialInstant { get; }
 
+        IReadOnlyCollection<LocalDate> GetActiveDates();
+
         IReadOnlyCollection<LocalDate> GetShortLeadTimeAllocationDates();
 
         IReadOnlyCollection<LocalDate> GetLongLeadTimeAllocationDates();
@@ -36,6 +38,18 @@
         }
 
         public Instant InitialInstant { get; }
+
+        public IReadOnlyCollection<LocalDate> GetActiveDates()
+        {
+            var currentDate = this.GetInitialDate();
+
+            var lastDayOfNextMonth = currentDate
+                .With(DateAdjusters.StartOfMonth)
+                .PlusMonths(1)
+                .With(DateAdjusters.EndOfMonth);
+
+            return this.WorkingDatesBetween(currentDate, lastDayOfNextMonth);
+        }
 
         public IReadOnlyCollection<LocalDate> GetShortLeadTimeAllocationDates()
         {
