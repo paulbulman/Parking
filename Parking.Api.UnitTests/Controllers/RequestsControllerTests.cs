@@ -1,6 +1,5 @@
 ﻿namespace Parking.Api.UnitTests.Controllers
 {
-    using System.Linq;
     using System.Threading.Tasks;
     using Api.Controllers;
     using Business;

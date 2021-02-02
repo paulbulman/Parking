@@ -5,6 +5,7 @@ namespace Parking.Api
     using Amazon.S3;
     using Business;
     using Business.Data;
+    using Converters;
     using Data;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -16,7 +17,9 @@ namespace Parking.Api
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services
+                .AddControllers()
+                .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new LocalDateConverter()));
 
             services.AddSingleton<IClock>(SystemClock.Instance);
 
