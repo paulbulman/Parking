@@ -12,6 +12,7 @@
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.5.4.20" />
     <PackageReference Include="AWSSDK.S3" Version="3.5.7.8" />
     <PackageReference Include="NodaTime" Version="3.0.4" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.8.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Parking.Business\Parking.Business.csproj" />

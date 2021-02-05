@@ -11,6 +11,7 @@ namespace Parking.Api
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Middleware;
     using NodaTime;
 
     public class Startup
@@ -39,6 +40,8 @@ namespace Parking.Api
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseMiddleware<SetUserMiddleware>();
 
             app.UseHttpsRedirection();
 
