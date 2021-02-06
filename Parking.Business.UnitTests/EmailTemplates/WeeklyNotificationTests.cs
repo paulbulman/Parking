@@ -6,6 +6,7 @@
     using Model;
     using NodaTime;
     using NodaTime.Testing.Extensions;
+    using TestHelpers;
     using Xunit;
 
     public static class WeeklyNotificationTests
@@ -17,7 +18,7 @@
         {
             var template = new WeeklyNotification(
                 new List<Request>(),
-                new User("user1", null, emailAddress),
+                CreateUser.With(userId: "user1", emailAddress: emailAddress),
                 new DateInterval(21.December(2020), 24.December(2020)).ToArray());
 
             Assert.Equal(emailAddress, template.To);
@@ -40,7 +41,7 @@
 
             var template = new WeeklyNotification(
                 new List<Request>(),
-                new User("user1", null, "1@abc.com"),
+                CreateUser.With(userId: "user1", emailAddress: "1@abc.com"),
                 dateInterval);
 
             Assert.Equal(expectedSubject, template.Subject);
@@ -49,7 +50,7 @@
         [Fact]
         public static void Body_contains_request_status_for_each_requested_date_in_period()
         {
-            var user = new User("user1", null, "1@abc.com");
+            var user = CreateUser.With(userId: "user1", emailAddress: "1@abc.com");
 
             var requests = new[]
             {
@@ -90,7 +91,7 @@
         [Fact]
         public static void Body_contains_other_interrupted_user_count_when_interrupted()
         {
-            var user = new User("user1", null, "1@abc.com");
+            var user = CreateUser.With(userId: "user1", emailAddress: "1@abc.com");
 
             var requests = new[]
             {
@@ -135,7 +136,7 @@
         [Fact]
         public static void Body_does_not_contain_dates_in_period_with_no_request()
         {
-            var user = new User("user1", null, "1@abc.com");
+            var user = CreateUser.With(userId: "user1", emailAddress: "1@abc.com");
 
             var requests = new[] { new Request(user.UserId, 21.December(2020), RequestStatus.Allocated) };
 
@@ -158,7 +159,7 @@
         [Fact]
         public static void Body_does_not_contain_dates_in_period_with_cancelled_request()
         {
-            var user = new User("user1", null, "1@abc.com");
+            var user = CreateUser.With(userId: "user1", emailAddress: "1@abc.com");
 
             var requests = new[]
             {

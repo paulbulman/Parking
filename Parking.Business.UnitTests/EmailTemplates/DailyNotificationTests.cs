@@ -5,6 +5,7 @@
     using Model;
     using NodaTime;
     using NodaTime.Testing.Extensions;
+    using TestHelpers;
     using Xunit;
 
     public static class DailyNotificationTests
@@ -16,7 +17,7 @@
         {
             var template = new DailyNotification(
                 new List<Request>(),
-                new User("user1", null, emailAddress),
+                CreateUser.With(userId: "user1", emailAddress: emailAddress),
                 22.December(2020));
 
             Assert.Equal(emailAddress, template.To);
@@ -27,14 +28,14 @@
         [InlineData(4, 1, "Parking status for Wed 01 Apr: Allocated")]
         public static void Subject_contains_requests_date(int month, int day, string expectedSubject)
         {
-            var user = new User("user1", null, "1@abc.com");
+            var user = CreateUser.With(userId: "user1", emailAddress: "1@abc.com");
             var localDate = new LocalDate(2020, month, day);
 
             var requests = new[] { new Request(user.UserId, localDate, RequestStatus.Allocated) };
             
             var template = new DailyNotification(
                 requests,
-                new User("user1", null, "1@abc.com"),
+                CreateUser.With(userId: "user1", emailAddress: "1@abc.com"),
                 localDate);
 
             Assert.Equal(expectedSubject, template.Subject);
@@ -45,7 +46,7 @@
         [InlineData(RequestStatus.Requested, "Parking status for Wed 01 Apr: INTERRUPTED")]
         public static void Subject_contains_request_status(RequestStatus requestStatus, string expectedSubject)
         {
-            var user = new User("user1", null, "1@abc.com");
+            var user = CreateUser.With(userId: "user1", emailAddress: "1@abc.com");
             var localDate = 1.April(2020);
 
             var requests = new[] { new Request(user.UserId, localDate, requestStatus) };
@@ -58,7 +59,7 @@
         [Fact]
         public static void Body_contains_request_status_when_allocated()
         {
-            var user = new User("user1", null, "1@abc.com");
+            var user = CreateUser.With(userId: "user1", emailAddress: "1@abc.com");
             var localDate = 1.April(2020);
 
             var requests = new[] { new Request(user.UserId, localDate, RequestStatus.Allocated) };
@@ -79,7 +80,7 @@
         [Fact]
         public static void Body_contains_request_status_when_interrupted()
         {
-            var user = new User("user1", null, "1@abc.com");
+            var user = CreateUser.With(userId: "user1", emailAddress: "1@abc.com");
             var localDate = 1.April(2020);
 
             var requests = new[] { new Request(user.UserId, localDate, RequestStatus.Requested) };
@@ -102,7 +103,7 @@
         [Fact]
         public static void Body_contains_other_interrupted_user_count_when_interrupted()
         {
-            var user = new User("user1", null, "1@abc.com");
+            var user = CreateUser.With(userId: "user1", emailAddress: "1@abc.com");
             var localDate = 1.April(2020);
 
             var requests = new[]

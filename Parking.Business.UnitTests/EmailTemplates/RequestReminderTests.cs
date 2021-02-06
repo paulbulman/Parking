@@ -2,9 +2,9 @@
 {
     using System.Linq;
     using Business.EmailTemplates;
-    using Model;
     using NodaTime;
     using NodaTime.Testing.Extensions;
+    using TestHelpers;
     using Xunit;
 
     public static class RequestReminderTests
@@ -15,7 +15,7 @@
         public static void To_returns_email_address_of_corresponding_user(string emailAddress)
         {
             var template = new RequestReminder(
-                new User("user1", null, emailAddress),
+                CreateUser.With(userId: "user1", emailAddress: emailAddress),
                 new DateInterval(21.December(2020), 24.December(2020)).ToArray());
 
             Assert.Equal(emailAddress, template.To);
@@ -31,7 +31,7 @@
             int lastDay,
             string expectedSubject)
         {
-            var user = new User("user1", null, "1@abc.com");
+            var user = CreateUser.With(userId: "user1", emailAddress: "1@abc.com");
 
             var template = new RequestReminder(
                 user,
@@ -46,7 +46,7 @@
         public static void Body_contains_requests_date_range()
         {
             var template = new RequestReminder(
-                new User("user1", null, "1@abc.com"),
+                CreateUser.With(userId: "user1", emailAddress: "1@abc.com"),
                 new DateInterval(21.December(2020), 24.December(2020)).ToArray());
 
             const string ExpectedPlainTextBody =

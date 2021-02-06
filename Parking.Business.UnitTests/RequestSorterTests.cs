@@ -6,6 +6,7 @@
     using Model;
     using NodaTime;
     using NodaTime.Testing.Extensions;
+    using TestHelpers;
     using Xunit;
 
     public static class RequestSorterTests
@@ -20,9 +21,9 @@
 
         private static readonly IReadOnlyCollection<User> DefaultUsers = new List<User>
         {
-            CreateUser("user1", NearbyDistance),
-            CreateUser("user2", NearbyDistance),
-            CreateUser("user3", NearbyDistance)
+            CreateUser.With(userId: "user1", commuteDistance: NearbyDistance),
+            CreateUser.With(userId: "user2", commuteDistance: NearbyDistance),
+            CreateUser.With(userId: "user3", commuteDistance: NearbyDistance)
         };
 
         [Fact]
@@ -202,8 +203,8 @@
         {
             var users = new[]
             {
-                CreateUser("user1", NearbyDistance),
-                CreateUser("user2", NearbyDistance + 0.01m)
+                CreateUser.With(userId: "user1", commuteDistance: NearbyDistance),
+                CreateUser.With(userId: "user2", commuteDistance: NearbyDistance + 0.01m)
             };
 
             var requests = new[]
@@ -224,8 +225,8 @@
         {
             var users = new[]
             {
-                CreateUser("user1", NearbyDistance),
-                CreateUser("user2", null)
+                CreateUser.With(userId: "user1", commuteDistance: NearbyDistance),
+                CreateUser.With(userId: "user2", commuteDistance: null)
             };
 
             var requests = new[]
@@ -246,8 +247,8 @@
         {
             var users = new[]
             {
-                CreateUser("user1", NearbyDistance + 1),
-                CreateUser("user2", NearbyDistance)
+                CreateUser.With(userId: "user1", commuteDistance: NearbyDistance + 1),
+                CreateUser.With(userId: "user2", commuteDistance: NearbyDistance)
             };
 
             var requests = new[]
@@ -267,9 +268,6 @@
 
             CheckOrder(new[] { "user2", "user1" }, result);
         }
-
-        private static User CreateUser(string userId, decimal? commuteDistance) =>
-            new User(userId, commuteDistance, null);
 
         private static IEnumerable<Request> SortRequests(
             IReadOnlyCollection<Request> requests,

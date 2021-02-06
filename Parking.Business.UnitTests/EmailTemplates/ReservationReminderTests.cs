@@ -1,9 +1,9 @@
 ﻿namespace Parking.Business.UnitTests.EmailTemplates
 {
     using Business.EmailTemplates;
-    using Model;
     using NodaTime;
     using NodaTime.Testing.Extensions;
+    using TestHelpers;
     using Xunit;
 
     public static class ReservationReminderTests
@@ -14,7 +14,7 @@
         public static void To_returns_email_address_of_corresponding_user(string emailAddress)
         {
             var template = new ReservationReminder(
-                new User("user1", null, emailAddress),
+                CreateUser.With(userId: "user1", emailAddress: emailAddress),
                 21.December(2020));
 
             Assert.Equal(emailAddress, template.To);
@@ -28,7 +28,7 @@
             int day,
             string expectedSubject)
         {
-            var user = new User("user1", null, "1@abc.com");
+            var user = CreateUser.With(userId: "user1", emailAddress: "1@abc.com");
 
             var template = new ReservationReminder(
                 user,
@@ -41,7 +41,7 @@
         public static void Body_contains_requests_date()
         {
             var template = new ReservationReminder(
-                new User("user1", null, "1@abc.com"),
+                CreateUser.With(userId: "user1", emailAddress: "1@abc.com"),
                 21.December(2020));
 
             const string ExpectedPlainTextBody =

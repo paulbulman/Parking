@@ -38,8 +38,8 @@
 
             var users = new[]
             {
-                new User("user1", null, "1@abc.com"),
-                new User("user2", null, "2@xyz.co.uk")
+                CreateUser.With(userId: "user1", emailAddress: "1@abc.com"),
+                CreateUser.With(userId: "user2", emailAddress: "2@xyz.co.uk"),
             };
 
             var mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);

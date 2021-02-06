@@ -36,7 +36,7 @@
                 .Setup(r => r.GetRequests(22.October(2020), 22.December(2020)))
                 .ReturnsAsync(requests);
 
-            var user = new User("user1", null, "1@abc.com");
+            var user = CreateUser.With(userId: "user1", emailAddress: "1@abc.com");
 
             var mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
             mockUserRepository
@@ -81,7 +81,7 @@
                 .Setup(r => r.GetRequests(22.October(2020), 22.December(2020)))
                 .ReturnsAsync(requests);
 
-            var user = new User("user1", null, "1@abc.com");
+            var user = CreateUser.With(userId: "user1", emailAddress: "1@abc.com");
 
             var mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
             mockUserRepository
@@ -124,8 +124,8 @@
 
             var users = new[]
             {
-                new User("user1", null, "1@abc.com"),
-                new User("user2", null, "2@xyxz.co.uk")
+                CreateUser.With(userId: "user1", emailAddress: "1@abc.com"),
+                CreateUser.With(userId: "user2", emailAddress: "2@xyxz.co.uk")
             };
 
             var mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);

@@ -4,6 +4,7 @@
     using Model;
     using NodaTime;
     using NodaTime.Testing.Extensions;
+    using TestHelpers;
     using Xunit;
 
     public static class SingleDayAllocationNotificationTests
@@ -15,7 +16,7 @@
         {
             var template = new SingleDayAllocationNotification(
                 new Request("user1", 2.January(2021), RequestStatus.Allocated),
-                new User("user1", null, emailAddress));
+                CreateUser.With(userId: "user1", emailAddress: emailAddress));
 
             Assert.Equal(emailAddress, template.To);
         }
@@ -27,7 +28,7 @@
         {
             var template = new SingleDayAllocationNotification(
                 new Request("user1", new LocalDate(2020, month, day), RequestStatus.Allocated),
-                new User("user1", null, "1@abc.com"));
+                CreateUser.With(userId: "user1", emailAddress: "1@abc.com"));
 
             Assert.Equal(expectedSubject, template.Subject);
         }
@@ -39,7 +40,7 @@
         {
             var template = new SingleDayAllocationNotification(
                 new Request("user1", new LocalDate(2020, month, day), RequestStatus.Allocated),
-                new User("user1", null, "1@abc.com"));
+                CreateUser.With(userId: "user1", emailAddress: "1@abc.com"));
 
             var expectedPlainTextBody =
                 $"You have been allocated a parking space for {expectedDateText}.\r\n\r\n" +

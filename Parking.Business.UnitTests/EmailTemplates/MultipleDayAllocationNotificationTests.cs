@@ -4,6 +4,7 @@
     using Business.EmailTemplates;
     using Model;
     using NodaTime.Testing.Extensions;
+    using TestHelpers;
     using Xunit;
 
     public static class MultipleDayAllocationNotificationTests
@@ -15,7 +16,7 @@
         {
             var template = new MultipleDayAllocationNotification(
                 new List<Request>(),
-                new User("user1", null, emailAddress));
+                CreateUser.With(userId: "user1", emailAddress: emailAddress));
 
             Assert.Equal(emailAddress, template.To);
         }
@@ -27,7 +28,7 @@
             
             var template = new MultipleDayAllocationNotification(
                 new List<Request>(),
-                new User("user1", null, "1@abc.com"));
+                CreateUser.With(userId: "user1", emailAddress: "1@abc.com"));
 
             Assert.Equal(ExpectedSubjectText, template.Subject);
         }
@@ -44,7 +45,7 @@
 
             var template = new MultipleDayAllocationNotification(
                 requests,
-                new User("user1", null, "1@abc.com"));
+                CreateUser.With(userId: "user1", emailAddress: "1@abc.com"));
 
             const string ExpectedPlainTextBody =
                 "You have been allocated parking spaces for the following dates:\r\n\r\n" +

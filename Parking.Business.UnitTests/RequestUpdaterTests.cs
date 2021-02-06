@@ -8,6 +8,7 @@
     using Moq;
     using NodaTime;
     using NodaTime.Testing.Extensions;
+    using TestHelpers;
     using Xunit;
 
     public static class RequestUpdaterTests
@@ -171,7 +172,7 @@
                 .Setup(r => r.GetReservations(EarliestConsideredDate, LastConsideredDate))
                 .ReturnsAsync(reservations);
 
-            var arbitraryUser = new User("user1", 1, "1@abc.com");
+            var arbitraryUser = CreateUser.With(userId: "user1");
             var users = new[] { arbitraryUser };
 
             var mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);

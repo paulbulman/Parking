@@ -7,6 +7,7 @@
     using Moq;
     using NodaTime;
     using NodaTime.Testing.Extensions;
+    using TestHelpers;
     using Xunit;
 
     public static class AllocationNotifierTests
@@ -16,8 +17,8 @@
         {
             var users = new[]
             {
-                new User("user1", null, "1@abc.com"),
-                new User("user2", null, "2@xyz.co.uk")
+                CreateUser.With(userId: "user1", emailAddress: "1@abc.com"),
+                CreateUser.With(userId: "user2", emailAddress: "2@xyz.co.uk"),
             };
 
             var mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
@@ -58,7 +59,7 @@
         [Fact]
         public static async Task Groups_notifications_into_a_single_email_when_a_user_has_multiple_notifications()
         {
-            var users = new[] { new User("user1", null, "1@abc.com") };
+            var users = new[] { CreateUser.With(userId: "user1", emailAddress: "1@abc.com") };
 
             var mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
             mockUserRepository
@@ -95,7 +96,7 @@
         [Fact]
         public static async Task Does_not_notify_user_when_request_will_appear_on_scheduled_daily_notification()
         {
-            var users = new[] { new User("user1", null, "1@abc.com") };
+            var users = new[] { CreateUser.With(userId: "user1", emailAddress: "1@abc.com") };
 
             var mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
             mockUserRepository
@@ -133,7 +134,7 @@
         [Fact]
         public static async Task Does_not_notify_user_when_request_will_appear_on_scheduled_weekly_notification()
         {
-            var users = new[] { new User("user1", null, "1@abc.com") };
+            var users = new[] { CreateUser.With(userId: "user1", emailAddress: "1@abc.com") };
 
             var mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
             mockUserRepository
