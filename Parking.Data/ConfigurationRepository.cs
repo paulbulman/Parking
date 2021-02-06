@@ -1,5 +1,6 @@
 ﻿namespace Parking.Data
 {
+    using System.Runtime.Serialization;
     using System.Text.Json;
     using System.Threading.Tasks;
     using Business.Data;
@@ -16,6 +17,11 @@
             var rawData = await rawItemRepository.GetConfiguration();
 
             var data = JsonSerializer.Deserialize<ConfigurationData>(rawData);
+
+            if (data == null)
+            {
+                throw new SerializationException("Could not deserialize raw configuration data.");
+            }
 
             return new Configuration(data.NearbyDistance, data.ShortLeadTimeSpaces, data.TotalSpaces);
         }

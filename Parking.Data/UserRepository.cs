@@ -17,7 +17,7 @@
             var queryResult = await rawItemRepository.GetUsers();
 
             return queryResult
-                .Select(r => new User(GetUserId(r.PrimaryKey), r.CommuteDistance, r.EmailAddress))
+                .Select(r => new User(GetUserId(r.PrimaryKey), r.CommuteDistance, r.EmailAddress, r.FirstName, r.LastName))
                 .ToArray();
         }
 

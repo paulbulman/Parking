@@ -7,7 +7,9 @@
         public static User With(
             string userId,
             decimal? commuteDistance = null,
-            string emailAddress = "john.doe@example.com") =>
-            new User(userId, commuteDistance, emailAddress);
+            string emailAddress = "john.doe@example.com",
+            string firstName = "John",
+            string lastName = "Doe") =>
+            new User(userId, commuteDistance, emailAddress, firstName, lastName);
     }
 }

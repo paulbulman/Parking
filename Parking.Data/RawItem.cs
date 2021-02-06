@@ -25,6 +25,12 @@
         [DynamoDBProperty("emailAddress")]
         public string EmailAddress { get; set; }
 
+        [DynamoDBProperty("firstName")]
+        public string FirstName { get; set; }
+
+        [DynamoDBProperty("lastName")]
+        public string LastName { get; set; }
+
         [DynamoDBProperty("requests")]
         public Dictionary<string, string> Requests { get; set; }
 

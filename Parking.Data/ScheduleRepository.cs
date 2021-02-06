@@ -2,6 +2,7 @@
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.Serialization;
     using System.Text.Json;
     using System.Threading.Tasks;
     using Business.Data;
@@ -32,6 +33,11 @@
             var rawData = await this.rawItemRepository.GetSchedules();
 
             var data = JsonSerializer.Deserialize<IDictionary<string, string>>(rawData);
+
+            if (data == null)
+            {
+                throw new SerializationException("Could not deserialize raw schedule data.");
+            }
 
             return data
                 .Select(ParseSchedule)

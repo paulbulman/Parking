@@ -1,4 +1,5 @@
-﻿namespace Parking.Data.UnitTests
+﻿// ReSharper disable StringLiteralTypo
+namespace Parking.Data.UnitTests
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -15,9 +16,9 @@
 
             var rawItems = new[]
             {
-                new RawItem { PrimaryKey = "USER#Id1", SortKey = "PROFILE", CommuteDistance = 1.23m, EmailAddress = "1@abc.com" },
-                new RawItem { PrimaryKey = "USER#Id2", SortKey = "PROFILE", CommuteDistance = 2.34m, EmailAddress = "2@abc.com" },
-                new RawItem { PrimaryKey = "USER#Id3", SortKey = "PROFILE", EmailAddress = "3@xyz.co.uk" }
+                new RawItem { PrimaryKey = "USER#Id1", SortKey = "PROFILE", CommuteDistance = 1.23m, EmailAddress = "1@abc.com", FirstName = "Sean", LastName = "Cantera" },
+                new RawItem { PrimaryKey = "USER#Id2", SortKey = "PROFILE", CommuteDistance = 2.34m, EmailAddress = "2@abc.com", FirstName = "Clyde", LastName = "Memory" },
+                new RawItem { PrimaryKey = "USER#Id3", SortKey = "PROFILE", EmailAddress = "3@xyz.co.uk", FirstName = "Kalle", LastName = "Rochewell" }
             };
             mockRawItemRepository.Setup(r => r.GetUsers()).ReturnsAsync(rawItems);
 
@@ -29,9 +30,9 @@
             
             Assert.Equal(rawItems.Length, result.Count);
 
-            CheckUser(result, "Id1", 1.23m, "1@abc.com");
-            CheckUser(result, "Id2", 2.34m, "2@abc.com");
-            CheckUser(result, "Id3", null, "3@xyz.co.uk");
+            CheckUser(result, "Id1", 1.23m, "1@abc.com", "Sean", "Cantera");
+            CheckUser(result, "Id2", 2.34m, "2@abc.com", "Clyde", "Memory");
+            CheckUser(result, "Id3", null, "3@xyz.co.uk", "Kalle", "Rochewell");
         }
 
         [Fact]
@@ -41,9 +42,9 @@
 
             var rawUsers = new[]
             {
-                new RawItem { PrimaryKey = "USER#Id1", SortKey = "PROFILE", CommuteDistance = 1.23m, EmailAddress = "1@abc.com" },
-                new RawItem { PrimaryKey = "USER#Id2", SortKey = "PROFILE", CommuteDistance = 2.34m, EmailAddress = "2@abc.com" },
-                new RawItem { PrimaryKey = "USER#Id3", SortKey = "PROFILE", EmailAddress = "3@xyz.co.uk" }
+                new RawItem { PrimaryKey = "USER#Id1", SortKey = "PROFILE", CommuteDistance = 1.23m, EmailAddress = "1@abc.com", FirstName = "Shalom", LastName = "Georgiades" },
+                new RawItem { PrimaryKey = "USER#Id2", SortKey = "PROFILE", CommuteDistance = 2.34m, EmailAddress = "2@abc.com", FirstName = "Randolf", LastName = "Blogg" },
+                new RawItem { PrimaryKey = "USER#Id3", SortKey = "PROFILE", EmailAddress = "3@xyz.co.uk", FirstName = "Kris", LastName = "Whibley" }
             };
             mockRawItemRepository.Setup(r => r.GetUsers()).ReturnsAsync(rawUsers);
 
@@ -58,20 +59,24 @@
 
             Assert.Equal(rawTeamLeaderUserIds.Length, result.Count);
 
-            CheckUser(result, "Id1", 1.23m, "1@abc.com");
-            CheckUser(result, "Id3", null, "3@xyz.co.uk");
+            CheckUser(result, "Id1", 1.23m, "1@abc.com", "Shalom", "Georgiades");
+            CheckUser(result, "Id3", null, "3@xyz.co.uk", "Kris", "Whibley");
         }
 
         private static void CheckUser(
             IEnumerable<User> result,
             string expectedUserId,
             decimal? expectedCommuteDistance,
-            string expectedEmailAddress)
+            string expectedEmailAddress,
+            string expectedFirstName,
+            string expectedLastName)
         {
             var actual = result.Where(u => 
                 u.UserId == expectedUserId &&
                 u.CommuteDistance == expectedCommuteDistance &&
-                u.EmailAddress == expectedEmailAddress);
+                u.EmailAddress == expectedEmailAddress &&
+                u.FirstName == expectedFirstName &&
+                u.LastName == expectedLastName);
 
             Assert.Single(actual);
         }
