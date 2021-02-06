@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Parking.Business\Parking.Business.csproj" />
+    <ProjectReference Include="..\Parking.TestHelpers\Parking.TestHelpers.csproj" />
   </ItemGroup>
 
 </Project>

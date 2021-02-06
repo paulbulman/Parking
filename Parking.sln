@@ -17,7 +17,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Parking.Business.UnitTests"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Parking.Api", "Parking.Api\Parking.Api.csproj", "{962FB90D-C250-44ED-9C55-5AC34BC2477A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parking.Api.UnitTests", "Parking.Api.UnitTests\Parking.Api.UnitTests.csproj", "{3D90D54E-C2C1-4BCE-8F58-A16459563BC9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Parking.Api.UnitTests", "Parking.Api.UnitTests\Parking.Api.UnitTests.csproj", "{3D90D54E-C2C1-4BCE-8F58-A16459563BC9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parking.TestHelpers", "Parking.TestHelpers\Parking.TestHelpers.csproj", "{C13D6CB2-4E75-4128-98C8-0A63F59AA42B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +59,10 @@ Global
 		{3D90D54E-C2C1-4BCE-8F58-A16459563BC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3D90D54E-C2C1-4BCE-8F58-A16459563BC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3D90D54E-C2C1-4BCE-8F58-A16459563BC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C13D6CB2-4E75-4128-98C8-0A63F59AA42B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C13D6CB2-4E75-4128-98C8-0A63F59AA42B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C13D6CB2-4E75-4128-98C8-0A63F59AA42B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C13D6CB2-4E75-4128-98C8-0A63F59AA42B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

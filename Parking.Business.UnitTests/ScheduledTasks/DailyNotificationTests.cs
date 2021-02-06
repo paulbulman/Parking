@@ -7,6 +7,7 @@
     using Model;
     using Moq;
     using NodaTime.Testing.Extensions;
+    using TestHelpers;
     using Xunit;
     using IEmailTemplate = Business.EmailTemplates.IEmailTemplate;
     using static DateCalculatorTests;

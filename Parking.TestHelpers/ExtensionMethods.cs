@@ -1,8 +1,8 @@
-﻿namespace Parking.Business.UnitTests
+﻿namespace Parking.TestHelpers
 {
     using NodaTime;
 
-    public static class TestHelpers
+    public static class ExtensionMethods
     {
         public static LocalDateTime At(this LocalDate localDate, int hour, int minute, int second) =>
             localDate.At(new LocalTime(hour, minute, second));

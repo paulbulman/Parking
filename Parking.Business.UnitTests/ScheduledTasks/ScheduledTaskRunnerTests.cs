@@ -6,6 +6,7 @@
     using Model;
     using Moq;
     using NodaTime.Testing.Extensions;
+    using TestHelpers;
     using Xunit;
 
     public static class ScheduledTaskRunnerTests

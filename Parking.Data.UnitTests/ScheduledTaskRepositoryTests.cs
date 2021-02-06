@@ -2,7 +2,7 @@
 {
     using System.Linq;
     using System.Threading.Tasks;
-    using Business.UnitTests;
+    using TestHelpers;
     using Model;
     using Moq;
     using NodaTime.Testing.Extensions;
