@@ -5,10 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Moq" Version="4.16.0" />
     <PackageReference Include="NodaTime" Version="3.0.5" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Parking.Business\Parking.Business.csproj" />
     <ProjectReference Include="..\Parking.Model\Parking.Model.csproj" />
   </ItemGroup>
 

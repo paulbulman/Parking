@@ -32,6 +32,7 @@ namespace Parking.Api
             services.AddScoped<IDateCalculator, DateCalculator>();
             services.AddScoped<IRawItemRepository, RawItemRepository>();
             services.AddScoped<IRequestRepository, RequestRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

@@ -3,10 +3,41 @@
     using System.Linq;
     using Model;
     using NodaTime;
+    using NodaTime.Testing.Extensions;
     using Xunit;
 
     public static class ExtensionMethodsTests
     {
+        [Fact]
+        public static void StartOfWeek_returns_same_day_when_called_with_Monday()
+        {
+            var localDate = 15.February(2021);
+
+            var actual = localDate.StartOfWeek();
+
+            var expected = 15.February(2021);
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Theory]
+        [InlineData(16)]
+        [InlineData(17)]
+        [InlineData(18)]
+        [InlineData(19)]
+        [InlineData(20)]
+        [InlineData(21)]
+        public static void StartOfWeek_returns_previous_Monday_when_called_with_other_day(int day)
+        {
+            var localDate = day.February(2021);
+
+            var actual = localDate.StartOfWeek();
+
+            var expected = 15.February(2021);
+
+            Assert.Equal(expected, actual);
+        }
+
         [Theory]
         [InlineData(2018, 11, 7, "Wed 07 Nov")]
         [InlineData(2019, 3, 2, "Sat 02 Mar")]

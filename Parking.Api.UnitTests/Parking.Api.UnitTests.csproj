@@ -22,7 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
     <Folder Include="Middleware\" />
   </ItemGroup>
 
@@ -30,6 +29,7 @@
     <ProjectReference Include="..\Parking.Api\Parking.Api.csproj" />
     <ProjectReference Include="..\Parking.Business\Parking.Business.csproj" />
     <ProjectReference Include="..\Parking.Model\Parking.Model.csproj" />
+    <ProjectReference Include="..\Parking.TestHelpers\Parking.TestHelpers.csproj" />
   </ItemGroup>
 
 </Project>

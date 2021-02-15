@@ -1,12 +1,10 @@
 ﻿namespace Parking.Api.Controllers
 {
-    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Business;
     using Business.Data;
     using Microsoft.AspNetCore.Mvc;
-    using Model;
 
     [Route("[controller]")]
     [ApiController]
@@ -25,11 +23,13 @@
         }
 
         [HttpGet]
-        public async Task<IEnumerable<Request>> GetAsync()
+        public async Task<IActionResult> GetAsync()
         {
             var activeDates = this.dateCalculator.GetActiveDates();
 
-            return await this.requestRepository.GetRequests(activeDates.First(), activeDates.Last());
+            var requests = await this.requestRepository.GetRequests(activeDates.First(), activeDates.Last());
+
+            return this.Ok(requests);
         }
     }
 }

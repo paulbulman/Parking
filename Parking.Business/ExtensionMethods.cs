@@ -8,6 +8,9 @@
 
     public static class ExtensionMethods
     {
+        public static LocalDate StartOfWeek(this LocalDate localDate) =>
+            localDate.Previous(IsoDayOfWeek.Sunday).Next(IsoDayOfWeek.Monday);
+
         public static string ToEmailDisplayString(this LocalDate localDate) =>
             LocalDatePattern.CreateWithCurrentCulture("ddd dd MMM").Format(localDate);
 

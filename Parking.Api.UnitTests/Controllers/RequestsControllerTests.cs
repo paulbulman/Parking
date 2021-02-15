@@ -1,5 +1,6 @@
 ﻿namespace Parking.Api.UnitTests.Controllers
 {
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Api.Controllers;
     using Business;
@@ -8,6 +9,7 @@
     using Moq;
     using NodaTime.Testing.Extensions;
     using Xunit;
+    using static ControllerHelpers;
 
     public static class RequestsControllerTests
     {
@@ -43,7 +45,9 @@
 
             var result = await controller.GetAsync();
 
-            Assert.Equal(requests, result);
+            var resultValue = GetResultValue<IEnumerable<Request>>(result);
+
+            Assert.Equal(requests, resultValue);
         }
     }
 }
