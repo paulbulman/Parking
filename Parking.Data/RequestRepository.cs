@@ -5,6 +5,7 @@
     using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
+    using Business;
     using Business.Data;
     using Model;
     using NodaTime;
@@ -17,23 +18,30 @@
 
         public async Task<IReadOnlyCollection<Request>> GetRequests(LocalDate firstDate, LocalDate lastDate)
         {
-            var yearMonths = Enumerable.Range(0, Period.Between(firstDate, lastDate, PeriodUnits.Days).Days + 1)
-                .Select(offset => firstDate.PlusDays(offset).ToYearMonth())
-                .Distinct();
+            var requests = new List<Request>();
 
-            var matchingRequests = new List<Request>();
-
-            foreach (var yearMonth in yearMonths)
+            foreach (var yearMonth in new DateInterval(firstDate, lastDate).YearMonths())
             {
                 var queryResult = await rawItemRepository.GetRequests(yearMonth);
 
-                var wholeMonthRequests =
-                    queryResult.SelectMany(r => CreateWholeMonthRequests(r.PrimaryKey, yearMonth, r.Requests));
-
-                matchingRequests.AddRange(wholeMonthRequests.Where(r => r.Date >= firstDate && r.Date <= lastDate));
+                requests.AddRange(CreateFilteredRequests(queryResult, yearMonth, firstDate, lastDate));
             }
 
-            return matchingRequests;
+            return requests;
+        }
+
+        public async Task<IReadOnlyCollection<Request>> GetRequests(string userId, LocalDate firstDate, LocalDate lastDate)
+        {
+            var requests = new List<Request>();
+
+            foreach (var yearMonth in new DateInterval(firstDate, lastDate).YearMonths())
+            {
+                var queryResult = await rawItemRepository.GetRequests(userId, yearMonth);
+
+                requests.AddRange(CreateFilteredRequests(queryResult, yearMonth, firstDate, lastDate));
+            }
+
+            return requests;
         }
 
         public async Task SaveRequests(IReadOnlyCollection<Request> requests)
@@ -79,6 +87,15 @@
             await rawItemRepository.SaveItems(rawItems);
         }
 
+        private static IReadOnlyCollection<Request> CreateFilteredRequests(
+            IReadOnlyCollection<RawItem> rawItems,
+            YearMonth yearMonth,
+            LocalDate firstDate,
+            LocalDate lastDate) =>
+            rawItems.SelectMany(r => CreateWholeMonthRequests(r.PrimaryKey, yearMonth, r.Requests))
+                .Where(r => r.Date >= firstDate && r.Date <= lastDate)
+                .ToArray();
+
         private static IEnumerable<Request> CreateWholeMonthRequests(
             string primaryKey,
             YearMonth yearMonth,
@@ -113,15 +130,13 @@
         private static LocalDate CreateLocalDate(YearMonth yearMonth, string dayKey) =>
             new LocalDate(yearMonth.Year, yearMonth.Month, int.Parse(dayKey));
 
-        private static RawItem CreateRawItem(string userId, IGrouping<YearMonth, Request> yearMonthRequests)
-        {
-            return new RawItem
+        private static RawItem CreateRawItem(string userId, IGrouping<YearMonth, Request> yearMonthRequests) =>
+            new RawItem
             {
                 PrimaryKey = $"USER#{userId}",
                 SortKey = $"REQUESTS#{yearMonthRequests.Key.ToString("yyyy-MM", CultureInfo.InvariantCulture)}",
                 Requests = yearMonthRequests.ToDictionary(CreateRawRequestDayKey, CreateRawRequestStatus)
             };
-        }
 
         private static string CreateRawRequestDayKey(Request request) =>
             request.Date.Day.ToString("D2", CultureInfo.InvariantCulture);

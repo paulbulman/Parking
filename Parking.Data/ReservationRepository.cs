@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Business;
     using Business.Data;
     using Model;
     using NodaTime;
@@ -15,13 +16,9 @@
 
         public async Task<IReadOnlyCollection<Reservation>> GetReservations(LocalDate firstDate, LocalDate lastDate)
         {
-            var yearMonths = Enumerable.Range(0, Period.Between(firstDate, lastDate, PeriodUnits.Days).Days + 1)
-                .Select(offset => firstDate.PlusDays(offset).ToYearMonth())
-                .Distinct();
-
             var matchingReservations = new List<Reservation>();
 
-            foreach (var yearMonth in yearMonths)
+            foreach (var yearMonth in new DateInterval(firstDate, lastDate).YearMonths())
             {
                 var queryResult = await rawItemRepository.GetReservations(yearMonth);
 

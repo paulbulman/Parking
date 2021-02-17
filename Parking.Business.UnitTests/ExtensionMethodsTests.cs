@@ -38,6 +38,30 @@
             Assert.Equal(expected, actual);
         }
 
+        [Fact]
+        public static void YearMonths_returns_single_YearMonth_when_Interval_is_within_single_month()
+        {
+            var dateInterval = new DateInterval(17.February(2021), 17.February(2021));
+
+            var actual = dateInterval.YearMonths();
+
+            var expected = new[] { new YearMonth(2021, 2) };
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public static void YearMonths_returns_multiple_YearMonths_when_Interval_spans_multiple_months()
+        {
+            var dateInterval = new DateInterval(31.January(2021), 1.February(2021));
+
+            var actual = dateInterval.YearMonths();
+
+            var expected = new[] { new YearMonth(2021, 1), new YearMonth(2021, 2) };
+
+            Assert.Equal(expected, actual);
+        }
+
         [Theory]
         [InlineData(2018, 11, 7, "Wed 07 Nov")]
         [InlineData(2019, 3, 2, "Sat 02 Mar")]
@@ -50,7 +74,7 @@
             var localDate = new LocalDate(year, month, day);
 
             var actual = localDate.ToEmailDisplayString();
-            
+
             Assert.Equal(expectedResult, actual);
         }
 
@@ -81,7 +105,7 @@
         public static void IsActive_returns_true_for_requested_and_allocated_statuses(RequestStatus requestStatus, bool expectedResult)
         {
             var actual = requestStatus.IsActive();
-            
+
             Assert.Equal(expectedResult, actual);
         }
     }

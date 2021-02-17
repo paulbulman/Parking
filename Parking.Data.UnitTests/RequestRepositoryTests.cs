@@ -13,7 +13,7 @@ namespace Parking.Data.UnitTests
     public static class RequestRepositoryTests
     {
         [Fact]
-        public static async void GetRequests_converts_raw_items_to_requests()
+        public static async void GetRequests_converts_raw_items_for_multiple_users_to_requests()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
 
@@ -49,6 +49,42 @@ namespace Parking.Data.UnitTests
             CheckRequest(result, "User1", 13.August(2020), RequestStatus.Allocated);
             CheckRequest(result, "User2", 2.August(2020), RequestStatus.Cancelled);
             CheckRequest(result, "User1", 30.September(2020), RequestStatus.Allocated);
+        }
+
+        [Fact]
+        public static async void GetRequests_converts_raw_items_for_single_user_to_requests()
+        {
+            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+
+            SetupMockRepository(
+                mockRawItemRepository,
+                "User1",
+                new YearMonth(2020, 8),
+                CreateRawItem(
+                    "User1",
+                    "2020-08",
+                    KeyValuePair.Create("02", "REQUESTED"),
+                    KeyValuePair.Create("13", "ALLOCATED")));
+            SetupMockRepository(
+                mockRawItemRepository,
+                "User1",
+                new YearMonth(2020, 9),
+                CreateRawItem(
+                    "User1",
+                    "2020-09",
+                    KeyValuePair.Create("30", "CANCELLED")));
+
+            var requestRepository = new RequestRepository(mockRawItemRepository.Object);
+
+            var result = await requestRepository.GetRequests("User1", 1.August(2020), 30.September(2020));
+
+            Assert.NotNull(result);
+
+            Assert.Equal(3, result.Count);
+
+            CheckRequest(result, "User1", 2.August(2020), RequestStatus.Requested);
+            CheckRequest(result, "User1", 13.August(2020), RequestStatus.Allocated);
+            CheckRequest(result, "User1", 30.September(2020), RequestStatus.Cancelled);
         }
 
         [Fact]
@@ -201,6 +237,15 @@ namespace Parking.Data.UnitTests
             params RawItem[] mockResult) =>
             mockRawItemRepository
                 .Setup(r => r.GetRequests(yearMonth))
+                .Returns(Task.FromResult((IReadOnlyCollection<RawItem>)mockResult));
+
+        private static void SetupMockRepository(
+            Mock<IRawItemRepository> mockRawItemRepository,
+            string userId,
+            YearMonth yearMonth,
+            params RawItem[] mockResult) =>
+            mockRawItemRepository
+                .Setup(r => r.GetRequests(userId, yearMonth))
                 .Returns(Task.FromResult((IReadOnlyCollection<RawItem>)mockResult));
 
         private static RawItem CreateRawItem(

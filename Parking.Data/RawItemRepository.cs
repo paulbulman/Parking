@@ -23,6 +23,8 @@
 
         Task<IReadOnlyCollection<RawItem>> GetRequests(YearMonth yearMonth);
 
+        Task<IReadOnlyCollection<RawItem>> GetRequests(string userId, YearMonth yearMonth);
+
         Task<IReadOnlyCollection<RawItem>> GetReservations(YearMonth yearMonth);
 
         Task<string> GetSchedules();
@@ -87,20 +89,20 @@
             return await QuerySecondaryIndex(hashKeyValue);
         }
 
+        public async Task<IReadOnlyCollection<RawItem>> GetRequests(string userId, YearMonth yearMonth)
+        {
+            var hashKeyValue = $"USER#{userId}";
+            var conditionValue = $"REQUESTS#{YearMonthPattern.Iso.Format(yearMonth)}";
+
+            return await QueryPartitionKey(hashKeyValue, conditionValue);
+        }
+
         public async Task<IReadOnlyCollection<RawItem>> GetReservations(YearMonth yearMonth)
         {
-            using var context = new DynamoDBContext(dynamoDbClient);
-
-            var config = new DynamoDBOperationConfig
-            {
-                OverrideTableName = TableName
-            };
-
             const string HashKeyValue = "GLOBAL";
             var conditionValue = $"RESERVATIONS#{YearMonthPattern.Iso.Format(yearMonth)}";
-            var query = context.QueryAsync<RawItem>(HashKeyValue, QueryOperator.Equal, new[] { conditionValue }, config);
 
-            return await query.GetRemainingAsync();
+            return await QueryPartitionKey(HashKeyValue, conditionValue);
         }
 
         public async Task<string> GetSchedules() => await GetBucketData(DataBucketName, SchedulesObjectKey);
@@ -185,6 +187,20 @@
                 Key = objectKey,
                 ContentBody = rawData
             });
+
+        public async Task<IReadOnlyCollection<RawItem>> QueryPartitionKey(string hashKeyValue, string conditionValue)
+        {
+            using var context = new DynamoDBContext(dynamoDbClient);
+
+            var config = new DynamoDBOperationConfig
+            {
+                OverrideTableName = TableName
+            };
+
+            var query = context.QueryAsync<RawItem>(hashKeyValue, QueryOperator.Equal, new[] { conditionValue }, config);
+
+            return await query.GetRemainingAsync();
+        }
 
         private async Task<IReadOnlyCollection<RawItem>> QuerySecondaryIndex(string hashKeyValue)
         {

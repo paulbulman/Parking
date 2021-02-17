@@ -37,8 +37,8 @@
             Assert.Null(result);
         }
 
-        private static Controller CreateController(ClaimsPrincipal user) =>
-            Mock.Of<Controller>(c =>
+        private static ControllerBase CreateController(ClaimsPrincipal user) =>
+            Mock.Of<ControllerBase>(c =>
                 c.ControllerContext == new ControllerContext
                 {
                     HttpContext = new DefaultHttpContext { User = user }

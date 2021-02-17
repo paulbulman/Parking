@@ -3,17 +3,16 @@ namespace Parking.Api.UnitTests.Controllers
 {
     using System.Collections.Generic;
     using System.Linq;
-    using System.Security.Claims;
     using System.Threading.Tasks;
     using Api.Controllers;
     using Api.Json.Calendar;
     using Api.Json.Overview;
-    using Microsoft.AspNetCore.Http;
     using Model;
     using NodaTime;
     using NodaTime.Testing.Extensions;
     using TestHelpers;
     using Xunit;
+    using static ControllerHelpers;
 
     public static class OverviewControllerTests
     {
@@ -33,12 +32,12 @@ namespace Parking.Api.UnitTests.Controllers
 
             var controller = new OverviewController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateRequestRepository.WithRequests(requests),
+                CreateRequestRepository.WithRequests(activeDates, requests),
                 CreateUserRepository.WithUsers(users));
 
             var result = await controller.GetAsync();
 
-            var calendar = ControllerHelpers.GetResultValue<Calendar<OverviewData>>(result);
+            var calendar = GetResultValue<Calendar<OverviewData>>(result);
 
             var visibleDays = GetAllDays(calendar)
                 .Where(d => !d.Hidden)
@@ -72,12 +71,12 @@ namespace Parking.Api.UnitTests.Controllers
 
             var controller = new OverviewController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateRequestRepository.WithRequests(requests),
+                CreateRequestRepository.WithRequests(activeDates, requests),
                 CreateUserRepository.WithUsers(users));
 
             var result = await controller.GetAsync();
 
-            var calendar = ControllerHelpers.GetResultValue<Calendar<OverviewData>>(result);
+            var calendar = GetResultValue<Calendar<OverviewData>>(result);
 
             var data = GetAllDays(calendar)
                 .Single(d => d.LocalDate == 15.February(2021))
@@ -94,12 +93,12 @@ namespace Parking.Api.UnitTests.Controllers
 
             var controller = new OverviewController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateRequestRepository.WithRequests(new List<Request>()),
+                CreateRequestRepository.WithRequests(activeDates, new List<Request>()),
                 CreateUserRepository.WithUsers(new List<User>()));
 
             var result = await controller.GetAsync();
 
-            var calendar = ControllerHelpers.GetResultValue<Calendar<OverviewData>>(result);
+            var calendar = GetResultValue<Calendar<OverviewData>>(result);
 
             var data = GetAllDays(calendar)
                 .Single(d => d.LocalDate == 15.February(2021))
@@ -118,12 +117,12 @@ namespace Parking.Api.UnitTests.Controllers
 
             var controller = new OverviewController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateRequestRepository.WithRequests(requests),
+                CreateRequestRepository.WithRequests(activeDates, requests),
                 CreateUserRepository.WithUsers(new List<User>()));
 
             var result = await controller.GetAsync();
 
-            var calendar = ControllerHelpers.GetResultValue<Calendar<OverviewData>>(result);
+            var calendar = GetResultValue<Calendar<OverviewData>>(result);
 
             var data = GetAllDays(calendar)
                 .Single(d => d.LocalDate == 15.February(2021))
@@ -152,19 +151,17 @@ namespace Parking.Api.UnitTests.Controllers
                 new Request("user2", 16.February(2021), RequestStatus.Allocated),
             };
 
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("cognito:username", "user2") }));
-
             var controller = new OverviewController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateRequestRepository.WithRequests(requests),
+                CreateRequestRepository.WithRequests(activeDates, requests),
                 CreateUserRepository.WithUsers(users))
             {
-                ControllerContext = { HttpContext = new DefaultHttpContext { User = user } }
+                ControllerContext = CreateControllerContext.WithUsername("user2")
             };
 
             var result = await controller.GetAsync();
 
-            var calendar = ControllerHelpers.GetResultValue<Calendar<OverviewData>>(result);
+            var calendar = GetResultValue<Calendar<OverviewData>>(result);
 
             var day1Data = GetDay(calendar, 15.February(2021)).Data;
             var day2Data = GetDay(calendar, 16.February(2021)).Data;

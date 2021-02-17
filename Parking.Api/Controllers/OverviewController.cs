@@ -14,7 +14,7 @@ namespace Parking.Api.Controllers
 
     [Route("[controller]")]
     [ApiController]
-    public class OverviewController : Controller
+    public class OverviewController : ControllerBase
     {
         private readonly IDateCalculator dateCalculator;
         private readonly IRequestRepository requestRepository;

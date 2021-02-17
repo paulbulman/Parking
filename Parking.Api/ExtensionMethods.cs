@@ -5,7 +5,7 @@
 
     public static class ExtensionMethods
     {
-        public static string GetCognitoUserId(this Controller controller) => 
+        public static string GetCognitoUserId(this ControllerBase controller) => 
             controller.User?.Claims.SingleOrDefault(c => c.Type == "cognito:username")?.Value;
     }
 }

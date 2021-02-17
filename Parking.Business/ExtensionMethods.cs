@@ -11,6 +11,9 @@
         public static LocalDate StartOfWeek(this LocalDate localDate) =>
             localDate.Previous(IsoDayOfWeek.Sunday).Next(IsoDayOfWeek.Monday);
 
+        public static IEnumerable<YearMonth> YearMonths(this DateInterval dateInterval) =>
+            dateInterval.Select(d => d.ToYearMonth()).Distinct();
+
         public static string ToEmailDisplayString(this LocalDate localDate) =>
             LocalDatePattern.CreateWithCurrentCulture("ddd dd MMM").Format(localDate);
 
