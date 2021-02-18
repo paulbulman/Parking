@@ -8,40 +8,29 @@ namespace Parking.Api.UnitTests.Controllers
     using Api.Json.Calendar;
     using Api.Json.Overview;
     using Model;
-    using NodaTime;
     using NodaTime.Testing.Extensions;
     using TestHelpers;
     using Xunit;
     using static ControllerHelpers;
+    using static Json.Calendar.CalendarHelpers;
 
     public static class OverviewControllerTests
     {
         [Fact]
-        public static async Task Returns_daily_data_for_each_active_date()
+        public static async Task Returns_overview_data_for_each_active_date()
         {
             var activeDates = new[] { 15.February(2021), 16.February(2021), 18.February(2021) };
 
-            var users = new[] { CreateUser.With(userId: "user1", firstName: "Cathie", lastName: "Phoenix") };
-
-            var requests = new[]
-            {
-                new Request("user1", 15.February(2021), RequestStatus.Allocated),
-                new Request("user1", 16.February(2021), RequestStatus.Allocated),
-                new Request("user1", 18.February(2021), RequestStatus.Requested),
-            };
-
             var controller = new OverviewController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateRequestRepository.WithRequests(activeDates, requests),
-                CreateUserRepository.WithUsers(users));
+                CreateRequestRepository.WithRequests(activeDates, new List<Request>()),
+                CreateUserRepository.WithUsers(new List<User>()));
 
             var result = await controller.GetAsync();
 
             var calendar = GetResultValue<Calendar<OverviewData>>(result);
 
-            var visibleDays = GetAllDays(calendar)
-                .Where(d => !d.Hidden)
-                .ToArray();
+            var visibleDays = GetVisibleDays(calendar);
 
             Assert.Equal(activeDates, visibleDays.Select(d => d.LocalDate));
 
@@ -78,9 +67,7 @@ namespace Parking.Api.UnitTests.Controllers
 
             var calendar = GetResultValue<Calendar<OverviewData>>(result);
 
-            var data = GetAllDays(calendar)
-                .Single(d => d.LocalDate == 15.February(2021))
-                .Data;
+            var data = GetDailyData(calendar, 15.February(2021));
 
             Assert.Equal(new[] { "Hynda Lindback", "Cathie Phoenix" }, data.AllocatedUsers.Select(u => u.Name));
             Assert.Equal(new[] { "Marco Call", "Shannen Muddicliffe" }, data.InterruptedUsers.Select(u => u.Name));
@@ -100,9 +87,7 @@ namespace Parking.Api.UnitTests.Controllers
 
             var calendar = GetResultValue<Calendar<OverviewData>>(result);
 
-            var data = GetAllDays(calendar)
-                .Single(d => d.LocalDate == 15.February(2021))
-                .Data;
+            var data = GetDailyData(calendar, 15.February(2021));
 
             Assert.Empty(data.AllocatedUsers);
             Assert.Empty(data.InterruptedUsers);
@@ -124,9 +109,7 @@ namespace Parking.Api.UnitTests.Controllers
 
             var calendar = GetResultValue<Calendar<OverviewData>>(result);
 
-            var data = GetAllDays(calendar)
-                .Single(d => d.LocalDate == 15.February(2021))
-                .Data;
+            var data = GetDailyData(calendar, 15.February(2021));
 
             Assert.Empty(data.AllocatedUsers);
             Assert.Empty(data.InterruptedUsers);
@@ -135,7 +118,7 @@ namespace Parking.Api.UnitTests.Controllers
         [Fact]
         public static async Task Highlights_active_user()
         {
-            var activeDates = new[] { 15.February(2021), 16.February(2021) };
+            var activeDates = new[] {15.February(2021), 16.February(2021)};
 
             var users = new[]
             {
@@ -163,8 +146,8 @@ namespace Parking.Api.UnitTests.Controllers
 
             var calendar = GetResultValue<Calendar<OverviewData>>(result);
 
-            var day1Data = GetDay(calendar, 15.February(2021)).Data;
-            var day2Data = GetDay(calendar, 16.February(2021)).Data;
+            var day1Data = GetDailyData(calendar, 15.February(2021));
+            var day2Data = GetDailyData(calendar, 16.February(2021));
 
             Assert.False(day1Data.AllocatedUsers.Single().IsHighlighted);
             Assert.True(day1Data.InterruptedUsers.Single().IsHighlighted);
@@ -172,11 +155,5 @@ namespace Parking.Api.UnitTests.Controllers
             Assert.True(day2Data.AllocatedUsers.Single().IsHighlighted);
             Assert.False(day2Data.InterruptedUsers.Single().IsHighlighted);
         }
-
-        private static IEnumerable<Day<OverviewData>> GetAllDays(Calendar<OverviewData> calendar) =>
-            calendar.Weeks.SelectMany(w => w.Days);
-
-        private static Day<OverviewData> GetDay(Calendar<OverviewData> calendar, LocalDate localDate) =>
-            calendar.Weeks.SelectMany(w => w.Days).Single(d => d.LocalDate == localDate);
     }
 }

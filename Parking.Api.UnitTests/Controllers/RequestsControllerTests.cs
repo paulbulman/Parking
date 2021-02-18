@@ -6,14 +6,12 @@
     using Api.Controllers;
     using Api.Json.Calendar;
     using Api.Json.Requests;
-    using Business.Data;
     using Model;
-    using Moq;
-    using NodaTime;
     using NodaTime.Testing.Extensions;
     using TestHelpers;
     using Xunit;
     using static ControllerHelpers;
+    using static Json.Calendar.CalendarHelpers;
 
     public static class RequestsControllerTests
     {
@@ -24,14 +22,9 @@
         {
             var activeDates = new[] { 2.February(2021), 3.February(2021), 4.February(2021) };
 
-            var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);
-            mockRequestRepository
-                .Setup(r => r.GetRequests(UserId, 2.February(2021), 4.February(2021)))
-                .ReturnsAsync(new List<Request>());
-
             var controller = new RequestsController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                mockRequestRepository.Object)
+                CreateRequestRepository.WithRequests(UserId, activeDates, new List<Request>()))
             {
                 ControllerContext = CreateControllerContext.WithUsername(UserId)
             };
@@ -40,9 +33,7 @@
 
             var calendar = GetResultValue<Calendar<RequestsData>>(result);
 
-            var visibleDays = GetAllDays(calendar)
-                .Where(d => !d.Hidden)
-                .ToArray();
+            var visibleDays = GetVisibleDays(calendar);
 
             Assert.Equal(activeDates, visibleDays.Select(d => d.LocalDate));
 
@@ -69,9 +60,9 @@
 
             var calendar = GetResultValue<Calendar<RequestsData>>(result);
 
-            var requested = GetDay(calendar, 2.February(2021)).Data.Requested;
+            var data = GetDailyData(calendar, 2.February(2021));
 
-            Assert.True(requested);
+            Assert.True(data.Requested);
         }
 
         [Fact]
@@ -90,9 +81,9 @@
 
             var calendar = GetResultValue<Calendar<RequestsData>>(result);
 
-            var requested = GetDay(calendar, 2.February(2021)).Data.Requested;
+            var data = GetDailyData(calendar, 2.February(2021));
 
-            Assert.False(requested);
+            Assert.False(data.Requested);
         }
 
         [Fact]
@@ -113,15 +104,9 @@
 
             var calendar = GetResultValue<Calendar<RequestsData>>(result);
 
-            var requested = GetDay(calendar, 2.February(2021)).Data.Requested;
+            var data = GetDailyData(calendar, 2.February(2021));
 
-            Assert.False(requested);
+            Assert.False(data.Requested);
         }
-
-        private static IEnumerable<Day<RequestsData>> GetAllDays(Calendar<RequestsData> calendar) =>
-            calendar.Weeks.SelectMany(w => w.Days);
-
-        private static Day<RequestsData> GetDay(Calendar<RequestsData> calendar, LocalDate localDate) =>
-            calendar.Weeks.SelectMany(w => w.Days).Single(d => d.LocalDate == localDate);
     }
 }

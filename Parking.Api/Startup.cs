@@ -29,9 +29,11 @@ namespace Parking.Api
             services.AddScoped<IAmazonS3, AmazonS3Client>();
 
             services.AddScoped<IBankHolidayRepository, BankHolidayRepository>();
+            services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
             services.AddScoped<IDateCalculator, DateCalculator>();
             services.AddScoped<IRawItemRepository, RawItemRepository>();
             services.AddScoped<IRequestRepository, RequestRepository>();
+            services.AddScoped<IReservationRepository, ReservationRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
         }
 
