@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Business;
     using Business.Data;
     using Model;
 
@@ -23,11 +24,9 @@
 
         public async Task<IReadOnlyCollection<User>> GetTeamLeaderUsers()
         {
-            const string TeamLeaderGroupName = "TeamLeader";
-
             var allUsers = await this.GetUsers();
 
-            var teamLeaderUserIds = await this.rawItemRepository.GetUserIdsInGroup(TeamLeaderGroupName);
+            var teamLeaderUserIds = await this.rawItemRepository.GetUserIdsInGroup(Constants.TeamLeaderGroupName);
 
             return allUsers
                 .Where(u => teamLeaderUserIds.Contains(u.UserId))

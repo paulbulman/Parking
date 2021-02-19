@@ -19,7 +19,4 @@
     <ProjectReference Include="..\Parking.Data\Parking.Data.csproj" />
     <ProjectReference Include="..\Parking.Model\Parking.Model.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Converters\" />
-  </ItemGroup>
 </Project>

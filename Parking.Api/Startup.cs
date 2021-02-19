@@ -3,16 +3,19 @@ namespace Parking.Api
     using Amazon.CognitoIdentityProvider;
     using Amazon.DynamoDBv2;
     using Amazon.S3;
+    using Authentication;
     using Business;
     using Business.Data;
     using Converters;
     using Data;
+    using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
-    using Middleware;
     using NodaTime;
+    using SystemClock = NodaTime.SystemClock;
 
     public class Startup
     {
@@ -21,6 +24,20 @@ namespace Parking.Api
             services
                 .AddControllers()
                 .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new LocalDateConverter()));
+
+            services.AddAuthentication("Default")
+                .AddScheme<AuthenticationSchemeOptions, DefaultAuthenticationHandler>("Default", null);
+
+            services.AddAuthorization(options =>
+            {
+                options.FallbackPolicy = new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .Build();
+
+                options.AddPolicy(
+                    "IsTeamLeader",
+                    policy => policy.RequireClaim("cognito:groups", Constants.TeamLeaderGroupName));
+            });
 
             services.AddSingleton<IClock>(SystemClock.Instance);
 
@@ -44,12 +61,11 @@ namespace Parking.Api
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseMiddleware<SetUserMiddleware>();
-
             app.UseHttpsRedirection();
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

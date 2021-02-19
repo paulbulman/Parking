@@ -7,10 +7,12 @@
     using Business;
     using Business.Data;
     using Json.Reservations;
+    using Microsoft.AspNetCore.Authorization;
     using Model;
     using NodaTime;
     using static Json.Calendar.Helpers;
 
+    [Authorize(Policy = "IsTeamLeader")]
     [Route("[controller]")]
     [ApiController]
     public class ReservationsController : ControllerBase
