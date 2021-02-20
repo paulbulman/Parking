@@ -56,7 +56,7 @@
 
             var reservationsUsers = users
                 .OrderBy(u => u.LastName)
-                .Select(u => new ReservationsUser(u.UserId, $"{u.FirstName} {u.LastName}"));
+                .Select(u => new ReservationsUser(u.UserId, u.DisplayName()));
 
             var response = new ReservationsResponse(calendar, configuration.ShortLeadTimeSpaces, reservationsUsers);
 

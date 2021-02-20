@@ -73,10 +73,10 @@ namespace Parking.Api.Controllers
             IEnumerable<User> users) =>
             requests
                 .Select(r => users.Single(u => u.UserId == r.UserId))
-                .OrderBy(u => u.LastName)
+                .OrderForDisplay()
                 .Select(u => CreateOverviewUser(currentUserId, u));
 
         private static OverviewUser CreateOverviewUser(string currentUserId, User user) =>
-            new OverviewUser($"{user.FirstName} {user.LastName}", user.UserId == currentUserId);
+            new OverviewUser(name: user.DisplayName(), isHighlighted: user.UserId == currentUserId);
     }
 }

@@ -91,7 +91,7 @@ namespace Parking.Api.UnitTests.Controllers
         }
 
         [Fact]
-        public static async Task Returns_list_of_users_sorted_by_last_name()
+        public static async Task Returns_sorted_list_of_users()
         {
             var activeDates = new[] { 15.February(2021) };
 
