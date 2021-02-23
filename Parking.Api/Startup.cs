@@ -3,6 +3,8 @@ namespace Parking.Api
     using Amazon.CognitoIdentityProvider;
     using Amazon.DynamoDBv2;
     using Amazon.S3;
+    using Amazon.SimpleNotificationService;
+    using Amazon.SimpleSystemsManagement;
     using Authentication;
     using Business;
     using Business.Data;
@@ -14,6 +16,7 @@ namespace Parking.Api
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Middleware;
     using NodaTime;
     using SystemClock = NodaTime.SystemClock;
 
@@ -44,10 +47,13 @@ namespace Parking.Api
             services.AddScoped<IAmazonCognitoIdentityProvider, AmazonCognitoIdentityProviderClient>();
             services.AddScoped<IAmazonDynamoDB, AmazonDynamoDBClient>();
             services.AddScoped<IAmazonS3, AmazonS3Client>();
+            services.AddScoped<IAmazonSimpleNotificationService, AmazonSimpleNotificationServiceClient>();
+            services.AddScoped<IAmazonSimpleSystemsManagement, AmazonSimpleSystemsManagementClient>();
 
             services.AddScoped<IBankHolidayRepository, BankHolidayRepository>();
             services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
             services.AddScoped<IDateCalculator, DateCalculator>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<IRawItemRepository, RawItemRepository>();
             services.AddScoped<IRequestRepository, RequestRepository>();
             services.AddScoped<IReservationRepository, ReservationRepository>();
@@ -60,6 +66,8 @@ namespace Parking.Api
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseHttpsRedirection();
 

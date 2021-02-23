@@ -12,6 +12,10 @@
     using Amazon.DynamoDBv2.DocumentModel;
     using Amazon.S3;
     using Amazon.S3.Model;
+    using Amazon.SimpleNotificationService;
+    using Amazon.SimpleNotificationService.Model;
+    using Amazon.SimpleSystemsManagement;
+    using Amazon.SimpleSystemsManagement.Model;
     using NodaTime;
     using NodaTime.Text;
 
@@ -29,6 +33,8 @@
 
         Task<string> GetSchedules();
 
+        Task<string> GetSmtpPassword();
+
         Task<IReadOnlyCollection<string>> GetTriggerFileKeys();
 
         Task<IReadOnlyCollection<RawItem>> GetUsers();
@@ -38,8 +44,10 @@
         Task SaveItems(IEnumerable<RawItem> rawItems);
 
         Task SaveSchedules(string rawData);
-        
-        Task SendEmail(string rawData);
+
+        Task SaveEmail(string rawData);
+
+        Task SendNotification(string subject, string body);
     }
 
     public class RawItemRepository : IRawItemRepository
@@ -47,29 +55,41 @@
         private const string SchedulesObjectKey = "schedules.json";
 
         private readonly IAmazonCognitoIdentityProvider cognitoIdentityProvider;
-        
+
         private readonly IAmazonDynamoDB dynamoDbClient;
 
         private readonly IAmazonS3 s3Client;
 
+        private readonly IAmazonSimpleNotificationService simpleNotificationService;
+
+        private readonly IAmazonSimpleSystemsManagement simpleSystemsManagement;
+
         public RawItemRepository(
             IAmazonCognitoIdentityProvider cognitoIdentityProvider,
             IAmazonDynamoDB dynamoDbClient,
-            IAmazonS3 s3Client)
+            IAmazonS3 s3Client,
+            IAmazonSimpleNotificationService simpleNotificationService,
+            IAmazonSimpleSystemsManagement simpleSystemsManagement)
         {
             this.cognitoIdentityProvider = cognitoIdentityProvider;
             this.dynamoDbClient = dynamoDbClient;
             this.s3Client = s3Client;
+            this.simpleNotificationService = simpleNotificationService;
+            this.simpleSystemsManagement = simpleSystemsManagement;
         }
 
         private static string DataBucketName => Environment.GetEnvironmentVariable("DATA_BUCKET_NAME");
 
         private static string EmailBucketName => Environment.GetEnvironmentVariable("EMAIL_BUCKET_NAME");
-        
+
+        private static string NotificationTopic => Environment.GetEnvironmentVariable("TOPIC_NAME");
+
+        private static string SmtpPasswordKey => Environment.GetEnvironmentVariable("SMTP_PASSWORD_KEY");
+
         private static string TriggerBucketName => Environment.GetEnvironmentVariable("TRIGGER_BUCKET_NAME");
 
         private static string TableName => Environment.GetEnvironmentVariable("TABLE_NAME");
-        
+
         private static string UserPoolId => Environment.GetEnvironmentVariable("USER_POOL_ID");
 
         public async Task DeleteTriggerFiles(IEnumerable<string> keys)
@@ -107,6 +127,15 @@
 
         public async Task<string> GetSchedules() => await GetBucketData(DataBucketName, SchedulesObjectKey);
 
+        public async Task<string> GetSmtpPassword()
+        {
+            var request = new GetParameterRequest { Name = SmtpPasswordKey, WithDecryption = true };
+
+            var response = await this.simpleSystemsManagement.GetParameterAsync(request);
+
+            return response.Parameter.Value;
+        }
+
         public async Task<IReadOnlyCollection<string>> GetTriggerFileKeys()
         {
             var request = new ListObjectsV2Request
@@ -133,7 +162,7 @@
                 GroupName = groupName,
                 UserPoolId = UserPoolId
             };
-            
+
             var response = await this.cognitoIdentityProvider.ListUsersInGroupAsync(request);
 
             return response
@@ -160,8 +189,11 @@
         public async Task SaveSchedules(string rawData) =>
             await SaveBucketData(DataBucketName, SchedulesObjectKey, rawData);
 
-        public async Task SendEmail(string rawData) =>
+        public async Task SaveEmail(string rawData) =>
             await SaveBucketData(EmailBucketName, Guid.NewGuid().ToString(), rawData);
+
+        public async Task SendNotification(string subject, string body) =>
+            await this.simpleNotificationService.PublishAsync(new PublishRequest(NotificationTopic, body, subject));
 
         private async Task<string> GetBucketData(string bucketName, string objectKey)
         {
@@ -188,7 +220,7 @@
                 ContentBody = rawData
             });
 
-        public async Task<IReadOnlyCollection<RawItem>> QueryPartitionKey(string hashKeyValue, string conditionValue)
+        private async Task<IReadOnlyCollection<RawItem>> QueryPartitionKey(string hashKeyValue, string conditionValue)
         {
             using var context = new DynamoDBContext(dynamoDbClient);
 

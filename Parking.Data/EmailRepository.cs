@@ -4,21 +4,23 @@
     using System.Threading.Tasks;
     using Business.Data;
     using Business.EmailTemplates;
-    using Model;
 
     public class EmailRepository : IEmailRepository
     {
         private readonly IRawItemRepository rawItemRepository;
+        private readonly IEmailSender emailSender;
 
-        public EmailRepository(IRawItemRepository rawItemRepository) => this.rawItemRepository = rawItemRepository;
+        public EmailRepository(IRawItemRepository rawItemRepository, IEmailSender emailSender)
+        {
+            this.rawItemRepository = rawItemRepository;
+            this.emailSender = emailSender;
+        }
 
-        public async Task Send(IEmailTemplate emailTemplate) =>
-            await rawItemRepository.SendEmail(
-                JsonSerializer.Serialize(
-                    new Email(
-                        emailTemplate.To,
-                        emailTemplate.Subject,
-                        emailTemplate.PlainTextBody,
-                        emailTemplate.HtmlBody)));
+        public async Task Send(IEmailTemplate emailTemplate)
+        {
+            await this.rawItemRepository.SaveEmail(JsonSerializer.Serialize(emailTemplate));
+
+            await this.emailSender.Send(emailTemplate);
+        }
     }
 }

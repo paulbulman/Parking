@@ -12,7 +12,7 @@
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>();
 
-            var emailRepository = new EmailRepository(mockRawItemRepository.Object);
+            var emailRepository = new EmailRepository(mockRawItemRepository.Object, Mock.Of<IEmailSender>());
 
             await emailRepository.Send(
                 Mock.Of<IEmailTemplate>(e =>
@@ -29,8 +29,23 @@
                 "\"HtmlBody\":\"Test HTML body\"" +
                 "}";
 
-            mockRawItemRepository.Verify(r => r.SendEmail(ExpectedJson), Times.Once);
+            mockRawItemRepository.Verify(r => r.SaveEmail(ExpectedJson), Times.Once);
             mockRawItemRepository.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public static async Task Sends_email()
+        {
+            var mockEmailSender = new Mock<IEmailSender>();
+
+            var emailRepository = new EmailRepository(Mock.Of<IRawItemRepository>(), mockEmailSender.Object);
+
+            var emailTemplate = Mock.Of<IEmailTemplate>();
+
+            await emailRepository.Send(emailTemplate);
+
+            mockEmailSender.Verify(s => s.Send(emailTemplate), Times.Once);
+            mockEmailSender.VerifyNoOtherCalls();
         }
     }
 }

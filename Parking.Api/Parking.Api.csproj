@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
@@ -7,10 +7,12 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Amazon.Lambda.AspNetCoreServer" Version="5.3.0" />
-    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.5.1.25" />
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.5.4.26" />
-    <PackageReference Include="AWSSDK.S3" Version="3.5.8.2" />
+    <PackageReference Include="Amazon.Lambda.AspNetCoreServer" Version="5.3.1" />
+    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.5.1.29" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.5.4.30" />
+    <PackageReference Include="AWSSDK.S3" Version="3.5.8.7" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.5.1.43" />
+    <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="3.5.9.13" />
     <PackageReference Include="NodaTime" Version="3.0.5" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.8.0" />
   </ItemGroup>
