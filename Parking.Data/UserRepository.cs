@@ -15,10 +15,17 @@
 
         public async Task<IReadOnlyCollection<User>> GetUsers()
         {
-            var queryResult = await rawItemRepository.GetUsers();
+            var queryResult = await this.rawItemRepository.GetUsers();
 
             return queryResult
-                .Select(r => new User(GetUserId(r.PrimaryKey), r.CommuteDistance, r.EmailAddress, r.FirstName, r.LastName))
+                .Select(r => new User(
+                    GetUserId(r.PrimaryKey),
+                    r.AlternativeRegistrationNumber,
+                    r.CommuteDistance,
+                    r.EmailAddress,
+                    r.FirstName,
+                    r.LastName,
+                    r.RegistrationNumber))
                 .ToArray();
         }
 

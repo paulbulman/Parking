@@ -19,6 +19,9 @@
         [DynamoDBProperty("SK")]
         public string SortKey { get; set; }
 
+        [DynamoDBProperty("alternativeRegistrationNumber")]
+        public string AlternativeRegistrationNumber { get; set; }
+
         [DynamoDBProperty("commuteDistance")]
         public decimal? CommuteDistance { get; set; }
 
@@ -30,6 +33,9 @@
 
         [DynamoDBProperty("lastName")]
         public string LastName { get; set; }
+
+        [DynamoDBProperty("registrationNumber")]
+        public string RegistrationNumber { get; set; }
 
         [DynamoDBProperty("requests")]
         public Dictionary<string, string> Requests { get; set; }
