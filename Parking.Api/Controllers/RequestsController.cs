@@ -42,7 +42,9 @@
 
             var calendar = CreateCalendar(data);
 
-            return this.Ok(calendar);
+            var response = new RequestsResponse(calendar);
+
+            return this.Ok(response);
         }
 
         private static RequestsData CreateDailyData(LocalDate localDate, IReadOnlyCollection<Request> requests)

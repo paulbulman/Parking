@@ -13,6 +13,22 @@ namespace Parking.Data.UnitTests
     public static class RequestRepositoryTests
     {
         [Fact]
+        public static async void GetRequests_returns_empty_collection_when_no_matching_raw_item_exists()
+        {
+            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+
+            SetupMockRepository(mockRawItemRepository, new YearMonth(2020, 8));
+            SetupMockRepository(mockRawItemRepository, new YearMonth(2020, 9));
+
+            var requestRepository = new RequestRepository(mockRawItemRepository.Object);
+
+            var result = await requestRepository.GetRequests(1.August(2020), 30.September(2020));
+
+            Assert.NotNull(result);
+            Assert.Empty(result);
+        }
+
+        [Fact]
         public static async void GetRequests_converts_raw_items_for_multiple_users_to_requests()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);

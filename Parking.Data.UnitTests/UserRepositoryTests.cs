@@ -10,7 +10,51 @@ namespace Parking.Data.UnitTests
     public static class UserRepositoryTests
     {
         [Fact]
-        public static async void Converts_raw_items_to_users()
+        public static async void GetUser_returns_null_when_requested_user_does_not_exist()
+        {
+            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+
+            mockRawItemRepository.Setup(r => r.GetUser(It.IsAny<string>())).ReturnsAsync((RawItem)null);
+
+            var userRepository = new UserRepository(mockRawItemRepository.Object);
+
+            var result = await userRepository.GetUser("UserId");
+
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public static async void GetUser_converts_raw_item_to_user()
+        {
+            const string UserId = "User1";
+
+            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+
+            var rawItem = new RawItem
+            {
+                PrimaryKey = "USER#User1",
+                SortKey = "PROFILE",
+                AlternativeRegistrationNumber = "W789XYZ",
+                CommuteDistance = 1.23m,
+                EmailAddress = "1@abc.com",
+                FirstName = "Sean",
+                LastName = "Cantera",
+                RegistrationNumber = "AB12CDE"
+            };
+
+            mockRawItemRepository.Setup(r => r.GetUser(UserId)).ReturnsAsync(rawItem);
+
+            var userRepository = new UserRepository(mockRawItemRepository.Object);
+
+            var result = await userRepository.GetUser(UserId);
+
+            Assert.NotNull(result);
+
+            CheckUser(new[] { result }, UserId, "W789XYZ", 1.23m, "1@abc.com", "Sean", "Cantera", "AB12CDE");
+        }
+
+        [Fact]
+        public static async void GetUsers_converts_raw_items_to_users()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
 
@@ -25,9 +69,9 @@ namespace Parking.Data.UnitTests
             var userRepository = new UserRepository(mockRawItemRepository.Object);
 
             var result = await userRepository.GetUsers();
-            
+
             Assert.NotNull(result);
-            
+
             Assert.Equal(rawItems.Length, result.Count);
 
             CheckUser(result, "Id1", "W789XYZ", 1.23m, "1@abc.com", "Sean", "Cantera", "AB12CDE");
@@ -36,7 +80,7 @@ namespace Parking.Data.UnitTests
         }
 
         [Fact]
-        public static async void Filters_team_leader_users()
+        public static async void GetTeamLeaderUsers_filters_team_leader_users()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
 
@@ -48,7 +92,7 @@ namespace Parking.Data.UnitTests
             };
             mockRawItemRepository.Setup(r => r.GetUsers()).ReturnsAsync(rawUsers);
 
-            var rawTeamLeaderUserIds = new[] {"Id1", "Id3"};
+            var rawTeamLeaderUserIds = new[] { "Id1", "Id3" };
             mockRawItemRepository.Setup(r => r.GetUserIdsInGroup("TeamLeader")).ReturnsAsync(rawTeamLeaderUserIds);
 
             var userRepository = new UserRepository(mockRawItemRepository.Object);
@@ -73,7 +117,7 @@ namespace Parking.Data.UnitTests
             string expectedLastName,
             string expectedRegistrationNumber)
         {
-            var actual = result.Where(u => 
+            var actual = result.Where(u =>
                 u.UserId == expectedUserId &&
                 u.AlternativeRegistrationNumber == expectedAlternativeRegistrationNumber &&
                 u.CommuteDistance == expectedCommuteDistance &&

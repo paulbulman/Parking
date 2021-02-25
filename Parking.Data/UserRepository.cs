@@ -13,19 +13,19 @@
 
         public UserRepository(IRawItemRepository rawItemRepository) => this.rawItemRepository = rawItemRepository;
 
+        public async Task<User> GetUser(string userId)
+        {
+            var queryResult = await this.rawItemRepository.GetUser(userId);
+
+            return queryResult != null ? CreateUser(queryResult) : null;
+        }
+
         public async Task<IReadOnlyCollection<User>> GetUsers()
         {
             var queryResult = await this.rawItemRepository.GetUsers();
 
             return queryResult
-                .Select(r => new User(
-                    GetUserId(r.PrimaryKey),
-                    r.AlternativeRegistrationNumber,
-                    r.CommuteDistance,
-                    r.EmailAddress,
-                    r.FirstName,
-                    r.LastName,
-                    r.RegistrationNumber))
+                .Select(CreateUser)
                 .ToArray();
         }
 
@@ -40,6 +40,14 @@
                 .ToArray();
         }
 
-        private static string GetUserId(string primaryKey) => primaryKey.Split('#')[1];
+        private static User CreateUser(RawItem rawItem) =>
+            new User(
+                rawItem.PrimaryKey.Split('#')[1],
+                rawItem.AlternativeRegistrationNumber,
+                rawItem.CommuteDistance,
+                rawItem.EmailAddress,
+                rawItem.FirstName,
+                rawItem.LastName,
+                rawItem.RegistrationNumber);
     }
 }

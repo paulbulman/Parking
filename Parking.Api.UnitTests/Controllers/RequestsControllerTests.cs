@@ -4,7 +4,6 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Api.Controllers;
-    using Api.Json.Calendar;
     using Api.Json.Requests;
     using Model;
     using NodaTime.Testing.Extensions;
@@ -31,9 +30,9 @@
 
             var result = await controller.GetAsync();
 
-            var calendar = GetResultValue<Calendar<RequestsData>>(result);
+            var response = GetResultValue<RequestsResponse>(result);
 
-            var visibleDays = GetVisibleDays(calendar);
+            var visibleDays = GetVisibleDays(response.Requests);
 
             Assert.Equal(activeDates, visibleDays.Select(d => d.LocalDate));
 
@@ -58,9 +57,9 @@
 
             var result = await controller.GetAsync();
 
-            var calendar = GetResultValue<Calendar<RequestsData>>(result);
+            var response = GetResultValue<RequestsResponse>(result);
 
-            var data = GetDailyData(calendar, 2.February(2021));
+            var data = GetDailyData(response.Requests, 2.February(2021));
 
             Assert.True(data.Requested);
         }
@@ -79,9 +78,9 @@
 
             var result = await controller.GetAsync();
 
-            var calendar = GetResultValue<Calendar<RequestsData>>(result);
+            var response = GetResultValue<RequestsResponse>(result);
 
-            var data = GetDailyData(calendar, 2.February(2021));
+            var data = GetDailyData(response.Requests, 2.February(2021));
 
             Assert.False(data.Requested);
         }
@@ -102,9 +101,9 @@
 
             var result = await controller.GetAsync();
 
-            var calendar = GetResultValue<Calendar<RequestsData>>(result);
+            var response = GetResultValue<RequestsResponse>(result);
 
-            var data = GetDailyData(calendar, 2.February(2021));
+            var data = GetDailyData(response.Requests, 2.February(2021));
 
             Assert.False(data.Requested);
         }

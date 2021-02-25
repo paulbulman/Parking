@@ -37,6 +37,8 @@
 
         Task<IReadOnlyCollection<string>> GetTriggerFileKeys();
 
+        Task<RawItem> GetUser(string userId);
+
         Task<IReadOnlyCollection<RawItem>> GetUsers();
 
         Task<IReadOnlyCollection<string>> GetUserIdsInGroup(string groupName);
@@ -146,6 +148,16 @@
             var objects = await s3Client.ListObjectsV2Async(request);
 
             return objects.S3Objects.Select(s => s.Key).ToArray();
+        }
+
+        public async Task<RawItem> GetUser(string userId)
+        {
+            var hashKeyValue = $"USER#{userId}";
+            const string ConditionValue = "PROFILE";
+
+            var result = await QueryPartitionKey(hashKeyValue, ConditionValue);
+
+            return result.FirstOrDefault();
         }
 
         public async Task<IReadOnlyCollection<RawItem>> GetUsers()

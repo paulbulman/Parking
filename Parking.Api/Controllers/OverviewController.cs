@@ -44,7 +44,9 @@ namespace Parking.Api.Controllers
 
             var calendar = CreateCalendar(data);
 
-            return this.Ok(calendar);
+            var response = new OverviewResponse(calendar);
+
+            return this.Ok(response);
         }
 
         private static OverviewData CreateDailyData(

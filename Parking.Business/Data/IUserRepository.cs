@@ -6,6 +6,8 @@
 
     public interface IUserRepository
     {
+        Task<User> GetUser(string userId);
+
         Task<IReadOnlyCollection<User>> GetUsers();
 
         Task<IReadOnlyCollection<User>> GetTeamLeaderUsers();

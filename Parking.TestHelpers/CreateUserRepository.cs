@@ -7,6 +7,17 @@
 
     public static class CreateUserRepository
     {
+        public static IUserRepository WithUser(string userId, User user)
+        {
+            var mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
+
+            mockUserRepository
+                .Setup(r => r.GetUser(userId))
+                .ReturnsAsync(user);
+
+            return mockUserRepository.Object;
+        }
+
         public static IUserRepository WithUsers(IReadOnlyCollection<User> users)
         {
             var mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
