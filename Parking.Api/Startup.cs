@@ -71,7 +71,7 @@ namespace Parking.Api
                 app.UseDeveloperExceptionPage();
             }
             
-            app.UseMiddleware<AuthorizationFailureMiddleware>();
+            app.UseMiddleware<HttpErrorMiddleware>();
             app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseHttpsRedirection();
