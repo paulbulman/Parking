@@ -4,7 +4,7 @@
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Primitives;
 
-    public class CreateDefaultHttpContext
+    public static class CreateDefaultHttpContext
     {
         public static DefaultHttpContext WithBearerToken(string rawTokenValue) =>
             new DefaultHttpContext

@@ -107,5 +107,25 @@
 
             Assert.False(data.Requested);
         }
+
+        [Fact]
+        public static async Task Returns_data_for_given_user_when_specified()
+        {
+            var activeDates = new[] { 2.February(2021) };
+
+            var requests = new[] { new Request(UserId, 2.February(2021), RequestStatus.Requested) };
+
+            var controller = new RequestsController(
+                CreateDateCalculator.WithActiveDates(activeDates),
+                CreateRequestRepository.WithRequests(UserId, activeDates, requests));
+
+            var result = await controller.GetAsync(UserId);
+
+            var resultValue = GetResultValue<RequestsResponse>(result);
+
+            var data = GetDailyData(resultValue.Requests, 2.February(2021));
+
+            Assert.True(data.Requested);
+        }
     }
 }

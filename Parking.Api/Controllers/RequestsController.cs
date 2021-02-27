@@ -6,6 +6,7 @@
     using Business;
     using Business.Data;
     using Json.Requests;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Model;
     using NodaTime;
@@ -27,11 +28,27 @@
             this.requestRepository = requestRepository;
         }
 
+        [Authorize(Policy = "IsTeamLeader")]
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetAsync(string userId)
+        {
+            var response = await this.GetRequests(userId);
+
+            return this.Ok(response);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetAsync()
         {
             var userId = this.GetCognitoUserId();
 
+            var response = await this.GetRequests(userId);
+
+            return this.Ok(response);
+        }
+
+        private async Task<RequestsResponse> GetRequests(string userId)
+        {
             var activeDates = this.dateCalculator.GetActiveDates();
 
             var requests = await this.requestRepository.GetRequests(userId, activeDates.First(), activeDates.Last());
@@ -42,9 +59,7 @@
 
             var calendar = CreateCalendar(data);
 
-            var response = new RequestsResponse(calendar);
-
-            return this.Ok(response);
+            return new RequestsResponse(calendar);
         }
 
         private static RequestsData CreateDailyData(LocalDate localDate, IReadOnlyCollection<Request> requests)
