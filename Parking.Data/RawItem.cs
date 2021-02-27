@@ -56,6 +56,17 @@
                     .Select(e => e.AsString())
                     .ToList());
 
-        public DynamoDBEntry ToEntry(object value) => throw new NotImplementedException("Updating reservations is currently supported only via the web API.");
+        public DynamoDBEntry ToEntry(object value)
+        {
+            if (!(value is Dictionary<string, List<string>> dailyData))
+            {
+                throw new ArgumentException("Could not convert raw value to dictionary", nameof(value));
+            }
+
+            return new Document(
+                dailyData.ToDictionary(
+                    day => day.Key,
+                    day => (DynamoDBEntry)new DynamoDBList(day.Value.Select(userId => new Primitive(userId)))));
+        }
     }
 }
