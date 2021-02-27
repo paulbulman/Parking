@@ -46,6 +46,34 @@
             return this.Ok(response);
         }
 
+        [HttpPatch("{userId}")]
+        public async Task<IActionResult> PatchAsync(string userId, [FromBody] UserPatchRequest request)
+        {
+            var existingUser = await this.userRepository.GetUser(userId);
+
+            if (existingUser == null)
+            {
+                return this.NotFound();
+            }
+
+            var updatedUser = new User(
+                existingUser.UserId,
+                request.AlternativeRegistrationNumber,
+                request.CommuteDistance,
+                existingUser.EmailAddress,
+                request.FirstName,
+                request.LastName,
+                request.RegistrationNumber);
+
+            await this.userRepository.SaveUser(updatedUser);
+
+            var usersData = CreateUsersData(updatedUser);
+
+            var response = new SingleUserResponse(usersData);
+
+            return this.Ok(response);
+        }
+
         private static UsersData CreateUsersData(User user) =>
             new UsersData(
                 userId: user.UserId,

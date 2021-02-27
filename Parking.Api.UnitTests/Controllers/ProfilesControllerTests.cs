@@ -52,7 +52,7 @@
                 .Setup(r => r.GetUser(UserId))
                 .ReturnsAsync(existingUser);
 
-            var request = new ProfilePatchRequest("__NEW_REG__", "__NEW_ALTERNATIVE_REG__");
+            var request = new ProfilePatchRequest("__NEW_ALTERNATIVE_REG__", "__NEW_REG__");
 
             var controller = new ProfilesController(mockUserRepository.Object)
             {
@@ -79,7 +79,7 @@
         }
 
         [Fact]
-        public static async Task Returns_updated_profile_after_saving()
+        public static async Task Returns_updated_profile_after_updating()
         {
             const string UserId = "User1";
 
@@ -91,7 +91,7 @@
                 .Setup(r => r.GetUser(UserId))
                 .ReturnsAsync(existingUser);
 
-            var request = new ProfilePatchRequest("__NEW_REG__", "__NEW_ALTERNATIVE_REG__");
+            var request = new ProfilePatchRequest("__NEW_ALTERNATIVE_REG__", "__NEW_REG__");
 
             var controller = new ProfilesController(mockUserRepository.Object)
             {
