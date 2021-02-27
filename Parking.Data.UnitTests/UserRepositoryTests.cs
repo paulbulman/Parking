@@ -11,6 +11,38 @@ namespace Parking.Data.UnitTests
     public static class UserRepositoryTests
     {
         [Fact]
+        public static async void UserExists_returns_true_when_user_with_given_ID_exists()
+        {
+            const string UserId = "User1";
+
+            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+
+            mockRawItemRepository.Setup(r => r.GetUser(UserId)).ReturnsAsync(new RawItem());
+
+            var userRepository = new UserRepository(mockRawItemRepository.Object);
+
+            var result = await userRepository.UserExists(UserId);
+
+            Assert.True(result);
+        }
+
+        [Fact]
+        public static async void UserExists_returns_false_when_no_user_with_given_ID_exists()
+        {
+            const string UserId = "User1";
+
+            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+
+            mockRawItemRepository.Setup(r => r.GetUser(UserId)).ReturnsAsync((RawItem)null);
+
+            var userRepository = new UserRepository(mockRawItemRepository.Object);
+
+            var result = await userRepository.UserExists(UserId);
+
+            Assert.False(result);
+        }
+
+        [Fact]
         public static async void GetUser_returns_null_when_requested_user_does_not_exist()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);

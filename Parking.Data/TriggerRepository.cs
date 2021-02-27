@@ -11,6 +11,9 @@
         public TriggerRepository(IRawItemRepository rawItemRepository) =>
             this.rawItemRepository = rawItemRepository;
 
+        public async Task AddTrigger() =>
+            await this.rawItemRepository.SaveTrigger();
+
         public async Task<IReadOnlyCollection<string>> GetKeys() =>
             await this.rawItemRepository.GetTriggerFileKeys();
 

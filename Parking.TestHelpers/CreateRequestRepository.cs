@@ -25,6 +25,12 @@
         public static IRequestRepository WithRequests(
             string userId,
             IReadOnlyCollection<LocalDate> activeDates,
+            IReadOnlyCollection<Request> requests) =>
+            MockWithRequests(userId, activeDates, requests).Object;
+
+        public static Mock<IRequestRepository> MockWithRequests(
+            string userId,
+            IReadOnlyCollection<LocalDate> activeDates,
             IReadOnlyCollection<Request> requests)
         {
             var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);
@@ -33,7 +39,7 @@
                 .Setup(r => r.GetRequests(userId, activeDates.First(), activeDates.Last()))
                 .ReturnsAsync(requests);
 
-            return mockRequestRepository.Object;
+            return mockRequestRepository;
         }
     }
 }

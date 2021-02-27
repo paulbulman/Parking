@@ -60,6 +60,7 @@ namespace Parking.Api
             services.AddScoped<IRawItemRepository, RawItemRepository>();
             services.AddScoped<IRequestRepository, RequestRepository>();
             services.AddScoped<IReservationRepository, ReservationRepository>();
+            services.AddScoped<ITriggerRepository, TriggerRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
         }
 

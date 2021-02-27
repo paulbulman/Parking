@@ -7,6 +7,18 @@
     public static class TriggerRepositoryTests
     {
         [Fact]
+        public static async Task Calls_raw_item_repository_to_add_new_trigger()
+        {
+            var mockRawItemRepository = new Mock<IRawItemRepository>();
+
+            var triggerRepository = new TriggerRepository(mockRawItemRepository.Object);
+
+            await triggerRepository.AddTrigger();
+
+            mockRawItemRepository.Verify(r => r.SaveTrigger(), Times.Once);
+        }
+
+        [Fact]
         public static async Task Returns_file_keys_from_raw_item_repository()
         {
             var keys = new[] {"key1", "key2"};

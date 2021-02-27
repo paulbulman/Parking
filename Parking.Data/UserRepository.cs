@@ -13,6 +13,13 @@
 
         public UserRepository(IRawItemRepository rawItemRepository) => this.rawItemRepository = rawItemRepository;
 
+        public async Task<bool> UserExists(string userId)
+        {
+            var queryResult = await this.rawItemRepository.GetUser(userId);
+            
+            return queryResult != null;
+        }
+
         public async Task<User> GetUser(string userId)
         {
             var queryResult = await this.rawItemRepository.GetUser(userId);

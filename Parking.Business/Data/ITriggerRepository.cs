@@ -5,6 +5,8 @@
 
     public interface ITriggerRepository
     {
+        Task AddTrigger();
+
         Task<IReadOnlyCollection<string>> GetKeys();
 
         Task DeleteKeys(IReadOnlyCollection<string> keys);

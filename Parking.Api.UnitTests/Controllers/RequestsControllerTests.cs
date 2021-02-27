@@ -5,7 +5,11 @@
     using System.Threading.Tasks;
     using Api.Controllers;
     using Api.Json.Requests;
+    using Business;
+    using Business.Data;
+    using Microsoft.AspNetCore.Mvc;
     using Model;
+    using Moq;
     using NodaTime.Testing.Extensions;
     using TestHelpers;
     using Xunit;
@@ -23,7 +27,9 @@
 
             var controller = new RequestsController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateRequestRepository.WithRequests(UserId, activeDates, new List<Request>()))
+                CreateRequestRepository.WithRequests(UserId, activeDates, new List<Request>()),
+                Mock.Of<ITriggerRepository>(),
+                CreateUserRepository.WithUserExists(UserId, true))
             {
                 ControllerContext = CreateControllerContext.WithUsername(UserId)
             };
@@ -45,12 +51,14 @@
         public static async Task Returns_true_when_space_has_been_requested(RequestStatus requestStatus)
         {
             var activeDates = new[] { 2.February(2021) };
-            
+
             var requests = new[] { new Request(UserId, 2.February(2021), requestStatus) };
 
             var controller = new RequestsController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateRequestRepository.WithRequests(UserId, activeDates, requests))
+                CreateRequestRepository.WithRequests(UserId, activeDates, requests),
+                Mock.Of<ITriggerRepository>(),
+                CreateUserRepository.WithUserExists(UserId, true))
             {
                 ControllerContext = CreateControllerContext.WithUsername(UserId)
             };
@@ -71,7 +79,9 @@
 
             var controller = new RequestsController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateRequestRepository.WithRequests(UserId, activeDates, new List<Request>()))
+                CreateRequestRepository.WithRequests(UserId, activeDates, new List<Request>()),
+                Mock.Of<ITriggerRepository>(),
+                CreateUserRepository.WithUserExists(UserId, true))
             {
                 ControllerContext = CreateControllerContext.WithUsername(UserId)
             };
@@ -94,7 +104,9 @@
 
             var controller = new RequestsController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateRequestRepository.WithRequests(UserId, activeDates, requests))
+                CreateRequestRepository.WithRequests(UserId, activeDates, requests),
+                Mock.Of<ITriggerRepository>(),
+                CreateUserRepository.WithUserExists(UserId, true))
             {
                 ControllerContext = CreateControllerContext.WithUsername(UserId)
             };
@@ -117,7 +129,9 @@
 
             var controller = new RequestsController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateRequestRepository.WithRequests(UserId, activeDates, requests));
+                CreateRequestRepository.WithRequests(UserId, activeDates, requests),
+                Mock.Of<ITriggerRepository>(),
+                CreateUserRepository.WithUserExists(UserId, true));
 
             var result = await controller.GetAsync(UserId);
 
@@ -126,6 +140,307 @@
             var data = GetDailyData(resultValue.Requests, 2.February(2021));
 
             Assert.True(data.Requested);
+        }
+
+        [Fact]
+        public static async Task Returns_404_response_when_given_user_does_not_exist()
+        {
+            var controller = new RequestsController(
+                Mock.Of<IDateCalculator>(),
+                Mock.Of<IRequestRepository>(),
+                Mock.Of<ITriggerRepository>(),
+                CreateUserRepository.WithUserExists(UserId, false));
+
+            var result = await controller.GetAsync(UserId);
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public static async Task Saves_requests_with_corresponding_state()
+        {
+            var activeDates = new[] { 2.February(2021), 3.February(2021) };
+
+            var mockRequestRepository =
+                CreateRequestRepository.MockWithRequests(UserId, activeDates, new List<Request>());
+
+            mockRequestRepository
+                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
+                .Returns(Task.CompletedTask);
+
+            var patchRequest = new RequestsPatchRequest(new[]
+            {
+                new RequestPatchRequestDailyData(2.February(2021), true),
+                new RequestPatchRequestDailyData(3.February(2021), false),
+            });
+
+            var controller = new RequestsController(
+                CreateDateCalculator.WithActiveDates(activeDates),
+                mockRequestRepository.Object,
+                Mock.Of<ITriggerRepository>(),
+                CreateUserRepository.WithUserExists(UserId, true))
+            {
+                ControllerContext = CreateControllerContext.WithUsername(UserId)
+            };
+
+            await controller.PatchAsync(patchRequest);
+
+            var expectedSavedRequests = new[]
+            {
+                new Request(UserId, 2.February(2021), RequestStatus.Requested),
+                new Request(UserId, 3.February(2021), RequestStatus.Cancelled),
+            };
+
+            CheckSavedRequests(mockRequestRepository, expectedSavedRequests);
+        }
+
+        [Fact]
+        public static async Task Adds_recalculation_trigger_when_saving_requests()
+        {
+            var activeDates = new[] { 2.February(2021) };
+
+            var mockRequestRepository =
+                CreateRequestRepository.MockWithRequests(UserId, activeDates, new List<Request>());
+
+            mockRequestRepository
+                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
+                .Returns(Task.CompletedTask);
+
+            var mockTriggerRepository = new Mock<ITriggerRepository>();
+            
+            var patchRequest = new RequestsPatchRequest(new List<RequestPatchRequestDailyData>());
+
+            var controller = new RequestsController(
+                CreateDateCalculator.WithActiveDates(activeDates),
+                mockRequestRepository.Object,
+                mockTriggerRepository.Object,
+                CreateUserRepository.WithUserExists(UserId, true))
+            {
+                ControllerContext = CreateControllerContext.WithUsername(UserId)
+            };
+
+            await controller.PatchAsync(patchRequest);
+
+            mockTriggerRepository.Verify(r => r.AddTrigger(), Times.Once);
+        }
+
+        [Fact]
+        public static async Task Updates_requests_with_last_given_value_for_each_date()
+        {
+            var activeDates = new[] { 2.February(2021), 3.February(2021) };
+
+            var mockRequestRepository =
+                CreateRequestRepository.MockWithRequests(UserId, activeDates, new List<Request>());
+
+            mockRequestRepository
+                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
+                .Returns(Task.CompletedTask);
+
+            var patchRequest = new RequestsPatchRequest(new[]
+            {
+                new RequestPatchRequestDailyData(2.February(2021), true),
+                new RequestPatchRequestDailyData(2.February(2021), false),
+                new RequestPatchRequestDailyData(2.February(2021), true),
+                new RequestPatchRequestDailyData(3.February(2021), false),
+                new RequestPatchRequestDailyData(3.February(2021), true),
+                new RequestPatchRequestDailyData(3.February(2021), false),
+            });
+
+            var controller = new RequestsController(
+                CreateDateCalculator.WithActiveDates(activeDates),
+                mockRequestRepository.Object,
+                Mock.Of<ITriggerRepository>(),
+                CreateUserRepository.WithUserExists(UserId, true))
+            {
+                ControllerContext = CreateControllerContext.WithUsername(UserId)
+            };
+
+            await controller.PatchAsync(patchRequest);
+
+            var expectedSavedRequests = new[]
+            {
+                new Request(UserId, 2.February(2021), RequestStatus.Requested),
+                new Request(UserId, 3.February(2021), RequestStatus.Cancelled),
+            };
+
+            CheckSavedRequests(mockRequestRepository, expectedSavedRequests);
+        }
+
+        [Fact]
+        public static async Task Does_not_update_unchanged_requests()
+        {
+            var activeDates = new[] { 2.February(2021), 3.February(2021) };
+
+            var mockRequestRepository =
+                CreateRequestRepository.MockWithRequests(UserId, activeDates, new List<Request>());
+
+            mockRequestRepository
+                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
+                .Returns(Task.CompletedTask);
+
+            var patchRequest = new RequestsPatchRequest(new[]
+            {
+                new RequestPatchRequestDailyData(2.February(2021), true),
+                new RequestPatchRequestDailyData(2.February(2021), false),
+                new RequestPatchRequestDailyData(3.February(2021), false),
+                new RequestPatchRequestDailyData(3.February(2021), true),
+            });
+
+            var controller = new RequestsController(
+                CreateDateCalculator.WithActiveDates(activeDates),
+                mockRequestRepository.Object,
+                Mock.Of<ITriggerRepository>(),
+                CreateUserRepository.WithUserExists(UserId, true))
+            {
+                ControllerContext = CreateControllerContext.WithUsername(UserId)
+            };
+
+            await controller.PatchAsync(patchRequest);
+
+            CheckSavedRequests(mockRequestRepository, new List<Request>());
+        }
+
+        [Fact]
+        public static async Task Does_not_update_requests_outside_active_date_range()
+        {
+            var activeDates = new[] { 2.February(2021), 3.February(2021) };
+
+            var mockRequestRepository =
+                CreateRequestRepository.MockWithRequests(UserId, activeDates, new List<Request>());
+
+            mockRequestRepository
+                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
+                .Returns(Task.CompletedTask);
+
+            var patchRequest = new RequestsPatchRequest(new[]
+            {
+                new RequestPatchRequestDailyData(1.February(2021), true),
+                new RequestPatchRequestDailyData(4.February(2021), true)
+            });
+
+            var controller = new RequestsController(
+                CreateDateCalculator.WithActiveDates(activeDates),
+                mockRequestRepository.Object,
+                Mock.Of<ITriggerRepository>(),
+                CreateUserRepository.WithUserExists(UserId, true))
+            {
+                ControllerContext = CreateControllerContext.WithUsername(UserId)
+            };
+
+            await controller.PatchAsync(patchRequest);
+
+            CheckSavedRequests(mockRequestRepository, new List<Request>());
+        }
+
+        [Fact]
+        public static async Task Updates_data_for_given_user_when_specified()
+        {
+            var activeDates = new[] { 2.February(2021) };
+
+            var mockRequestRepository =
+                CreateRequestRepository.MockWithRequests(UserId, activeDates, new List<Request>());
+
+            mockRequestRepository
+                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
+                .Returns(Task.CompletedTask);
+
+            var patchRequest = new RequestsPatchRequest(new[]
+            {
+                new RequestPatchRequestDailyData(2.February(2021), true),
+                new RequestPatchRequestDailyData(3.February(2021), false),
+            });
+
+            var controller = new RequestsController(
+                CreateDateCalculator.WithActiveDates(activeDates),
+                mockRequestRepository.Object,
+                Mock.Of<ITriggerRepository>(),
+                CreateUserRepository.WithUserExists(UserId, true));
+
+            await controller.PatchAsync(UserId, patchRequest);
+
+            var expectedSavedRequests = new[] { new Request(UserId, 2.February(2021), RequestStatus.Requested) };
+
+            CheckSavedRequests(mockRequestRepository, expectedSavedRequests);
+        }
+
+        [Fact]
+        public static async Task Returns_updated_requests_after_saving()
+        {
+            var activeDates = new[] { 2.February(2021), 3.February(2021) };
+
+            var returnedRequests = new[] { new Request(UserId, 2.February(2021), RequestStatus.Requested) };
+
+            var mockRequestRepository =
+                CreateRequestRepository.MockWithRequests(UserId, activeDates, returnedRequests);
+
+            mockRequestRepository
+                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
+                .Returns(Task.CompletedTask);
+
+            var patchRequest =
+                new RequestsPatchRequest(new[] { new RequestPatchRequestDailyData(2.February(2021), true) });
+
+            var controller = new RequestsController(
+                CreateDateCalculator.WithActiveDates(activeDates),
+                mockRequestRepository.Object,
+                Mock.Of<ITriggerRepository>(),
+                CreateUserRepository.WithUserExists(UserId, true))
+            {
+                ControllerContext = CreateControllerContext.WithUsername(UserId)
+            };
+
+            var result = await controller.PatchAsync(patchRequest);
+
+            var resultValue = GetResultValue<RequestsResponse>(result);
+
+            var day1data = GetDailyData(resultValue.Requests, 2.February(2021));
+            var day2data = GetDailyData(resultValue.Requests, 3.February(2021));
+
+            Assert.True(day1data.Requested);
+            Assert.False(day2data.Requested);
+        }
+
+        [Fact]
+        public static async Task Returns_404_response_when_given_user_to_update_does_not_exist()
+        {
+            var controller = new RequestsController(
+                Mock.Of<IDateCalculator>(),
+                Mock.Of<IRequestRepository>(),
+                Mock.Of<ITriggerRepository>(),
+                CreateUserRepository.WithUserExists(UserId, false));
+
+            var result = await controller.PatchAsync(
+                UserId,
+                new RequestsPatchRequest(Enumerable.Empty<RequestPatchRequestDailyData>()));
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        private static void CheckSavedRequests(
+            Mock<IRequestRepository> mockRequestRepository,
+            IReadOnlyCollection<Request> expectedSavedRequests)
+        {
+            mockRequestRepository.Verify(
+                r => r.SaveRequests(It.Is<IReadOnlyCollection<Request>>(
+                    actual => CheckRequests(expectedSavedRequests, actual.ToList()))),
+                Times.Once);
+        }
+
+        private static bool CheckRequests(
+            IReadOnlyCollection<Request> expected,
+            IReadOnlyCollection<Request> actual) =>
+            actual.Count == expected.Count && expected.All(e => actual.Contains(e, new RequestsComparer()));
+
+        private class RequestsComparer : IEqualityComparer<Request>
+        {
+            public bool Equals(Request first, Request second) =>
+                first != null &&
+                second != null &&
+                first.UserId == second.UserId &&
+                first.Date == second.Date &&
+                first.Status == second.Status;
+
+            public int GetHashCode(Request request) => request.Date.GetHashCode();
         }
     }
 }

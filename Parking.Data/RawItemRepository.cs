@@ -51,6 +51,8 @@
 
         Task SaveEmail(string rawData);
 
+        Task SaveTrigger();
+
         Task SendNotification(string subject, string body);
     }
 
@@ -211,6 +213,9 @@
 
         public async Task SaveEmail(string rawData) =>
             await this.SaveBucketData(EmailBucketName, Guid.NewGuid().ToString(), rawData);
+
+        public async Task SaveTrigger() =>
+            await this.SaveBucketData(TriggerBucketName, Guid.NewGuid().ToString(), string.Empty);
 
         public async Task SendNotification(string subject, string body) =>
             await this.simpleNotificationService.PublishAsync(new PublishRequest(NotificationTopic, body, subject));
