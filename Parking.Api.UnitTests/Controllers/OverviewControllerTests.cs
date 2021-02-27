@@ -27,9 +27,9 @@ namespace Parking.Api.UnitTests.Controllers
 
             var result = await controller.GetAsync();
 
-            var response = GetResultValue<OverviewResponse>(result);
+            var resultValue = GetResultValue<OverviewResponse>(result);
 
-            var visibleDays = GetVisibleDays(response.Overview);
+            var visibleDays = GetVisibleDays(resultValue.Overview);
 
             Assert.Equal(activeDates, visibleDays.Select(d => d.LocalDate));
 
@@ -64,9 +64,9 @@ namespace Parking.Api.UnitTests.Controllers
 
             var result = await controller.GetAsync();
 
-            var response = GetResultValue<OverviewResponse>(result);
+            var resultValue = GetResultValue<OverviewResponse>(result);
 
-            var data = GetDailyData(response.Overview, 15.February(2021));
+            var data = GetDailyData(resultValue.Overview, 15.February(2021));
 
             Assert.Equal(new[] { "Hynda Lindback", "Cathie Phoenix" }, data.AllocatedUsers.Select(u => u.Name));
             Assert.Equal(new[] { "Marco Call", "Shannen Muddicliffe" }, data.InterruptedUsers.Select(u => u.Name));
@@ -84,9 +84,9 @@ namespace Parking.Api.UnitTests.Controllers
 
             var result = await controller.GetAsync();
 
-            var response = GetResultValue<OverviewResponse>(result);
+            var resultValue = GetResultValue<OverviewResponse>(result);
 
-            var data = GetDailyData(response.Overview, 15.February(2021));
+            var data = GetDailyData(resultValue.Overview, 15.February(2021));
 
             Assert.Empty(data.AllocatedUsers);
             Assert.Empty(data.InterruptedUsers);
@@ -106,9 +106,9 @@ namespace Parking.Api.UnitTests.Controllers
 
             var result = await controller.GetAsync();
 
-            var response = GetResultValue<OverviewResponse>(result);
+            var resultValue = GetResultValue<OverviewResponse>(result);
 
-            var data = GetDailyData(response.Overview, 15.February(2021));
+            var data = GetDailyData(resultValue.Overview, 15.February(2021));
 
             Assert.Empty(data.AllocatedUsers);
             Assert.Empty(data.InterruptedUsers);
@@ -143,10 +143,10 @@ namespace Parking.Api.UnitTests.Controllers
 
             var result = await controller.GetAsync();
 
-            var response = GetResultValue<OverviewResponse>(result);
+            var resultValue = GetResultValue<OverviewResponse>(result);
 
-            var day1Data = GetDailyData(response.Overview, 15.February(2021));
-            var day2Data = GetDailyData(response.Overview, 16.February(2021));
+            var day1Data = GetDailyData(resultValue.Overview, 15.February(2021));
+            var day2Data = GetDailyData(resultValue.Overview, 16.February(2021));
 
             Assert.False(day1Data.AllocatedUsers.Single().IsHighlighted);
             Assert.True(day1Data.InterruptedUsers.Single().IsHighlighted);

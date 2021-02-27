@@ -29,18 +29,18 @@ namespace Parking.Api.UnitTests.Controllers
 
             var result = await controller.GetAsync();
 
-            var response = GetResultValue<RegistrationNumbersResponse>(result);
+            var resultValue = GetResultValue<RegistrationNumbersResponse>(result);
 
-            Assert.NotNull(response.RegistrationNumbers);
+            Assert.NotNull(resultValue.RegistrationNumbers);
 
-            var actualRegistrationNumbers = response.RegistrationNumbers.ToArray();
+            var actualRegistrationNumbers = resultValue.RegistrationNumbers.ToArray();
 
             Assert.Equal(2, actualRegistrationNumbers.Length);
 
             Assert.All(actualRegistrationNumbers, r => Assert.Equal("Mariam Brayn", r.Name));
 
-            CheckData(actualRegistrationNumbers[0], "A12XYZ", "Mariam Brayn");
-            CheckData(actualRegistrationNumbers[1], "Z999ABC", "Mariam Brayn");
+            CheckResult(actualRegistrationNumbers[0], "A12XYZ", "Mariam Brayn");
+            CheckResult(actualRegistrationNumbers[1], "Z999ABC", "Mariam Brayn");
         }
 
         [Fact]
@@ -64,16 +64,16 @@ namespace Parking.Api.UnitTests.Controllers
 
             var result = await controller.GetAsync();
 
-            var response = GetResultValue<RegistrationNumbersResponse>(result);
+            var resultValue = GetResultValue<RegistrationNumbersResponse>(result);
 
-            Assert.NotNull(response.RegistrationNumbers);
+            Assert.NotNull(resultValue.RegistrationNumbers);
 
-            var actualRegistrationNumbers = response.RegistrationNumbers.ToArray();
+            var actualRegistrationNumbers = resultValue.RegistrationNumbers.ToArray();
 
             Assert.Equal(2, actualRegistrationNumbers.Length);
 
-            CheckData(actualRegistrationNumbers[0], "A12XYZ", "Mariam Brayn");
-            CheckData(actualRegistrationNumbers[1], "Z999ABC", "Meris Wigsell");
+            CheckResult(actualRegistrationNumbers[0], "A12XYZ", "Mariam Brayn");
+            CheckResult(actualRegistrationNumbers[1], "Z999ABC", "Meris Wigsell");
         }
 
         [Fact]
@@ -99,21 +99,21 @@ namespace Parking.Api.UnitTests.Controllers
 
             var result = await controller.GetAsync();
 
-            var response = GetResultValue<RegistrationNumbersResponse>(result);
+            var resultValue = GetResultValue<RegistrationNumbersResponse>(result);
 
-            Assert.NotNull(response.RegistrationNumbers);
+            Assert.NotNull(resultValue.RegistrationNumbers);
 
-            var actualRegistrationNumbers = response.RegistrationNumbers.ToArray();
+            var actualRegistrationNumbers = resultValue.RegistrationNumbers.ToArray();
 
             Assert.Equal(4, actualRegistrationNumbers.Length);
 
-            CheckData(actualRegistrationNumbers[0], "AAA", "Meris Wigsell"); 
-            CheckData(actualRegistrationNumbers[1], "BBB", "Mariam Brayn");
-            CheckData(actualRegistrationNumbers[2], "CCC", "Mariam Brayn");
-            CheckData(actualRegistrationNumbers[3], "DDD", "Meris Wigsell");
+            CheckResult(actualRegistrationNumbers[0], "AAA", "Meris Wigsell"); 
+            CheckResult(actualRegistrationNumbers[1], "BBB", "Mariam Brayn");
+            CheckResult(actualRegistrationNumbers[2], "CCC", "Mariam Brayn");
+            CheckResult(actualRegistrationNumbers[3], "DDD", "Meris Wigsell");
         }
 
-        private static void CheckData(
+        private static void CheckResult(
             RegistrationNumbersData actual,
             string expectedRegistrationNumber,
             string expectedName)

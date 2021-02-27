@@ -30,11 +30,11 @@ namespace Parking.Api.UnitTests.Controllers
 
             var result = await controller.GetAsync();
 
-            var response = GetResultValue<ReservationsResponse>(result);
+            var resultValue = GetResultValue<ReservationsResponse>(result);
 
-            Assert.NotNull(response.Reservations);
+            Assert.NotNull(resultValue.Reservations);
 
-            var visibleDays = GetVisibleDays(response.Reservations);
+            var visibleDays = GetVisibleDays(resultValue.Reservations);
 
             Assert.Equal(activeDates, visibleDays.Select(d => d.LocalDate));
 
@@ -63,9 +63,9 @@ namespace Parking.Api.UnitTests.Controllers
 
             var result = await controller.GetAsync();
 
-            var response = GetResultValue<ReservationsResponse>(result);
+            var resultValue = GetResultValue<ReservationsResponse>(result);
 
-            var data = GetDailyData(response.Reservations, 15.February(2021));
+            var data = GetDailyData(resultValue.Reservations, 15.February(2021));
 
             Assert.Equal(new[] {"User1", "User2", "User3"}, data.UserIds);
         }
@@ -85,9 +85,9 @@ namespace Parking.Api.UnitTests.Controllers
 
             var result = await controller.GetAsync();
 
-            var response = GetResultValue<ReservationsResponse>(result);
+            var resultValue = GetResultValue<ReservationsResponse>(result);
 
-            Assert.Equal(2, response.ShortLeadTimeSpaces);
+            Assert.Equal(2, resultValue.ShortLeadTimeSpaces);
         }
 
         [Fact]
@@ -110,11 +110,11 @@ namespace Parking.Api.UnitTests.Controllers
 
             var result = await controller.GetAsync();
 
-            var response = GetResultValue<ReservationsResponse>(result);
+            var resultValue = GetResultValue<ReservationsResponse>(result);
 
-            Assert.NotNull(response.Users);
+            Assert.NotNull(resultValue.Users);
 
-            var actualUsers = response.Users.ToArray();
+            var actualUsers = resultValue.Users.ToArray();
 
             Assert.Equal(3, actualUsers.Length);
 
@@ -141,9 +141,9 @@ namespace Parking.Api.UnitTests.Controllers
 
             var result = await controller.GetAsync();
 
-            var response = GetResultValue<ReservationsResponse>(result);
+            var resultValue = GetResultValue<ReservationsResponse>(result);
 
-            var data = GetDailyData(response.Reservations, 15.February(2021));
+            var data = GetDailyData(resultValue.Reservations, 15.February(2021));
 
             Assert.NotNull(data.UserIds);
 

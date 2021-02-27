@@ -1,8 +1,8 @@
-﻿namespace Parking.Api.Json.Users
+﻿namespace Parking.Api.Json.UsersList
 {
-    public class UsersUser
+    public class UsersListUser
     {
-        public UsersUser(string userId, string name)
+        public UsersListUser(string userId, string name)
         {
             this.UserId = userId;
             this.Name = name;

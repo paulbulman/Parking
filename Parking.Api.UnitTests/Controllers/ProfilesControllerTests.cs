@@ -23,12 +23,12 @@
 
             var result = await controller.GetAsync();
 
-            var response = GetResultValue<ProfileResponse>(result);
+            var resultValue = GetResultValue<ProfileResponse>(result);
 
-            Assert.NotNull(response.Profile);
+            Assert.NotNull(resultValue.Profile);
 
-            Assert.Equal("AB123CDE", response.Profile.RegistrationNumber);
-            Assert.Equal("A999XYZ", response.Profile.AlternativeRegistrationNumber);
+            Assert.Equal("AB123CDE", resultValue.Profile.RegistrationNumber);
+            Assert.Equal("A999XYZ", resultValue.Profile.AlternativeRegistrationNumber);
         }
     }
 }

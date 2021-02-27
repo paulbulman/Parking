@@ -40,6 +40,9 @@ namespace Parking.Api
                 options.AddPolicy(
                     "IsTeamLeader",
                     policy => policy.RequireClaim("cognito:groups", Constants.TeamLeaderGroupName));
+                options.AddPolicy(
+                    "IsUserAdmin",
+                    policy => policy.RequireClaim("cognito:groups", Constants.UserAdminGroupName));
             });
 
             services.AddSingleton<IClock>(SystemClock.Instance);

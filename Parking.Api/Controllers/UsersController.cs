@@ -1,13 +1,14 @@
 ﻿namespace Parking.Api.Controllers
 {
-    using Microsoft.AspNetCore.Mvc;
     using System.Linq;
     using System.Threading.Tasks;
     using Business.Data;
     using Json.Users;
     using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using Model;
 
-    [Authorize(Policy = "IsTeamLeader")]
+    [Authorize(Policy = "IsUserAdmin")]
     [Route("[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
@@ -21,13 +22,37 @@
         {
             var users = await this.userRepository.GetUsers();
 
-            var userUsers = users
-                .OrderBy(u => u.LastName)
-                .Select(u => new UsersUser(u.UserId, u.DisplayName()));
+            var usersData = users.OrderForDisplay().Select(CreateUsersData);
 
-            var response = new UsersResponse(userUsers);
+            var response = new MultipleUsersResponse(usersData);
 
             return this.Ok(response);
         }
+
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetAsync(string userId)
+        {
+            var user = await this.userRepository.GetUser(userId);
+
+            if (user == null)
+            {
+                return this.NotFound();
+            }
+
+            var usersData = CreateUsersData(user);
+
+            var response = new SingleUserResponse(usersData);
+
+            return this.Ok(response);
+        }
+
+        private static UsersData CreateUsersData(User user) =>
+            new UsersData(
+                userId: user.UserId,
+                alternativeRegistrationNumber: user.AlternativeRegistrationNumber,
+                commuteDistance: user.CommuteDistance,
+                firstName: user.FirstName,
+                lastName: user.LastName,
+                registrationNumber: user.RegistrationNumber);
     }
 }

@@ -30,9 +30,9 @@
 
             var result = await controller.GetAsync();
 
-            var response = GetResultValue<RequestsResponse>(result);
+            var resultValue = GetResultValue<RequestsResponse>(result);
 
-            var visibleDays = GetVisibleDays(response.Requests);
+            var visibleDays = GetVisibleDays(resultValue.Requests);
 
             Assert.Equal(activeDates, visibleDays.Select(d => d.LocalDate));
 
@@ -57,9 +57,9 @@
 
             var result = await controller.GetAsync();
 
-            var response = GetResultValue<RequestsResponse>(result);
+            var resultValue = GetResultValue<RequestsResponse>(result);
 
-            var data = GetDailyData(response.Requests, 2.February(2021));
+            var data = GetDailyData(resultValue.Requests, 2.February(2021));
 
             Assert.True(data.Requested);
         }
@@ -78,9 +78,9 @@
 
             var result = await controller.GetAsync();
 
-            var response = GetResultValue<RequestsResponse>(result);
+            var resultValue = GetResultValue<RequestsResponse>(result);
 
-            var data = GetDailyData(response.Requests, 2.February(2021));
+            var data = GetDailyData(resultValue.Requests, 2.February(2021));
 
             Assert.False(data.Requested);
         }
@@ -101,9 +101,9 @@
 
             var result = await controller.GetAsync();
 
-            var response = GetResultValue<RequestsResponse>(result);
+            var resultValue = GetResultValue<RequestsResponse>(result);
 
-            var data = GetDailyData(response.Requests, 2.February(2021));
+            var data = GetDailyData(resultValue.Requests, 2.February(2021));
 
             Assert.False(data.Requested);
         }
