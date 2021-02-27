@@ -30,6 +30,7 @@ namespace Parking.Api.Controllers
             this.userRepository = userRepository;
         }
 
+        [HttpGet]
         public async Task<IActionResult> GetAsync()
         {
             var activeDates = this.dateCalculator.GetActiveDates();

@@ -5,6 +5,7 @@ namespace Parking.Data.UnitTests
     using System.Linq;
     using Model;
     using Moq;
+    using TestHelpers;
     using Xunit;
 
     public static class UserRepositoryTests
@@ -105,6 +106,39 @@ namespace Parking.Data.UnitTests
 
             CheckUser(result, "Id1", null, null, "1@abc.com", "Shalom", "Georgiades", null);
             CheckUser(result, "Id3", null, null, "3@xyz.co.uk", "Kris", "Whibley", null);
+        }
+
+        [Fact]
+        public static async void Save_user_converts_user_to_raw_item()
+        {
+            var user = CreateUser.With(
+                userId: "User1",
+                alternativeRegistrationNumber: "A999XYZ",
+                commuteDistance: 12.3m,
+                emailAddress: "john.doe@example.com",
+                firstName: "John",
+                lastName: "Doe",
+                registrationNumber: "AB12CDE");
+
+            var mockRawItemRepository = new Mock<IRawItemRepository>();
+
+            var userRepository = new UserRepository(mockRawItemRepository.Object);
+
+            await userRepository.SaveUser(user);
+
+            mockRawItemRepository.Verify(
+                r => r.SaveItem(It.Is<RawItem>(actual =>
+                    actual.PrimaryKey == "USER#User1" &&
+                    actual.SortKey == "PROFILE" &&
+                    actual.AlternativeRegistrationNumber == "A999XYZ" &&
+                    actual.CommuteDistance == 12.3m &&
+                    actual.EmailAddress == "john.doe@example.com" &&
+                    actual.FirstName == "John" &&
+                    actual.LastName == "Doe" &&
+                    actual.RegistrationNumber == "AB12CDE")),
+                Times.Once);
+
+            mockRawItemRepository.VerifyNoOtherCalls();
         }
 
         private static void CheckUser(

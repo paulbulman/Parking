@@ -43,6 +43,8 @@
 
         Task<IReadOnlyCollection<string>> GetUserIdsInGroup(string groupName);
 
+        Task SaveItem(RawItem rawItem);
+
         Task SaveItems(IEnumerable<RawItem> rawItems);
 
         Task SaveSchedules(string rawData);
@@ -98,17 +100,17 @@
         {
             foreach (var key in keys)
             {
-                await s3Client.DeleteObjectAsync(TriggerBucketName, key);
+                await this.s3Client.DeleteObjectAsync(TriggerBucketName, key);
             }
         }
 
-        public async Task<string> GetConfiguration() => await GetBucketData(DataBucketName, "configuration.json");
+        public async Task<string> GetConfiguration() => await this.GetBucketData(DataBucketName, "configuration.json");
 
         public async Task<IReadOnlyCollection<RawItem>> GetRequests(YearMonth yearMonth)
         {
             var hashKeyValue = $"REQUESTS#{YearMonthPattern.Iso.Format(yearMonth)}";
 
-            return await QuerySecondaryIndex(hashKeyValue);
+            return await this.QuerySecondaryIndex(hashKeyValue);
         }
 
         public async Task<IReadOnlyCollection<RawItem>> GetRequests(string userId, YearMonth yearMonth)
@@ -116,7 +118,7 @@
             var hashKeyValue = $"USER#{userId}";
             var conditionValue = $"REQUESTS#{YearMonthPattern.Iso.Format(yearMonth)}";
 
-            return await QueryPartitionKey(hashKeyValue, conditionValue);
+            return await this.QueryPartitionKey(hashKeyValue, conditionValue);
         }
 
         public async Task<IReadOnlyCollection<RawItem>> GetReservations(YearMonth yearMonth)
@@ -124,10 +126,10 @@
             const string HashKeyValue = "GLOBAL";
             var conditionValue = $"RESERVATIONS#{YearMonthPattern.Iso.Format(yearMonth)}";
 
-            return await QueryPartitionKey(HashKeyValue, conditionValue);
+            return await this.QueryPartitionKey(HashKeyValue, conditionValue);
         }
 
-        public async Task<string> GetSchedules() => await GetBucketData(DataBucketName, SchedulesObjectKey);
+        public async Task<string> GetSchedules() => await this.GetBucketData(DataBucketName, SchedulesObjectKey);
 
         public async Task<string> GetSmtpPassword()
         {
@@ -145,7 +147,7 @@
                 BucketName = TriggerBucketName
             };
 
-            var objects = await s3Client.ListObjectsV2Async(request);
+            var objects = await this.s3Client.ListObjectsV2Async(request);
 
             return objects.S3Objects.Select(s => s.Key).ToArray();
         }
@@ -155,7 +157,7 @@
             var hashKeyValue = $"USER#{userId}";
             const string ConditionValue = "PROFILE";
 
-            var result = await QueryPartitionKey(hashKeyValue, ConditionValue);
+            var result = await this.QueryPartitionKey(hashKeyValue, ConditionValue);
 
             return result.FirstOrDefault();
         }
@@ -164,7 +166,7 @@
         {
             const string HashKeyValue = "PROFILE";
 
-            return await QuerySecondaryIndex(HashKeyValue);
+            return await this.QuerySecondaryIndex(HashKeyValue);
         }
 
         public async Task<IReadOnlyCollection<string>> GetUserIdsInGroup(string groupName)
@@ -183,14 +185,20 @@
                 .ToArray();
         }
 
+        public async Task SaveItem(RawItem rawItem)
+        {
+            using var context = new DynamoDBContext(this.dynamoDbClient);
+
+            var config = new DynamoDBOperationConfig { OverrideTableName = TableName };
+
+            await context.SaveAsync(rawItem, config);
+        }
+
         public async Task SaveItems(IEnumerable<RawItem> rawItems)
         {
-            using var context = new DynamoDBContext(dynamoDbClient);
+            using var context = new DynamoDBContext(this.dynamoDbClient);
 
-            var config = new DynamoDBOperationConfig
-            {
-                OverrideTableName = TableName
-            };
+            var config = new DynamoDBOperationConfig { OverrideTableName = TableName };
 
             foreach (var rawItem in rawItems)
             {
@@ -199,10 +207,10 @@
         }
 
         public async Task SaveSchedules(string rawData) =>
-            await SaveBucketData(DataBucketName, SchedulesObjectKey, rawData);
+            await this.SaveBucketData(DataBucketName, SchedulesObjectKey, rawData);
 
         public async Task SaveEmail(string rawData) =>
-            await SaveBucketData(EmailBucketName, Guid.NewGuid().ToString(), rawData);
+            await this.SaveBucketData(EmailBucketName, Guid.NewGuid().ToString(), rawData);
 
         public async Task SendNotification(string subject, string body) =>
             await this.simpleNotificationService.PublishAsync(new PublishRequest(NotificationTopic, body, subject));
@@ -215,7 +223,7 @@
                 Key = objectKey
             };
 
-            using var response = await s3Client.GetObjectAsync(request);
+            using var response = await this.s3Client.GetObjectAsync(request);
 
             await using var responseStream = response.ResponseStream;
 
@@ -225,7 +233,7 @@
         }
 
         private async Task SaveBucketData(string bucketName, string objectKey, string rawData) =>
-            await s3Client.PutObjectAsync(new PutObjectRequest
+            await this.s3Client.PutObjectAsync(new PutObjectRequest
             {
                 BucketName = bucketName,
                 Key = objectKey,
@@ -234,12 +242,9 @@
 
         private async Task<IReadOnlyCollection<RawItem>> QueryPartitionKey(string hashKeyValue, string conditionValue)
         {
-            using var context = new DynamoDBContext(dynamoDbClient);
+            using var context = new DynamoDBContext(this.dynamoDbClient);
 
-            var config = new DynamoDBOperationConfig
-            {
-                OverrideTableName = TableName
-            };
+            var config = new DynamoDBOperationConfig { OverrideTableName = TableName };
 
             var query = context.QueryAsync<RawItem>(hashKeyValue, QueryOperator.Equal, new[] { conditionValue }, config);
 
@@ -250,12 +255,12 @@
         {
             const string SecondaryIndexName = "SK-PK-index";
 
-            using var context = new DynamoDBContext(dynamoDbClient);
+            using var context = new DynamoDBContext(this.dynamoDbClient);
 
             var config = new DynamoDBOperationConfig
             {
-                IndexName = SecondaryIndexName,
-                OverrideTableName = TableName
+                OverrideTableName = TableName,
+                IndexName = SecondaryIndexName
             };
 
             var query = context.QueryAsync<RawItem>(hashKeyValue, config);

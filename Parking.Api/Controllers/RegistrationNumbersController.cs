@@ -17,6 +17,7 @@
 
         public RegistrationNumbersController(IUserRepository userRepository) => this.userRepository = userRepository;
 
+        [HttpGet]
         public async Task<IActionResult> GetAsync()
         {
             var users = await this.userRepository.GetUsers();

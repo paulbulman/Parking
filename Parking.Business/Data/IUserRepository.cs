@@ -10,6 +10,8 @@
 
         Task<IReadOnlyCollection<User>> GetUsers();
 
+        Task SaveUser(User user);
+
         Task<IReadOnlyCollection<User>> GetTeamLeaderUsers();
     }
 }
