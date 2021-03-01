@@ -8,5 +8,7 @@
     public interface IReservationRepository
     {
         Task<IReadOnlyCollection<Reservation>> GetReservations(LocalDate firstDate, LocalDate lastDate);
+
+        Task SaveReservations(IReadOnlyCollection<Reservation> reservations);
     }
 }

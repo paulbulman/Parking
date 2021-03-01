@@ -40,6 +40,30 @@
         [HttpGet]
         public async Task<IActionResult> GetAsync()
         {
+            var response = await this.GetReservations();
+
+            return this.Ok(response);
+        }
+
+        [HttpPatch]
+        public async Task<IActionResult> PatchAsync([FromBody] ReservationsPatchRequest request)
+        {
+            var activeDates = this.dateCalculator.GetActiveDates();
+
+            var reservations = request.Reservations
+                .Where(r => activeDates.Contains(r.Date))
+                .SelectMany(CreateReservations)
+                .ToList();
+
+            await this.reservationRepository.SaveReservations(reservations);
+
+            var response = await this.GetReservations();
+
+            return this.Ok(response);
+        }
+
+        private async Task<ReservationsResponse> GetReservations()
+        {
             var configuration = await this.configurationRepository.GetConfiguration();
 
             var activeDates = this.dateCalculator.GetActiveDates();
@@ -58,9 +82,7 @@
                 .OrderBy(u => u.LastName)
                 .Select(u => new ReservationsUser(u.UserId, u.DisplayName()));
 
-            var response = new ReservationsResponse(calendar, configuration.ShortLeadTimeSpaces, reservationsUsers);
-
-            return this.Ok(response);
+            return new ReservationsResponse(calendar, configuration.ShortLeadTimeSpaces, reservationsUsers);
         }
 
         private static ReservationsData CreateDailyData(
@@ -71,5 +93,8 @@
 
             return new ReservationsData(filteredReservations.Select(r => r.UserId));
         }
+
+        private static IEnumerable<Reservation> CreateReservations(ReservationsPatchRequestDailyData dailyData) =>
+            dailyData.Reservations.UserIds.Select(userId => new Reservation(userId, dailyData.Date));
     }
 }

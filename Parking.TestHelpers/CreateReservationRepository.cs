@@ -11,15 +11,17 @@
     {
         public static IReservationRepository WithReservations(
             IReadOnlyCollection<LocalDate> activeDates,
-            IReadOnlyCollection<Reservation> reservations)
+            IReadOnlyCollection<Reservation> reservations) =>
+            MockWithReservations(activeDates, reservations).Object;
+
+        public static Mock<IReservationRepository> MockWithReservations(IReadOnlyCollection<LocalDate> activeDates, IReadOnlyCollection<Reservation> reservations)
         {
             var mockReservationRepository = new Mock<IReservationRepository>(MockBehavior.Strict);
 
             mockReservationRepository
                 .Setup(r => r.GetReservations(activeDates.First(), activeDates.Last()))
                 .ReturnsAsync(reservations);
-
-            return mockReservationRepository.Object;
+            return mockReservationRepository;
         }
     }
 }

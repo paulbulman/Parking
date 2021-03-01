@@ -1,12 +1,13 @@
 ﻿namespace Parking.Data.UnitTests
 {
+    using System.Threading.Tasks;
     using Moq;
     using Xunit;
 
     public static class ConfigurationRepositoryTests
     {
         [Fact]
-        public static async void Converts_raw_data_to_configuration()
+        public static async Task Converts_raw_data_to_configuration()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
 

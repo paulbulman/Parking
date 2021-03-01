@@ -3,6 +3,7 @@ namespace Parking.Data.UnitTests
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using Model;
     using Moq;
     using TestHelpers;
@@ -11,7 +12,7 @@ namespace Parking.Data.UnitTests
     public static class UserRepositoryTests
     {
         [Fact]
-        public static async void UserExists_returns_true_when_user_with_given_ID_exists()
+        public static async Task UserExists_returns_true_when_user_with_given_ID_exists()
         {
             const string UserId = "User1";
 
@@ -27,7 +28,7 @@ namespace Parking.Data.UnitTests
         }
 
         [Fact]
-        public static async void UserExists_returns_false_when_no_user_with_given_ID_exists()
+        public static async Task UserExists_returns_false_when_no_user_with_given_ID_exists()
         {
             const string UserId = "User1";
 
@@ -43,7 +44,7 @@ namespace Parking.Data.UnitTests
         }
 
         [Fact]
-        public static async void GetUser_returns_null_when_requested_user_does_not_exist()
+        public static async Task GetUser_returns_null_when_requested_user_does_not_exist()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
 
@@ -57,7 +58,7 @@ namespace Parking.Data.UnitTests
         }
 
         [Fact]
-        public static async void GetUser_converts_raw_item_to_user()
+        public static async Task GetUser_converts_raw_item_to_user()
         {
             const string UserId = "User1";
 
@@ -87,7 +88,7 @@ namespace Parking.Data.UnitTests
         }
 
         [Fact]
-        public static async void GetUsers_converts_raw_items_to_users()
+        public static async Task GetUsers_converts_raw_items_to_users()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
 
@@ -113,7 +114,7 @@ namespace Parking.Data.UnitTests
         }
 
         [Fact]
-        public static async void GetTeamLeaderUsers_filters_team_leader_users()
+        public static async Task GetTeamLeaderUsers_filters_team_leader_users()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
 
@@ -141,7 +142,7 @@ namespace Parking.Data.UnitTests
         }
 
         [Fact]
-        public static async void Save_user_converts_user_to_raw_item()
+        public static async Task Save_user_converts_user_to_raw_item()
         {
             var user = CreateUser.With(
                 userId: "User1",

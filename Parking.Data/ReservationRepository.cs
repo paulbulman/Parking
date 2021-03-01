@@ -1,6 +1,7 @@
 ﻿namespace Parking.Data
 {
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
     using Business;
@@ -20,7 +21,7 @@
 
             foreach (var yearMonth in new DateInterval(firstDate, lastDate).YearMonths())
             {
-                var queryResult = await rawItemRepository.GetReservations(yearMonth);
+                var queryResult = await this.rawItemRepository.GetReservations(yearMonth);
 
                 var wholeMonthReservations =
                     queryResult.SelectMany(r => CreateWholeMonthReservations(yearMonth, r.Reservations));
@@ -30,6 +31,31 @@
             }
 
             return matchingReservations;
+        }
+
+        public async Task SaveReservations(IReadOnlyCollection<Reservation> reservations)
+        {
+            if (!reservations.Any())
+            {
+                return;
+            }
+
+            var orderedReservations = reservations.OrderBy(r => r.Date).ToList();
+
+            var firstDate = orderedReservations.First().Date.With(DateAdjusters.StartOfMonth);
+            var lastDate = orderedReservations.Last().Date.With(DateAdjusters.EndOfMonth);
+
+            var existingReservations = await this.GetReservations(firstDate, lastDate);
+
+            var combinedReservations = existingReservations
+                .Where(existing => !IsOverwritten(existing, reservations))
+                .Concat(reservations);
+
+            var rawItems = combinedReservations
+                .GroupBy(r => r.Date.ToYearMonth())
+                .Select(CreateRawItem);
+
+            await this.rawItemRepository.SaveItems(rawItems);
         }
 
         private static IEnumerable<Reservation> CreateWholeMonthReservations(
@@ -47,5 +73,23 @@
 
         private static LocalDate CreateLocalDate(YearMonth yearMonth, string dayKey) =>
             new LocalDate(yearMonth.Year, yearMonth.Month, int.Parse(dayKey));
+
+        private static bool IsOverwritten(Reservation existingReservation, IEnumerable<Reservation> newReservations) =>
+            newReservations.Any(updated => updated.Date == existingReservation.Date);
+
+        private static RawItem CreateRawItem(IGrouping<YearMonth, Reservation> monthReservations) =>
+            new RawItem
+            {
+                PrimaryKey = "GLOBAL",
+                SortKey = $"RESERVATIONS#{monthReservations.Key.ToString("yyyy-MM", CultureInfo.InvariantCulture)}",
+                Reservations = CreateRawReservations(monthReservations)
+            };
+
+        private static Dictionary<string, List<string>> CreateRawReservations(IEnumerable<Reservation> monthReservations) =>
+            monthReservations
+                .GroupBy(r => r.Date)
+                .ToDictionary(
+                    g => g.Key.Day.ToString("D2", CultureInfo.InvariantCulture),
+                    g => g.Select(r => r.UserId).ToList());
     }
 }

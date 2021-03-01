@@ -6,7 +6,9 @@ namespace Parking.Api.UnitTests.Controllers
     using System.Threading.Tasks;
     using Api.Controllers;
     using Api.Json.Reservations;
+    using Business.Data;
     using Model;
+    using Moq;
     using NodaTime.Testing.Extensions;
     using TestHelpers;
     using Xunit;
@@ -42,7 +44,7 @@ namespace Parking.Api.UnitTests.Controllers
         }
 
         [Fact]
-        public static async Task Returns_saved_reservations()
+        public static async Task Returns_previously_saved_reservations()
         {
             var activeDates = new[] { 15.February(2021), 16.February(2021), 18.February(2021) };
 
@@ -67,7 +69,7 @@ namespace Parking.Api.UnitTests.Controllers
 
             var data = GetDailyData(resultValue.Reservations, 15.February(2021));
 
-            Assert.Equal(new[] {"User1", "User2", "User3"}, data.UserIds);
+            Assert.Equal(new[] { "User1", "User2", "User3" }, data.UserIds);
         }
 
         [Fact]
@@ -148,6 +150,146 @@ namespace Parking.Api.UnitTests.Controllers
             Assert.NotNull(data.UserIds);
 
             Assert.Empty(data.UserIds);
+        }
+
+        [Fact]
+        public static async Task Saves_reservations()
+        {
+            var activeDates = new[] { 2.February(2021), 3.February(2021) };
+
+            var mockReservationRepository =
+                CreateReservationRepository.MockWithReservations(activeDates, new List<Reservation>());
+
+            mockReservationRepository
+                .Setup(r => r.SaveReservations(It.IsAny<IReadOnlyCollection<Reservation>>()))
+                .Returns(Task.CompletedTask);
+
+            var patchRequest = new ReservationsPatchRequest(new[]
+            {
+                new ReservationsPatchRequestDailyData(2.February(2021),
+                    new ReservationsData(new List<string> {"User1", "User2"})),
+                new ReservationsPatchRequestDailyData(3.February(2021),
+                    new ReservationsData(new List<string> {"User2", "User3"})),
+            });
+
+            var controller = new ReservationsController(
+                CreateConfigurationRepository.WithDefaultConfiguration(),
+                CreateDateCalculator.WithActiveDates(activeDates),
+                mockReservationRepository.Object,
+                CreateUserRepository.WithUsers(new List<User>()));
+
+            await controller.PatchAsync(patchRequest);
+
+            var expectedSavedReservations = new[]
+            {
+                new Reservation("User1", 2.February(2021)),
+                new Reservation("User2", 2.February(2021)),
+                new Reservation("User2", 3.February(2021)),
+                new Reservation("User3", 3.February(2021)),
+            };
+
+            CheckSavedReservations(mockReservationRepository, expectedSavedReservations);
+        }
+
+        [Fact]
+        public static async Task Does_not_save_reservations_outside_active_date_range()
+        {
+            var activeDates = new[] { 2.February(2021), 3.February(2021) };
+
+            var mockReservationRepository =
+                CreateReservationRepository.MockWithReservations(activeDates, new List<Reservation>());
+
+            mockReservationRepository
+                .Setup(r => r.SaveReservations(It.IsAny<IReadOnlyCollection<Reservation>>()))
+                .Returns(Task.CompletedTask);
+
+            var patchRequest = new ReservationsPatchRequest(new[]
+            {
+                new ReservationsPatchRequestDailyData(1.February(2021),
+                    new ReservationsData(new List<string> {"User1", "User2"})),
+                new ReservationsPatchRequestDailyData(4.February(2021),
+                    new ReservationsData(new List<string> {"User1", "User2"})),
+            });
+
+            var controller = new ReservationsController(
+                CreateConfigurationRepository.WithDefaultConfiguration(),
+                CreateDateCalculator.WithActiveDates(activeDates),
+                mockReservationRepository.Object,
+                CreateUserRepository.WithUsers(new List<User>()));
+
+            await controller.PatchAsync(patchRequest);
+
+            CheckSavedReservations(mockReservationRepository, new List<Reservation>());
+        }
+
+        [Fact]
+        public static async Task Returns_updated_reservations_after_saving()
+        {
+            var activeDates = new[] { 2.February(2021), 3.February(2021) };
+
+            var returnedReservations = new[]
+            {
+                new Reservation("User1", 2.February(2021)),
+                new Reservation("User2", 2.February(2021)),
+                new Reservation("User2", 3.February(2021)),
+                new Reservation("User3", 3.February(2021)),
+            };
+
+            var mockReservationRepository =
+                CreateReservationRepository.MockWithReservations(activeDates, returnedReservations);
+
+            mockReservationRepository
+                .Setup(r => r.SaveReservations(It.IsAny<IReadOnlyCollection<Reservation>>()))
+                .Returns(Task.CompletedTask);
+
+            var patchRequest = new ReservationsPatchRequest(new[]
+            {
+                new ReservationsPatchRequestDailyData(
+                    2.February(2021),
+                    new ReservationsData(new[] {"User1", "User2"}))
+            });
+
+            var controller = new ReservationsController(
+                CreateConfigurationRepository.WithDefaultConfiguration(),
+                CreateDateCalculator.WithActiveDates(activeDates),
+                mockReservationRepository.Object,
+                CreateUserRepository.WithUsers(new List<User>()));
+
+            var result = await controller.PatchAsync(patchRequest);
+
+            var resultValue = GetResultValue<ReservationsResponse>(result);
+
+            var day1Data = GetDailyData(resultValue.Reservations, 2.February(2021));
+            var day2Data = GetDailyData(resultValue.Reservations, 3.February(2021));
+
+            Assert.Equal(new[] { "User1", "User2" }, day1Data.UserIds);
+            Assert.Equal(new[] { "User2", "User3" }, day2Data.UserIds);
+        }
+
+        private static void CheckSavedReservations(
+            Mock<IReservationRepository> mockReservationRepository,
+            IReadOnlyCollection<Reservation> expectedSavedReservations)
+        {
+            mockReservationRepository.Verify(
+                r => r.SaveReservations(It.Is<IReadOnlyCollection<Reservation>>(
+                    actual => CheckReservations(expectedSavedReservations, actual.ToList()))),
+                Times.Once);
+        }
+
+        private static bool CheckReservations(
+            IReadOnlyCollection<Reservation> expected,
+            IReadOnlyCollection<Reservation> actual) =>
+            actual.Count == expected.Count && expected.All(e => actual.Contains(e, new ReservationsComparer()));
+
+        private class ReservationsComparer : IEqualityComparer<Reservation>
+        {
+            public bool Equals(Reservation first, Reservation second) =>
+                first != null &&
+                second != null &&
+                first.UserId == second.UserId &&
+                first.Date == second.Date;
+
+            public int GetHashCode(Reservation reservation) => reservation.Date.GetHashCode();
         }
     }
 }

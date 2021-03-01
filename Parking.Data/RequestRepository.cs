@@ -121,9 +121,9 @@
         private static RequestStatus CreateRequestStatus(string rawRequestStatus) =>
             rawRequestStatus switch
             {
-                "REQUESTED" => RequestStatus.Requested,
-                "ALLOCATED" => RequestStatus.Allocated,
-                "CANCELLED" => RequestStatus.Cancelled,
+                "R" => RequestStatus.Requested,
+                "A" => RequestStatus.Allocated,
+                "C" => RequestStatus.Cancelled,
                 _ => throw new ArgumentOutOfRangeException(nameof(rawRequestStatus))
             };
 
@@ -144,9 +144,9 @@
         private static string CreateRawRequestStatus(Request request) =>
             request.Status switch
             {
-                RequestStatus.Requested => "REQUESTED",
-                RequestStatus.Allocated => "ALLOCATED",
-                RequestStatus.Cancelled => "CANCELLED",
+                RequestStatus.Requested => "R",
+                RequestStatus.Allocated => "A",
+                RequestStatus.Cancelled => "C",
                 _ => throw new ArgumentOutOfRangeException(nameof(request))
             };
     }

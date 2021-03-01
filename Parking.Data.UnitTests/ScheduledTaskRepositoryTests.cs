@@ -11,7 +11,7 @@
     public static class ScheduledTaskRepositoryTests
     {
         [Fact]
-        public static async void Converts_raw_data_to_scheduled_tasks()
+        public static async Task Converts_raw_data_to_scheduled_tasks()
         {
             var rawData =
                 "{" +
@@ -54,7 +54,7 @@
         }
 
         [Fact]
-        public static async void Saves_combined_updated_and_existing_scheduled_tasks()
+        public static async Task Saves_combined_updated_and_existing_scheduled_tasks()
         {
             var initialRawData =
                 "{" +

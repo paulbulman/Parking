@@ -13,7 +13,7 @@ namespace Parking.Data.UnitTests
     public static class RequestRepositoryTests
     {
         [Fact]
-        public static async void GetRequests_returns_empty_collection_when_no_matching_raw_item_exists()
+        public static async Task GetRequests_returns_empty_collection_when_no_matching_raw_item_exists()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
 
@@ -29,7 +29,7 @@ namespace Parking.Data.UnitTests
         }
 
         [Fact]
-        public static async void GetRequests_converts_raw_items_for_multiple_users_to_requests()
+        public static async Task GetRequests_converts_raw_items_for_multiple_users_to_requests()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
 
@@ -39,19 +39,19 @@ namespace Parking.Data.UnitTests
                 CreateRawItem(
                     "User1",
                     "2020-08",
-                    KeyValuePair.Create("02", "REQUESTED"),
-                    KeyValuePair.Create("13", "ALLOCATED")),
+                    KeyValuePair.Create("02", "R"),
+                    KeyValuePair.Create("13", "A")),
                 CreateRawItem(
                     "User2",
                     "2020-08",
-                    KeyValuePair.Create("02", "CANCELLED")));
+                    KeyValuePair.Create("02", "C")));
             SetupMockRepository(
                 mockRawItemRepository,
                 new YearMonth(2020, 9),
                 CreateRawItem(
                     "User1",
                     "2020-09",
-                    KeyValuePair.Create("30", "ALLOCATED")));
+                    KeyValuePair.Create("30", "A")));
 
             var requestRepository = new RequestRepository(mockRawItemRepository.Object);
 
@@ -68,7 +68,7 @@ namespace Parking.Data.UnitTests
         }
 
         [Fact]
-        public static async void GetRequests_converts_raw_items_for_single_user_to_requests()
+        public static async Task GetRequests_converts_raw_items_for_single_user_to_requests()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
 
@@ -79,8 +79,8 @@ namespace Parking.Data.UnitTests
                 CreateRawItem(
                     "User1",
                     "2020-08",
-                    KeyValuePair.Create("02", "REQUESTED"),
-                    KeyValuePair.Create("13", "ALLOCATED")));
+                    KeyValuePair.Create("02", "R"),
+                    KeyValuePair.Create("13", "A")));
             SetupMockRepository(
                 mockRawItemRepository,
                 "User1",
@@ -88,7 +88,7 @@ namespace Parking.Data.UnitTests
                 CreateRawItem(
                     "User1",
                     "2020-09",
-                    KeyValuePair.Create("30", "CANCELLED")));
+                    KeyValuePair.Create("30", "C")));
 
             var requestRepository = new RequestRepository(mockRawItemRepository.Object);
 
@@ -104,15 +104,15 @@ namespace Parking.Data.UnitTests
         }
 
         [Fact]
-        public static async void GetRequests_filters_requests_outside_specified_date_range()
+        public static async Task GetRequests_filters_requests_outside_specified_date_range()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
 
             SetupMockRepository(
                 mockRawItemRepository,
                 new YearMonth(2020, 8),
-                CreateRawItem("User1", "2020-08", KeyValuePair.Create("02", "REQUESTED")),
-                CreateRawItem("User2", "2020-08", KeyValuePair.Create("02", "CANCELLED")));
+                CreateRawItem("User1", "2020-08", KeyValuePair.Create("02", "R")),
+                CreateRawItem("User2", "2020-08", KeyValuePair.Create("02", "C")));
 
             var requestRepository = new RequestRepository(mockRawItemRepository.Object);
 
@@ -123,7 +123,7 @@ namespace Parking.Data.UnitTests
         }
 
         [Fact]
-        public static async void SaveRequests_handles_empty_list()
+        public static async Task SaveRequests_handles_empty_list()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>();
 
@@ -135,7 +135,7 @@ namespace Parking.Data.UnitTests
         }
 
         [Fact]
-        public static async void SaveRequests_converts_requests_to_raw_items()
+        public static async Task SaveRequests_converts_requests_to_raw_items()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
             mockRawItemRepository
@@ -160,16 +160,16 @@ namespace Parking.Data.UnitTests
                 CreateRawItem(
                     "User1",
                     "2020-09",
-                    KeyValuePair.Create("01", "ALLOCATED"),
-                    KeyValuePair.Create("02", "CANCELLED")),
+                    KeyValuePair.Create("01", "A"),
+                    KeyValuePair.Create("02", "C")),
                 CreateRawItem(
                     "User1",
                     "2020-10",
-                    KeyValuePair.Create("03", "REQUESTED")),
+                    KeyValuePair.Create("03", "R")),
                 CreateRawItem(
                     "User2",
                     "2020-10",
-                    KeyValuePair.Create("04", "REQUESTED")),
+                    KeyValuePair.Create("04", "R")),
             };
 
             mockRawItemRepository.Verify(r => r.SaveItems(
@@ -178,7 +178,7 @@ namespace Parking.Data.UnitTests
         }
         
         [Fact]
-        public static async void SaveRequests_combines_new_and_existing_requests()
+        public static async Task SaveRequests_combines_new_and_existing_requests()
         {
             var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
             mockRawItemRepository
@@ -188,12 +188,12 @@ namespace Parking.Data.UnitTests
                     CreateRawItem(
                         "User1", 
                         "2020-09", 
-                        KeyValuePair.Create("01", "ALLOCATED"),
-                        KeyValuePair.Create("02", "REQUESTED")),
+                        KeyValuePair.Create("01", "A"),
+                        KeyValuePair.Create("02", "R")),
                     CreateRawItem(
                         "User2",
                         "2020-09",
-                        KeyValuePair.Create("03", "ALLOCATED"))
+                        KeyValuePair.Create("03", "A"))
                 });
             mockRawItemRepository
                 .Setup(r => r.GetRequests(new YearMonth(2020, 10)))
@@ -202,7 +202,7 @@ namespace Parking.Data.UnitTests
                     CreateRawItem(
                         "User1",
                         "2020-10",
-                        KeyValuePair.Create("03", "REQUESTED"))
+                        KeyValuePair.Create("03", "R"))
                 });
             mockRawItemRepository
                 .Setup(r => r.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
@@ -223,22 +223,22 @@ namespace Parking.Data.UnitTests
                 CreateRawItem(
                     "User1",
                     "2020-09",
-                    KeyValuePair.Create("01", "ALLOCATED"),
-                    KeyValuePair.Create("02", "ALLOCATED"),
-                    KeyValuePair.Create("03", "REQUESTED")),
+                    KeyValuePair.Create("01", "A"),
+                    KeyValuePair.Create("02", "A"),
+                    KeyValuePair.Create("03", "R")),
                 CreateRawItem(
                     "User2",
                     "2020-09",
-                    KeyValuePair.Create("03", "ALLOCATED")),
+                    KeyValuePair.Create("03", "A")),
                 CreateRawItem(
                     "User1",
                     "2020-10",
-                    KeyValuePair.Create("03", "REQUESTED")),
+                    KeyValuePair.Create("03", "R")),
                 CreateRawItem(
                     "User2",
                     "2020-10",
-                    KeyValuePair.Create("03", "CANCELLED"),
-                    KeyValuePair.Create("04", "REQUESTED")),
+                    KeyValuePair.Create("03", "C"),
+                    KeyValuePair.Create("04", "R")),
                 
             };
 
