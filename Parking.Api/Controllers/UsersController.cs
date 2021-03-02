@@ -46,6 +46,26 @@
             return this.Ok(response);
         }
 
+        public async Task<IActionResult> PostAsync([FromBody] UserPostRequest request)
+        {
+            var newUser = new User(
+                string.Empty,
+                request.AlternativeRegistrationNumber,
+                request.CommuteDistance,
+                request.EmailAddress,
+                request.FirstName,
+                request.LastName,
+                request.RegistrationNumber);
+
+            var user = await this.userRepository.CreateUser(newUser);
+
+            var usersData = CreateUsersData(user);
+
+            var response = new SingleUserResponse(usersData);
+
+            return this.Ok(response);
+        }
+
         [HttpPatch("{userId}")]
         public async Task<IActionResult> PatchAsync(string userId, [FromBody] UserPatchRequest request)
         {

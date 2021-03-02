@@ -21,6 +21,8 @@
 
     public interface IRawItemRepository
     {
+        Task<string> CreateUser(string emailAddress, string firstName, string lastName);
+
         Task DeleteTriggerFiles(IEnumerable<string> keys);
 
         Task<string> GetConfiguration();
@@ -54,6 +56,8 @@
         Task SaveTrigger();
 
         Task SendNotification(string subject, string body);
+
+        Task UpdateUser(string userId, string firstName, string lastName);
     }
 
     public class RawItemRepository : IRawItemRepository
@@ -97,6 +101,24 @@
         private static string TableName => Environment.GetEnvironmentVariable("TABLE_NAME");
 
         private static string UserPoolId => Environment.GetEnvironmentVariable("USER_POOL_ID");
+
+        public async Task<string> CreateUser(string emailAddress, string firstName, string lastName)
+        {
+            var result = await this.cognitoIdentityProvider.AdminCreateUserAsync(new AdminCreateUserRequest
+            {
+                Username = emailAddress,
+                UserPoolId = UserPoolId,
+                UserAttributes = new List<AttributeType>
+                {
+                    new AttributeType {Name = "given_name", Value = firstName},
+                    new AttributeType {Name = "family_name", Value = lastName},
+                    new AttributeType {Name = "email", Value = emailAddress},
+                    new AttributeType {Name = "email_verified", Value = "true"},
+                }
+            });
+
+            return result.User.Username;
+        }
 
         public async Task DeleteTriggerFiles(IEnumerable<string> keys)
         {
@@ -219,6 +241,18 @@
 
         public async Task SendNotification(string subject, string body) =>
             await this.simpleNotificationService.PublishAsync(new PublishRequest(NotificationTopic, body, subject));
+
+        public async Task UpdateUser(string userId, string firstName, string lastName) =>
+            await this.cognitoIdentityProvider.AdminUpdateUserAttributesAsync(new AdminUpdateUserAttributesRequest
+            {
+                Username = userId,
+                UserPoolId = UserPoolId,
+                UserAttributes = new List<AttributeType>
+                {
+                    new AttributeType {Name = "given_name", Value = firstName},
+                    new AttributeType {Name = "family_name", Value = lastName},
+                }
+            });
 
         private async Task<string> GetBucketData(string bucketName, string objectKey)
         {

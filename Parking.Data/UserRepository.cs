@@ -13,6 +13,24 @@
 
         public UserRepository(IRawItemRepository rawItemRepository) => this.rawItemRepository = rawItemRepository;
 
+        public async Task<User> CreateUser(User user)
+        {
+            var userId = await this.rawItemRepository.CreateUser(user.EmailAddress, user.FirstName, user.LastName);
+
+            var newUser = new User(
+                userId,
+                user.AlternativeRegistrationNumber,
+                user.CommuteDistance,
+                user.EmailAddress,
+                user.FirstName,
+                user.LastName,
+                user.RegistrationNumber);
+                
+            await this.rawItemRepository.SaveItem(CreateRawItem(newUser));
+
+            return newUser;
+        }
+
         public async Task<bool> UserExists(string userId)
         {
             var queryResult = await this.rawItemRepository.GetUser(userId);
@@ -36,7 +54,12 @@
                 .ToArray();
         }
 
-        public async Task SaveUser(User user) => await this.rawItemRepository.SaveItem(CreateRawItem(user));
+        public async Task SaveUser(User user)
+        {
+            await this.rawItemRepository.UpdateUser(user.UserId, user.FirstName, user.LastName);
+
+            await this.rawItemRepository.SaveItem(CreateRawItem(user));
+        }
 
         public async Task<IReadOnlyCollection<User>> GetTeamLeaderUsers()
         {

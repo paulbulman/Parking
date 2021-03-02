@@ -97,6 +97,62 @@ namespace Parking.Api.UnitTests.Controllers
         }
 
         [Fact]
+        public static async Task Creates_new_user()
+        {
+            var mockUserRepository = new Mock<IUserRepository>();
+            mockUserRepository
+                .Setup(r => r.CreateUser(It.IsAny<User>()))
+                .ReturnsAsync(CreateUser.With(userId: "User1"));
+
+            var controller = new UsersController(mockUserRepository.Object);
+
+            var request = new UserPostRequest("Z999ABC", 12.3M, "john.doe@example.com", "John", "Doe", "AB12CDE");
+
+            await controller.PostAsync(request);
+
+            mockUserRepository.Verify(r => r.CreateUser(It.Is<User>(u =>
+                u.AlternativeRegistrationNumber == "Z999ABC" &&
+                u.CommuteDistance == 12.3m &&
+                u.EmailAddress == "john.doe@example.com" &&
+                u.FirstName == "John" &&
+                u.LastName == "Doe" &&
+                u.RegistrationNumber == "AB12CDE")));
+
+            mockUserRepository.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public static async Task Returns_newly_created_user()
+        {
+            var returnedUser = CreateUser.With(
+                userId: "User1",
+                alternativeRegistrationNumber: "__ALTERNATIVE_REG__",
+                commuteDistance: 99,
+                emailAddress: "__EMAIL_ADDRESS__",
+                firstName: "__FIRST_NAME__",
+                lastName: "__LAST_NAME__",
+                registrationNumber: "__REG__");
+
+            var mockUserRepository = new Mock<IUserRepository>();
+            mockUserRepository
+                .Setup(r => r.CreateUser(It.IsAny<User>()))
+                .ReturnsAsync(returnedUser);
+
+            var controller = new UsersController(mockUserRepository.Object);
+
+            var request = new UserPostRequest("Z999ABC", 12.3M, "john.doe@example.com", "John", "Doe", "AB12CDE");
+
+            var result = await controller.PostAsync(request);
+
+            var resultValue = GetResultValue<SingleUserResponse>(result);
+
+            Assert.NotNull(resultValue.User);
+
+            CheckResult(
+                resultValue.User, "User1", "__ALTERNATIVE_REG__", 99, "__FIRST_NAME__", "__LAST_NAME__", "__REG__");
+        }
+
+        [Fact]
         public static async Task Saves_combined_updated_editable_properties_and_existing_readonly_properties()
         {
             const string UserId = "User1";

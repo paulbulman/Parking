@@ -6,6 +6,8 @@
 
     public interface IUserRepository
     {
+        Task<User> CreateUser(User user);
+        
         Task<bool> UserExists(string userId);
 
         Task<User> GetUser(string userId);

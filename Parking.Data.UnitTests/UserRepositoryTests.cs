@@ -12,6 +12,86 @@ namespace Parking.Data.UnitTests
     public static class UserRepositoryTests
     {
         [Fact]
+        public static async Task Create_user_creates_new_identity_provider_user()
+        {
+            var mockRawItemRepository = new Mock<IRawItemRepository>();
+
+            var userRepository = new UserRepository(mockRawItemRepository.Object);
+
+            var user = CreateUser.With(
+                userId: string.Empty, 
+                emailAddress: "john.doe@example.com", 
+                firstName: "John", 
+                lastName: "Doe");
+            
+            await userRepository.CreateUser(user);
+
+            mockRawItemRepository.Verify(r => r.CreateUser("john.doe@example.com", "John", "Doe"), Times.Once);
+        }
+
+        [Fact]
+        public static async Task Create_user_creates_new_database_user()
+        {
+            var mockRawItemRepository = new Mock<IRawItemRepository>();
+            mockRawItemRepository
+                .Setup(r => r.CreateUser(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync("User1");
+
+            var userRepository = new UserRepository(mockRawItemRepository.Object);
+
+            var user = CreateUser.With(
+                userId: string.Empty,
+                alternativeRegistrationNumber: "A999XYZ",
+                commuteDistance: 1.23m,
+                emailAddress: "john.doe@example.com",
+                firstName: "John",
+                lastName: "Doe",
+                registrationNumber: "AB12CDE"
+            );
+
+            await userRepository.CreateUser(user);
+
+            mockRawItemRepository.Verify(
+                r => r.SaveItem(It.Is<RawItem>(actual =>
+                    actual.PrimaryKey == "USER#User1" &&
+                    actual.SortKey == "PROFILE" &&
+                    actual.AlternativeRegistrationNumber == "A999XYZ" &&
+                    actual.CommuteDistance == 1.23m &&
+                    actual.EmailAddress == "john.doe@example.com" &&
+                    actual.FirstName == "John" &&
+                    actual.LastName == "Doe" &&
+                    actual.RegistrationNumber == "AB12CDE")),
+                Times.Once);
+        }
+
+        [Fact]
+        public static async Task Create_user_returns_newly_created_user()
+        {
+            var mockRawItemRepository = new Mock<IRawItemRepository>();
+            mockRawItemRepository
+                .Setup(r => r.CreateUser(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync("User1");
+
+            var userRepository = new UserRepository(mockRawItemRepository.Object);
+
+            var user = CreateUser.With(
+                userId: string.Empty,
+                alternativeRegistrationNumber: "A999XYZ",
+                commuteDistance: 1.23m,
+                emailAddress: "john.doe@example.com",
+                firstName: "John",
+                lastName: "Doe",
+                registrationNumber: "AB12CDE"
+            );
+
+            var result = await userRepository.CreateUser(user);
+
+            Assert.NotNull(result);
+
+            CheckUser(new[] { result }, "User1", "A999XYZ", 1.23m, "john.doe@example.com", "John", "Doe", "AB12CDE");
+        }
+
+        [Fact]
         public static async Task UserExists_returns_true_when_user_with_given_ID_exists()
         {
             const string UserId = "User1";
@@ -142,7 +222,25 @@ namespace Parking.Data.UnitTests
         }
 
         [Fact]
-        public static async Task Save_user_converts_user_to_raw_item()
+        public static async Task Save_user_updates_user_in_identity_provider()
+        {
+            var user = CreateUser.With(userId: "User1", firstName: "John", lastName: "Doe");
+
+            var mockRawItemRepository = new Mock<IRawItemRepository>();
+
+            var userRepository = new UserRepository(mockRawItemRepository.Object);
+
+            await userRepository.SaveUser(user);
+
+            mockRawItemRepository.Verify(r => r.UpdateUser("User1", "John", "Doe"), Times.Once);
+
+            mockRawItemRepository.Verify(r => r.SaveItem(It.IsAny<RawItem>()), Times.Once);
+
+            mockRawItemRepository.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public static async Task Save_user_updates_user_in_database()
         {
             var user = CreateUser.With(
                 userId: "User1",
@@ -169,6 +267,10 @@ namespace Parking.Data.UnitTests
                     actual.FirstName == "John" &&
                     actual.LastName == "Doe" &&
                     actual.RegistrationNumber == "AB12CDE")),
+                Times.Once);
+
+            mockRawItemRepository.Verify(
+                r => r.UpdateUser(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()),
                 Times.Once);
 
             mockRawItemRepository.VerifyNoOtherCalls();
