@@ -51,7 +51,7 @@
             var activeDates = this.dateCalculator.GetActiveDates();
 
             var reservations = request.Reservations
-                .Where(r => activeDates.Contains(r.Date))
+                .Where(r => activeDates.Contains(r.LocalDate))
                 .SelectMany(CreateReservations)
                 .ToList();
 
@@ -95,6 +95,6 @@
         }
 
         private static IEnumerable<Reservation> CreateReservations(ReservationsPatchRequestDailyData dailyData) =>
-            dailyData.Reservations.UserIds.Select(userId => new Reservation(userId, dailyData.Date));
+            dailyData.UserIds.Select(userId => new Reservation(userId, dailyData.LocalDate));
     }
 }

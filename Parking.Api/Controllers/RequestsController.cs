@@ -119,8 +119,8 @@
             var activeDates = this.dateCalculator.GetActiveDates();
 
             var requestsToSave = request.Requests
-                .Where(r => activeDates.Contains(r.Date))
-                .GroupBy(r => r.Date)
+                .Where(r => activeDates.Contains(r.LocalDate))
+                .GroupBy(r => r.LocalDate)
                 .Where(g => !ValuesCancelOut(g))
                 .Select(AuthoritativeValue)
                 .Select(v => CreateRequest(userId, v))
@@ -132,16 +132,16 @@
         }
 
         private static bool ValuesCancelOut(
-            IGrouping<LocalDate, RequestPatchRequestDailyData> dailyRequests) => dailyRequests.Count() % 2 == 0;
+            IGrouping<LocalDate, RequestsPatchRequestDailyData> dailyRequests) => dailyRequests.Count() % 2 == 0;
 
-        private static RequestPatchRequestDailyData AuthoritativeValue(
-            IGrouping<LocalDate, RequestPatchRequestDailyData> dailyRequests) => dailyRequests.Last();
+        private static RequestsPatchRequestDailyData AuthoritativeValue(
+            IGrouping<LocalDate, RequestsPatchRequestDailyData> dailyRequests) => dailyRequests.Last();
 
-        private static Request CreateRequest(string userId, RequestPatchRequestDailyData data)
+        private static Request CreateRequest(string userId, RequestsPatchRequestDailyData data)
         {
             var status = data.Requested ? RequestStatus.Requested : RequestStatus.Cancelled;
 
-            return new Request(userId, data.Date, status);
+            return new Request(userId, data.LocalDate, status);
         }
     }
 }

@@ -166,10 +166,8 @@ namespace Parking.Api.UnitTests.Controllers
 
             var patchRequest = new ReservationsPatchRequest(new[]
             {
-                new ReservationsPatchRequestDailyData(2.February(2021),
-                    new ReservationsData(new List<string> {"User1", "User2"})),
-                new ReservationsPatchRequestDailyData(3.February(2021),
-                    new ReservationsData(new List<string> {"User2", "User3"})),
+                new ReservationsPatchRequestDailyData(2.February(2021), new List<string> {"User1", "User2"}),
+                new ReservationsPatchRequestDailyData(3.February(2021), new List<string> {"User2", "User3"}),
             });
 
             var controller = new ReservationsController(
@@ -205,10 +203,8 @@ namespace Parking.Api.UnitTests.Controllers
 
             var patchRequest = new ReservationsPatchRequest(new[]
             {
-                new ReservationsPatchRequestDailyData(1.February(2021),
-                    new ReservationsData(new List<string> {"User1", "User2"})),
-                new ReservationsPatchRequestDailyData(4.February(2021),
-                    new ReservationsData(new List<string> {"User1", "User2"})),
+                new ReservationsPatchRequestDailyData(1.February(2021), new List<string> {"User1", "User2"}),
+                new ReservationsPatchRequestDailyData(4.February(2021), new List<string> {"User1", "User2"}),
             });
 
             var controller = new ReservationsController(
@@ -244,9 +240,7 @@ namespace Parking.Api.UnitTests.Controllers
 
             var patchRequest = new ReservationsPatchRequest(new[]
             {
-                new ReservationsPatchRequestDailyData(
-                    2.February(2021),
-                    new ReservationsData(new[] {"User1", "User2"}))
+                new ReservationsPatchRequestDailyData(2.February(2021), new[] {"User1", "User2"})
             });
 
             var controller = new ReservationsController(

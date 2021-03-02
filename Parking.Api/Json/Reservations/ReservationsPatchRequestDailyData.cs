@@ -1,17 +1,18 @@
 ﻿namespace Parking.Api.Json.Reservations
 {
+    using System.Collections.Generic;
     using NodaTime;
 
     public class ReservationsPatchRequestDailyData
     {
-        public ReservationsPatchRequestDailyData(LocalDate date, ReservationsData reservations)
+        public ReservationsPatchRequestDailyData(LocalDate localDate, IEnumerable<string> userIds)
         {
-            this.Date = date;
-            this.Reservations = reservations;
+            this.LocalDate = localDate;
+            this.UserIds = userIds;
         }
         
-        public LocalDate Date { get; }
-        
-        public ReservationsData Reservations { get; }
+        public LocalDate LocalDate { get; }
+
+        public IEnumerable<string> UserIds { get; }
     }
 }

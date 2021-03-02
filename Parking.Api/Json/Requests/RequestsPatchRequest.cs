@@ -4,8 +4,8 @@
 
     public class RequestsPatchRequest
     {
-        public RequestsPatchRequest(IEnumerable<RequestPatchRequestDailyData> requests) => this.Requests = requests;
+        public RequestsPatchRequest(IEnumerable<RequestsPatchRequestDailyData> requests) => this.Requests = requests;
 
-        public IEnumerable<RequestPatchRequestDailyData> Requests { get; }
+        public IEnumerable<RequestsPatchRequestDailyData> Requests { get; }
     }
 }

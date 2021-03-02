@@ -170,8 +170,8 @@
 
             var patchRequest = new RequestsPatchRequest(new[]
             {
-                new RequestPatchRequestDailyData(2.February(2021), true),
-                new RequestPatchRequestDailyData(3.February(2021), false),
+                new RequestsPatchRequestDailyData(2.February(2021), true),
+                new RequestsPatchRequestDailyData(3.February(2021), false),
             });
 
             var controller = new RequestsController(
@@ -208,7 +208,7 @@
 
             var mockTriggerRepository = new Mock<ITriggerRepository>();
             
-            var patchRequest = new RequestsPatchRequest(new List<RequestPatchRequestDailyData>());
+            var patchRequest = new RequestsPatchRequest(new List<RequestsPatchRequestDailyData>());
 
             var controller = new RequestsController(
                 CreateDateCalculator.WithActiveDates(activeDates),
@@ -238,12 +238,12 @@
 
             var patchRequest = new RequestsPatchRequest(new[]
             {
-                new RequestPatchRequestDailyData(2.February(2021), true),
-                new RequestPatchRequestDailyData(2.February(2021), false),
-                new RequestPatchRequestDailyData(2.February(2021), true),
-                new RequestPatchRequestDailyData(3.February(2021), false),
-                new RequestPatchRequestDailyData(3.February(2021), true),
-                new RequestPatchRequestDailyData(3.February(2021), false),
+                new RequestsPatchRequestDailyData(2.February(2021), true),
+                new RequestsPatchRequestDailyData(2.February(2021), false),
+                new RequestsPatchRequestDailyData(2.February(2021), true),
+                new RequestsPatchRequestDailyData(3.February(2021), false),
+                new RequestsPatchRequestDailyData(3.February(2021), true),
+                new RequestsPatchRequestDailyData(3.February(2021), false),
             });
 
             var controller = new RequestsController(
@@ -280,10 +280,10 @@
 
             var patchRequest = new RequestsPatchRequest(new[]
             {
-                new RequestPatchRequestDailyData(2.February(2021), true),
-                new RequestPatchRequestDailyData(2.February(2021), false),
-                new RequestPatchRequestDailyData(3.February(2021), false),
-                new RequestPatchRequestDailyData(3.February(2021), true),
+                new RequestsPatchRequestDailyData(2.February(2021), true),
+                new RequestsPatchRequestDailyData(2.February(2021), false),
+                new RequestsPatchRequestDailyData(3.February(2021), false),
+                new RequestsPatchRequestDailyData(3.February(2021), true),
             });
 
             var controller = new RequestsController(
@@ -314,8 +314,8 @@
 
             var patchRequest = new RequestsPatchRequest(new[]
             {
-                new RequestPatchRequestDailyData(1.February(2021), true),
-                new RequestPatchRequestDailyData(4.February(2021), true)
+                new RequestsPatchRequestDailyData(1.February(2021), true),
+                new RequestsPatchRequestDailyData(4.February(2021), true)
             });
 
             var controller = new RequestsController(
@@ -346,8 +346,8 @@
 
             var patchRequest = new RequestsPatchRequest(new[]
             {
-                new RequestPatchRequestDailyData(2.February(2021), true),
-                new RequestPatchRequestDailyData(3.February(2021), false),
+                new RequestsPatchRequestDailyData(2.February(2021), true),
+                new RequestsPatchRequestDailyData(3.February(2021), false),
             });
 
             var controller = new RequestsController(
@@ -378,7 +378,7 @@
                 .Returns(Task.CompletedTask);
 
             var patchRequest =
-                new RequestsPatchRequest(new[] { new RequestPatchRequestDailyData(2.February(2021), true) });
+                new RequestsPatchRequest(new[] { new RequestsPatchRequestDailyData(2.February(2021), true) });
 
             var controller = new RequestsController(
                 CreateDateCalculator.WithActiveDates(activeDates),
@@ -411,7 +411,7 @@
 
             var result = await controller.PatchAsync(
                 UserId,
-                new RequestsPatchRequest(Enumerable.Empty<RequestPatchRequestDailyData>()));
+                new RequestsPatchRequest(Enumerable.Empty<RequestsPatchRequestDailyData>()));
 
             Assert.IsType<NotFoundResult>(result);
         }
