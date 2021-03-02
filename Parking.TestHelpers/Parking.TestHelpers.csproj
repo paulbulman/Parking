@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
-    <PackageReference Include="Moq" Version="4.16.0" />
+    <PackageReference Include="Moq" Version="4.16.1" />
     <PackageReference Include="NodaTime" Version="3.0.5" />
   </ItemGroup>
 
