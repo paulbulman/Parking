@@ -4,6 +4,7 @@ namespace Parking.Data.UnitTests
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Aws;
     using Model;
     using Moq;
     using TestHelpers;
@@ -14,9 +15,9 @@ namespace Parking.Data.UnitTests
         [Fact]
         public static async Task Create_user_creates_new_identity_provider_user()
         {
-            var mockRawItemRepository = new Mock<IRawItemRepository>();
+            var mockIdentityProvider = new Mock<IIdentityProvider>();
 
-            var userRepository = new UserRepository(mockRawItemRepository.Object);
+            var userRepository = new UserRepository(Mock.Of<IDatabaseProvider>(), mockIdentityProvider.Object);
 
             var user = CreateUser.With(
                 userId: string.Empty, 
@@ -26,18 +27,21 @@ namespace Parking.Data.UnitTests
             
             await userRepository.CreateUser(user);
 
-            mockRawItemRepository.Verify(r => r.CreateUser("john.doe@example.com", "John", "Doe"), Times.Once);
+            mockIdentityProvider.Verify(p => p.CreateUser("john.doe@example.com", "John", "Doe"), Times.Once);
         }
 
         [Fact]
         public static async Task Create_user_creates_new_database_user()
         {
-            var mockRawItemRepository = new Mock<IRawItemRepository>();
-            mockRawItemRepository
-                .Setup(r => r.CreateUser(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            var mockIdentityProvider = new Mock<IIdentityProvider>();
+
+            mockIdentityProvider
+                .Setup(p => p.CreateUser(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync("User1");
 
-            var userRepository = new UserRepository(mockRawItemRepository.Object);
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>();
+
+            var userRepository = new UserRepository(mockDatabaseProvider.Object, mockIdentityProvider.Object);
 
             var user = CreateUser.With(
                 userId: string.Empty,
@@ -51,8 +55,8 @@ namespace Parking.Data.UnitTests
 
             await userRepository.CreateUser(user);
 
-            mockRawItemRepository.Verify(
-                r => r.SaveItem(It.Is<RawItem>(actual =>
+            mockDatabaseProvider.Verify(
+                p => p.SaveItem(It.Is<RawItem>(actual =>
                     actual.PrimaryKey == "USER#User1" &&
                     actual.SortKey == "PROFILE" &&
                     actual.AlternativeRegistrationNumber == "A999XYZ" &&
@@ -67,12 +71,12 @@ namespace Parking.Data.UnitTests
         [Fact]
         public static async Task Create_user_returns_newly_created_user()
         {
-            var mockRawItemRepository = new Mock<IRawItemRepository>();
-            mockRawItemRepository
-                .Setup(r => r.CreateUser(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            var mockIdentityProvider = new Mock<IIdentityProvider>();
+            mockIdentityProvider
+                .Setup(p => p.CreateUser(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync("User1");
 
-            var userRepository = new UserRepository(mockRawItemRepository.Object);
+            var userRepository = new UserRepository(Mock.Of<IDatabaseProvider>(), mockIdentityProvider.Object);
 
             var user = CreateUser.With(
                 userId: string.Empty,
@@ -96,11 +100,11 @@ namespace Parking.Data.UnitTests
         {
             const string UserId = "User1";
 
-            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
-            mockRawItemRepository.Setup(r => r.GetUser(UserId)).ReturnsAsync(new RawItem());
+            mockDatabaseProvider.Setup(p => p.GetUser(UserId)).ReturnsAsync(new RawItem());
 
-            var userRepository = new UserRepository(mockRawItemRepository.Object);
+            var userRepository = new UserRepository(mockDatabaseProvider.Object, Mock.Of<IIdentityProvider>());
 
             var result = await userRepository.UserExists(UserId);
 
@@ -112,11 +116,11 @@ namespace Parking.Data.UnitTests
         {
             const string UserId = "User1";
 
-            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
-            mockRawItemRepository.Setup(r => r.GetUser(UserId)).ReturnsAsync((RawItem)null);
+            mockDatabaseProvider.Setup(p => p.GetUser(UserId)).ReturnsAsync((RawItem)null);
 
-            var userRepository = new UserRepository(mockRawItemRepository.Object);
+            var userRepository = new UserRepository(mockDatabaseProvider.Object, Mock.Of<IIdentityProvider>());
 
             var result = await userRepository.UserExists(UserId);
 
@@ -126,11 +130,11 @@ namespace Parking.Data.UnitTests
         [Fact]
         public static async Task GetUser_returns_null_when_requested_user_does_not_exist()
         {
-            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
-            mockRawItemRepository.Setup(r => r.GetUser(It.IsAny<string>())).ReturnsAsync((RawItem)null);
+            mockDatabaseProvider.Setup(p => p.GetUser(It.IsAny<string>())).ReturnsAsync((RawItem)null);
 
-            var userRepository = new UserRepository(mockRawItemRepository.Object);
+            var userRepository = new UserRepository(mockDatabaseProvider.Object, Mock.Of<IIdentityProvider>());
 
             var result = await userRepository.GetUser("UserId");
 
@@ -142,7 +146,7 @@ namespace Parking.Data.UnitTests
         {
             const string UserId = "User1";
 
-            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
             var rawItem = new RawItem
             {
@@ -156,9 +160,9 @@ namespace Parking.Data.UnitTests
                 RegistrationNumber = "AB12CDE"
             };
 
-            mockRawItemRepository.Setup(r => r.GetUser(UserId)).ReturnsAsync(rawItem);
+            mockDatabaseProvider.Setup(p => p.GetUser(UserId)).ReturnsAsync(rawItem);
 
-            var userRepository = new UserRepository(mockRawItemRepository.Object);
+            var userRepository = new UserRepository(mockDatabaseProvider.Object, Mock.Of<IIdentityProvider>());
 
             var result = await userRepository.GetUser(UserId);
 
@@ -170,7 +174,7 @@ namespace Parking.Data.UnitTests
         [Fact]
         public static async Task GetUsers_converts_raw_items_to_users()
         {
-            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
             var rawItems = new[]
             {
@@ -178,9 +182,9 @@ namespace Parking.Data.UnitTests
                 new RawItem { PrimaryKey = "USER#Id2", SortKey = "PROFILE", CommuteDistance = 2.34m, EmailAddress = "2@abc.com", FirstName = "Clyde", LastName = "Memory", RegistrationNumber = "FG34HIJ" },
                 new RawItem { PrimaryKey = "USER#Id3", SortKey = "PROFILE", EmailAddress = "3@xyz.co.uk", FirstName = "Kalle", LastName = "Rochewell" }
             };
-            mockRawItemRepository.Setup(r => r.GetUsers()).ReturnsAsync(rawItems);
+            mockDatabaseProvider.Setup(p => p.GetUsers()).ReturnsAsync(rawItems);
 
-            var userRepository = new UserRepository(mockRawItemRepository.Object);
+            var userRepository = new UserRepository(mockDatabaseProvider.Object, Mock.Of<IIdentityProvider>());
 
             var result = await userRepository.GetUsers();
 
@@ -196,7 +200,7 @@ namespace Parking.Data.UnitTests
         [Fact]
         public static async Task GetTeamLeaderUsers_filters_team_leader_users()
         {
-            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
             var rawUsers = new[]
             {
@@ -204,12 +208,14 @@ namespace Parking.Data.UnitTests
                 new RawItem { PrimaryKey = "USER#Id2", SortKey = "PROFILE", EmailAddress = "2@abc.com", FirstName = "Randolf", LastName = "Blogg" },
                 new RawItem { PrimaryKey = "USER#Id3", SortKey = "PROFILE", EmailAddress = "3@xyz.co.uk", FirstName = "Kris", LastName = "Whibley" }
             };
-            mockRawItemRepository.Setup(r => r.GetUsers()).ReturnsAsync(rawUsers);
+            mockDatabaseProvider.Setup(p => p.GetUsers()).ReturnsAsync(rawUsers);
+
+            var mockIdentityProvider = new Mock<IIdentityProvider>(MockBehavior.Strict);
 
             var rawTeamLeaderUserIds = new[] { "Id1", "Id3" };
-            mockRawItemRepository.Setup(r => r.GetUserIdsInGroup("TeamLeader")).ReturnsAsync(rawTeamLeaderUserIds);
+            mockIdentityProvider.Setup(p => p.GetUserIdsInGroup("TeamLeader")).ReturnsAsync(rawTeamLeaderUserIds);
 
-            var userRepository = new UserRepository(mockRawItemRepository.Object);
+            var userRepository = new UserRepository(mockDatabaseProvider.Object, mockIdentityProvider.Object);
 
             var result = await userRepository.GetTeamLeaderUsers();
 
@@ -226,17 +232,13 @@ namespace Parking.Data.UnitTests
         {
             var user = CreateUser.With(userId: "User1", firstName: "John", lastName: "Doe");
 
-            var mockRawItemRepository = new Mock<IRawItemRepository>();
+            var mockIdentityProvider = new Mock<IIdentityProvider>();
 
-            var userRepository = new UserRepository(mockRawItemRepository.Object);
+            var userRepository = new UserRepository(Mock.Of<IDatabaseProvider>(), mockIdentityProvider.Object);
 
             await userRepository.SaveUser(user);
 
-            mockRawItemRepository.Verify(r => r.UpdateUser("User1", "John", "Doe"), Times.Once);
-
-            mockRawItemRepository.Verify(r => r.SaveItem(It.IsAny<RawItem>()), Times.Once);
-
-            mockRawItemRepository.VerifyNoOtherCalls();
+            mockIdentityProvider.Verify(p => p.UpdateUser("User1", "John", "Doe"), Times.Once);
         }
 
         [Fact]
@@ -251,14 +253,14 @@ namespace Parking.Data.UnitTests
                 lastName: "Doe",
                 registrationNumber: "AB12CDE");
 
-            var mockRawItemRepository = new Mock<IRawItemRepository>();
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>();
 
-            var userRepository = new UserRepository(mockRawItemRepository.Object);
+            var userRepository = new UserRepository(mockDatabaseProvider.Object, Mock.Of<IIdentityProvider>());
 
             await userRepository.SaveUser(user);
 
-            mockRawItemRepository.Verify(
-                r => r.SaveItem(It.Is<RawItem>(actual =>
+            mockDatabaseProvider.Verify(
+                p => p.SaveItem(It.Is<RawItem>(actual =>
                     actual.PrimaryKey == "USER#User1" &&
                     actual.SortKey == "PROFILE" &&
                     actual.AlternativeRegistrationNumber == "A999XYZ" &&
@@ -268,12 +270,6 @@ namespace Parking.Data.UnitTests
                     actual.LastName == "Doe" &&
                     actual.RegistrationNumber == "AB12CDE")),
                 Times.Once);
-
-            mockRawItemRepository.Verify(
-                r => r.UpdateUser(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()),
-                Times.Once);
-
-            mockRawItemRepository.VerifyNoOtherCalls();
         }
 
         private static void CheckUser(

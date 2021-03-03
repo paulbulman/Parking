@@ -3,18 +3,19 @@
     using System.Runtime.Serialization;
     using System.Text.Json;
     using System.Threading.Tasks;
+    using Aws;
     using Business.Data;
     using Model;
 
     public class ConfigurationRepository : IConfigurationRepository
     {
-        private readonly IRawItemRepository rawItemRepository;
+        private readonly IStorageProvider storageProvider;
 
-        public ConfigurationRepository(IRawItemRepository rawItemRepository) => this.rawItemRepository = rawItemRepository;
+        public ConfigurationRepository(IStorageProvider storageProvider) => this.storageProvider = storageProvider;
 
         public async Task<Configuration> GetConfiguration()
         {
-            var rawData = await rawItemRepository.GetConfiguration();
+            var rawData = await this.storageProvider.GetConfiguration();
 
             var data = JsonSerializer.Deserialize<ConfigurationData>(rawData);
 

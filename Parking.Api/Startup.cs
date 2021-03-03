@@ -10,6 +10,7 @@ namespace Parking.Api
     using Business.Data;
     using Converters;
     using Data;
+    using Data.Aws;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
@@ -52,12 +53,17 @@ namespace Parking.Api
             services.AddScoped<IAmazonS3, AmazonS3Client>();
             services.AddScoped<IAmazonSimpleNotificationService, AmazonSimpleNotificationServiceClient>();
             services.AddScoped<IAmazonSimpleSystemsManagement, AmazonSimpleSystemsManagementClient>();
+            
+            services.AddScoped<IDatabaseProvider, DatabaseProvider>();
+            services.AddScoped<IIdentityProvider, IdentityProvider>();
+            services.AddScoped<INotificationProvider, NotificationProvider>();
+            services.AddScoped<ISecretProvider, SecretProvider>();
+            services.AddScoped<IStorageProvider, StorageProvider>();
 
             services.AddScoped<IBankHolidayRepository, BankHolidayRepository>();
             services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
             services.AddScoped<IDateCalculator, DateCalculator>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
-            services.AddScoped<IRawItemRepository, RawItemRepository>();
             services.AddScoped<IRequestRepository, RequestRepository>();
             services.AddScoped<IReservationRepository, ReservationRepository>();
             services.AddScoped<ITriggerRepository, TriggerRepository>();

@@ -4,6 +4,7 @@
     using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
+    using Aws;
     using Business;
     using Business.Data;
     using Model;
@@ -11,9 +12,9 @@
 
     public class ReservationRepository : IReservationRepository
     {
-        private readonly IRawItemRepository rawItemRepository;
+        private readonly IDatabaseProvider databaseProvider;
 
-        public ReservationRepository(IRawItemRepository rawItemRepository) => this.rawItemRepository = rawItemRepository;
+        public ReservationRepository(IDatabaseProvider databaseProvider) => this.databaseProvider = databaseProvider;
 
         public async Task<IReadOnlyCollection<Reservation>> GetReservations(LocalDate firstDate, LocalDate lastDate)
         {
@@ -21,7 +22,7 @@
 
             foreach (var yearMonth in new DateInterval(firstDate, lastDate).YearMonths())
             {
-                var queryResult = await this.rawItemRepository.GetReservations(yearMonth);
+                var queryResult = await this.databaseProvider.GetReservations(yearMonth);
 
                 var wholeMonthReservations =
                     queryResult.SelectMany(r => CreateWholeMonthReservations(yearMonth, r.Reservations));
@@ -55,7 +56,7 @@
                 .GroupBy(r => r.Date.ToYearMonth())
                 .Select(CreateRawItem);
 
-            await this.rawItemRepository.SaveItems(rawItems);
+            await this.databaseProvider.SaveItems(rawItems);
         }
 
         private static IEnumerable<Reservation> CreateWholeMonthReservations(

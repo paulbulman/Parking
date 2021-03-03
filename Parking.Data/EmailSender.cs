@@ -6,6 +6,7 @@
     using System.Net.Mime;
     using System.Threading;
     using System.Threading.Tasks;
+    using Aws;
     using Business.EmailTemplates;
 
     public interface IEmailSender
@@ -15,9 +16,9 @@
 
     public class EmailSender : IEmailSender
     {
-        private readonly IRawItemRepository rawItemRepository;
+        private readonly ISecretProvider secretProvider;
 
-        public EmailSender(IRawItemRepository rawItemRepository) => this.rawItemRepository = rawItemRepository;
+        public EmailSender(ISecretProvider secretProvider) => this.secretProvider = secretProvider;
 
         public async Task Send(IEmailTemplate emailTemplate)
         {
@@ -36,7 +37,7 @@
             var host = Environment.GetEnvironmentVariable("SMTP_HOST");
             var username = Environment.GetEnvironmentVariable("SMTP_USERNAME");
 
-            var password = await this.rawItemRepository.GetSmtpPassword();
+            var password = await this.secretProvider.GetSmtpPassword();
 
             var message = new MailMessage(fromEmailAddress, emailTemplate.To, emailTemplate.Subject, emailTemplate.PlainTextBody);
 

@@ -5,6 +5,7 @@
     using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
+    using Aws;
     using Business;
     using Business.Data;
     using Model;
@@ -12,9 +13,9 @@
 
     public class RequestRepository : IRequestRepository
     {
-        private readonly IRawItemRepository rawItemRepository;
+        private readonly IDatabaseProvider databaseProvider;
 
-        public RequestRepository(IRawItemRepository rawItemRepository) => this.rawItemRepository = rawItemRepository;
+        public RequestRepository(IDatabaseProvider databaseProvider) => this.databaseProvider = databaseProvider;
 
         public async Task<IReadOnlyCollection<Request>> GetRequests(LocalDate firstDate, LocalDate lastDate)
         {
@@ -22,7 +23,7 @@
 
             foreach (var yearMonth in new DateInterval(firstDate, lastDate).YearMonths())
             {
-                var queryResult = await rawItemRepository.GetRequests(yearMonth);
+                var queryResult = await this.databaseProvider.GetRequests(yearMonth);
 
                 requests.AddRange(CreateFilteredRequests(queryResult, yearMonth, firstDate, lastDate));
             }
@@ -36,7 +37,7 @@
 
             foreach (var yearMonth in new DateInterval(firstDate, lastDate).YearMonths())
             {
-                var queryResult = await rawItemRepository.GetRequests(userId, yearMonth);
+                var queryResult = await this.databaseProvider.GetRequests(userId, yearMonth);
 
                 requests.AddRange(CreateFilteredRequests(queryResult, yearMonth, firstDate, lastDate));
             }
@@ -84,7 +85,7 @@
                 rawItems.AddRange(userMonthRequests);
             }
 
-            await rawItemRepository.SaveItems(rawItems);
+            await this.databaseProvider.SaveItems(rawItems);
         }
 
         private static IReadOnlyCollection<Request> CreateFilteredRequests(

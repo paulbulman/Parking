@@ -2,22 +2,23 @@
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Aws;
     using Business.Data;
 
     public class TriggerRepository : ITriggerRepository
     {
-        private readonly IRawItemRepository rawItemRepository;
+        private readonly IStorageProvider storageProvider;
 
-        public TriggerRepository(IRawItemRepository rawItemRepository) =>
-            this.rawItemRepository = rawItemRepository;
+        public TriggerRepository(IStorageProvider storageProvider) =>
+            this.storageProvider = storageProvider;
 
         public async Task AddTrigger() =>
-            await this.rawItemRepository.SaveTrigger();
+            await this.storageProvider.SaveTrigger();
 
         public async Task<IReadOnlyCollection<string>> GetKeys() =>
-            await this.rawItemRepository.GetTriggerFileKeys();
+            await this.storageProvider.GetTriggerFileKeys();
 
         public async Task DeleteKeys(IReadOnlyCollection<string> keys) =>
-            await this.rawItemRepository.DeleteTriggerFiles(keys);
+            await this.storageProvider.DeleteTriggerFiles(keys);
     }
 }

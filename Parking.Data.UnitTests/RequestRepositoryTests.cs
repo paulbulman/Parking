@@ -4,6 +4,7 @@ namespace Parking.Data.UnitTests
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Aws;
     using Model;
     using Moq;
     using NodaTime;
@@ -15,12 +16,12 @@ namespace Parking.Data.UnitTests
         [Fact]
         public static async Task GetRequests_returns_empty_collection_when_no_matching_raw_item_exists()
         {
-            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
-            SetupMockRepository(mockRawItemRepository, new YearMonth(2020, 8));
-            SetupMockRepository(mockRawItemRepository, new YearMonth(2020, 9));
+            SetupMockRepository(mockDatabaseProvider, new YearMonth(2020, 8));
+            SetupMockRepository(mockDatabaseProvider, new YearMonth(2020, 9));
 
-            var requestRepository = new RequestRepository(mockRawItemRepository.Object);
+            var requestRepository = new RequestRepository(mockDatabaseProvider.Object);
 
             var result = await requestRepository.GetRequests(1.August(2020), 30.September(2020));
 
@@ -31,10 +32,10 @@ namespace Parking.Data.UnitTests
         [Fact]
         public static async Task GetRequests_converts_raw_items_for_multiple_users_to_requests()
         {
-            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
             SetupMockRepository(
-                mockRawItemRepository,
+                mockDatabaseProvider,
                 new YearMonth(2020, 8),
                 CreateRawItem(
                     "User1",
@@ -46,14 +47,14 @@ namespace Parking.Data.UnitTests
                     "2020-08",
                     KeyValuePair.Create("02", "C")));
             SetupMockRepository(
-                mockRawItemRepository,
+                mockDatabaseProvider,
                 new YearMonth(2020, 9),
                 CreateRawItem(
                     "User1",
                     "2020-09",
                     KeyValuePair.Create("30", "A")));
 
-            var requestRepository = new RequestRepository(mockRawItemRepository.Object);
+            var requestRepository = new RequestRepository(mockDatabaseProvider.Object);
 
             var result = await requestRepository.GetRequests(1.August(2020), 30.September(2020));
 
@@ -70,10 +71,10 @@ namespace Parking.Data.UnitTests
         [Fact]
         public static async Task GetRequests_converts_raw_items_for_single_user_to_requests()
         {
-            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
             SetupMockRepository(
-                mockRawItemRepository,
+                mockDatabaseProvider,
                 "User1",
                 new YearMonth(2020, 8),
                 CreateRawItem(
@@ -82,7 +83,7 @@ namespace Parking.Data.UnitTests
                     KeyValuePair.Create("02", "R"),
                     KeyValuePair.Create("13", "A")));
             SetupMockRepository(
-                mockRawItemRepository,
+                mockDatabaseProvider,
                 "User1",
                 new YearMonth(2020, 9),
                 CreateRawItem(
@@ -90,7 +91,7 @@ namespace Parking.Data.UnitTests
                     "2020-09",
                     KeyValuePair.Create("30", "C")));
 
-            var requestRepository = new RequestRepository(mockRawItemRepository.Object);
+            var requestRepository = new RequestRepository(mockDatabaseProvider.Object);
 
             var result = await requestRepository.GetRequests("User1", 1.August(2020), 30.September(2020));
 
@@ -106,15 +107,15 @@ namespace Parking.Data.UnitTests
         [Fact]
         public static async Task GetRequests_filters_requests_outside_specified_date_range()
         {
-            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
             SetupMockRepository(
-                mockRawItemRepository,
+                mockDatabaseProvider,
                 new YearMonth(2020, 8),
                 CreateRawItem("User1", "2020-08", KeyValuePair.Create("02", "R")),
                 CreateRawItem("User2", "2020-08", KeyValuePair.Create("02", "C")));
 
-            var requestRepository = new RequestRepository(mockRawItemRepository.Object);
+            var requestRepository = new RequestRepository(mockDatabaseProvider.Object);
 
             var result = await requestRepository.GetRequests(3.August(2020), 31.August(2020));
 
@@ -125,27 +126,27 @@ namespace Parking.Data.UnitTests
         [Fact]
         public static async Task SaveRequests_handles_empty_list()
         {
-            var mockRawItemRepository = new Mock<IRawItemRepository>();
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>();
 
-            var requestRepository = new RequestRepository(mockRawItemRepository.Object);
+            var requestRepository = new RequestRepository(mockDatabaseProvider.Object);
 
             await requestRepository.SaveRequests(new List<Request>());
 
-            mockRawItemRepository.VerifyNoOtherCalls();
+            mockDatabaseProvider.VerifyNoOtherCalls();
         }
 
         [Fact]
         public static async Task SaveRequests_converts_requests_to_raw_items()
         {
-            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
-            mockRawItemRepository
-                .Setup(r => r.GetRequests(It.IsAny<YearMonth>()))
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
+            mockDatabaseProvider
+                .Setup(p => p.GetRequests(It.IsAny<YearMonth>()))
                 .ReturnsAsync(new List<RawItem>());
-            mockRawItemRepository
-                .Setup(r => r.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
+            mockDatabaseProvider
+                .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
                 .Returns(Task.CompletedTask);
 
-            var requestRepository = new RequestRepository(mockRawItemRepository.Object);
+            var requestRepository = new RequestRepository(mockDatabaseProvider.Object);
             await requestRepository.SaveRequests(
                 new[]
                 {
@@ -172,7 +173,7 @@ namespace Parking.Data.UnitTests
                     KeyValuePair.Create("04", "R")),
             };
 
-            mockRawItemRepository.Verify(r => r.SaveItems(
+            mockDatabaseProvider.Verify(p => p.SaveItems(
                 It.Is<IEnumerable<RawItem>>(actual => CheckRawItems(expectedRawItems, actual.ToList()))),
                 Times.Once);
         }
@@ -180,9 +181,9 @@ namespace Parking.Data.UnitTests
         [Fact]
         public static async Task SaveRequests_combines_new_and_existing_requests()
         {
-            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
-            mockRawItemRepository
-                .Setup(r => r.GetRequests(new YearMonth(2020, 9)))
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
+            mockDatabaseProvider
+                .Setup(p => p.GetRequests(new YearMonth(2020, 9)))
                 .ReturnsAsync(new []
                 {
                     CreateRawItem(
@@ -195,8 +196,8 @@ namespace Parking.Data.UnitTests
                         "2020-09",
                         KeyValuePair.Create("03", "A"))
                 });
-            mockRawItemRepository
-                .Setup(r => r.GetRequests(new YearMonth(2020, 10)))
+            mockDatabaseProvider
+                .Setup(p => p.GetRequests(new YearMonth(2020, 10)))
                 .ReturnsAsync(new[]
                 {
                     CreateRawItem(
@@ -204,11 +205,11 @@ namespace Parking.Data.UnitTests
                         "2020-10",
                         KeyValuePair.Create("03", "R"))
                 });
-            mockRawItemRepository
-                .Setup(r => r.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
+            mockDatabaseProvider
+                .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
                 .Returns(Task.CompletedTask);
 
-            var requestRepository = new RequestRepository(mockRawItemRepository.Object);
+            var requestRepository = new RequestRepository(mockDatabaseProvider.Object);
             await requestRepository.SaveRequests(
                 new[]
                 {
@@ -242,26 +243,26 @@ namespace Parking.Data.UnitTests
                 
             };
 
-            mockRawItemRepository.Verify(r => r.SaveItems(
-                    It.Is<IEnumerable<RawItem>>(actual => CheckRawItems(expectedRawItems, actual.ToList()))),
+            mockDatabaseProvider.Verify(
+                p => p.SaveItems(It.Is<IEnumerable<RawItem>>(actual => CheckRawItems(expectedRawItems, actual.ToList()))),
                 Times.Once);
         }
 
         private static void SetupMockRepository(
-            Mock<IRawItemRepository> mockRawItemRepository,
+            Mock<IDatabaseProvider> mockDatabaseProvider,
             YearMonth yearMonth,
             params RawItem[] mockResult) =>
-            mockRawItemRepository
-                .Setup(r => r.GetRequests(yearMonth))
+            mockDatabaseProvider
+                .Setup(p => p.GetRequests(yearMonth))
                 .Returns(Task.FromResult((IReadOnlyCollection<RawItem>)mockResult));
 
         private static void SetupMockRepository(
-            Mock<IRawItemRepository> mockRawItemRepository,
+            Mock<IDatabaseProvider> mockDatabaseProvider,
             string userId,
             YearMonth yearMonth,
             params RawItem[] mockResult) =>
-            mockRawItemRepository
-                .Setup(r => r.GetRequests(userId, yearMonth))
+            mockDatabaseProvider
+                .Setup(p => p.GetRequests(userId, yearMonth))
                 .Returns(Task.FromResult((IReadOnlyCollection<RawItem>)mockResult));
 
         private static RawItem CreateRawItem(

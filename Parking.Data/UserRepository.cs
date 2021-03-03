@@ -3,19 +3,26 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Aws;
     using Business;
     using Business.Data;
     using Model;
 
     public class UserRepository : IUserRepository
     {
-        private readonly IRawItemRepository rawItemRepository;
+        private readonly IDatabaseProvider databaseProvider;
+        
+        private readonly IIdentityProvider identityProvider;
 
-        public UserRepository(IRawItemRepository rawItemRepository) => this.rawItemRepository = rawItemRepository;
+        public UserRepository(IDatabaseProvider databaseProvider,  IIdentityProvider identityProvider)
+        {
+            this.databaseProvider = databaseProvider;
+            this.identityProvider = identityProvider;
+        }
 
         public async Task<User> CreateUser(User user)
         {
-            var userId = await this.rawItemRepository.CreateUser(user.EmailAddress, user.FirstName, user.LastName);
+            var userId = await this.identityProvider.CreateUser(user.EmailAddress, user.FirstName, user.LastName);
 
             var newUser = new User(
                 userId,
@@ -26,28 +33,28 @@
                 user.LastName,
                 user.RegistrationNumber);
                 
-            await this.rawItemRepository.SaveItem(CreateRawItem(newUser));
+            await this.databaseProvider.SaveItem(CreateRawItem(newUser));
 
             return newUser;
         }
 
         public async Task<bool> UserExists(string userId)
         {
-            var queryResult = await this.rawItemRepository.GetUser(userId);
+            var queryResult = await this.databaseProvider.GetUser(userId);
             
             return queryResult != null;
         }
 
         public async Task<User> GetUser(string userId)
         {
-            var queryResult = await this.rawItemRepository.GetUser(userId);
+            var queryResult = await this.databaseProvider.GetUser(userId);
 
             return queryResult != null ? CreateUser(queryResult) : null;
         }
 
         public async Task<IReadOnlyCollection<User>> GetUsers()
         {
-            var queryResult = await this.rawItemRepository.GetUsers();
+            var queryResult = await this.databaseProvider.GetUsers();
 
             return queryResult
                 .Select(CreateUser)
@@ -56,16 +63,16 @@
 
         public async Task SaveUser(User user)
         {
-            await this.rawItemRepository.UpdateUser(user.UserId, user.FirstName, user.LastName);
+            await this.identityProvider.UpdateUser(user.UserId, user.FirstName, user.LastName);
 
-            await this.rawItemRepository.SaveItem(CreateRawItem(user));
+            await this.databaseProvider.SaveItem(CreateRawItem(user));
         }
 
         public async Task<IReadOnlyCollection<User>> GetTeamLeaderUsers()
         {
             var allUsers = await this.GetUsers();
 
-            var teamLeaderUserIds = await this.rawItemRepository.GetUserIdsInGroup(Constants.TeamLeaderGroupName);
+            var teamLeaderUserIds = await this.identityProvider.GetUserIdsInGroup(Constants.TeamLeaderGroupName);
 
             return allUsers
                 .Where(u => teamLeaderUserIds.Contains(u.UserId))

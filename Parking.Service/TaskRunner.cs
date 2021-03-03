@@ -11,6 +11,7 @@
     using Business.Data;
     using Business.ScheduledTasks;
     using Data;
+    using Data.Aws;
     using Microsoft.Extensions.DependencyInjection;
     using NodaTime;
 
@@ -72,6 +73,12 @@
             services.AddScoped<IAmazonSimpleNotificationService, AmazonSimpleNotificationServiceClient>();
             services.AddScoped<IAmazonSimpleSystemsManagement, AmazonSimpleSystemsManagementClient>();
 
+            services.AddScoped<IDatabaseProvider, DatabaseProvider>();
+            services.AddScoped<IIdentityProvider, IdentityProvider>();
+            services.AddScoped<INotificationProvider, NotificationProvider>();
+            services.AddScoped<ISecretProvider, SecretProvider>();
+            services.AddScoped<IStorageProvider, StorageProvider>();
+
             services.AddScoped<IAllocationCreator, AllocationCreator>();
             services.AddScoped<AllocationNotifier>();
             services.AddScoped<IBankHolidayRepository, BankHolidayRepository>();
@@ -81,7 +88,6 @@
             services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<Random>();
-            services.AddScoped<IRawItemRepository, RawItemRepository>();
             services.AddScoped<IRequestRepository, RequestRepository>();
             services.AddScoped<IRequestSorter, RequestSorter>();
             services.AddScoped<RequestUpdater>();

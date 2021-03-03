@@ -2,6 +2,7 @@
 {
     using System.Linq;
     using System.Threading.Tasks;
+    using Aws;
     using TestHelpers;
     using Model;
     using Moq;
@@ -21,13 +22,13 @@
                 "\"WEEKLY_NOTIFICATION\":\"2020-12-17T00:00:00Z\"" +
                 "}";
 
-            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+            var mockStorageProvider = new Mock<IStorageProvider>(MockBehavior.Strict);
 
-            mockRawItemRepository
-                .Setup(r => r.GetSchedules())
+            mockStorageProvider
+                .Setup(p => p.GetSchedules())
                 .ReturnsAsync(rawData);
 
-            var scheduleRepository = new ScheduleRepository(mockRawItemRepository.Object);
+            var scheduleRepository = new ScheduleRepository(mockStorageProvider.Object);
 
             var result = await scheduleRepository.GetSchedules();
 
@@ -56,7 +57,7 @@
         [Fact]
         public static async Task Saves_combined_updated_and_existing_scheduled_tasks()
         {
-            var initialRawData =
+            const string InitialRawData = 
                 "{" +
                 "\"DAILY_NOTIFICATION\":\"2020-12-14T11:00:00Z\"," +
                 "\"REQUEST_REMINDER\":\"2020-12-16T00:00:00Z\"," +
@@ -64,7 +65,7 @@
                 "\"WEEKLY_NOTIFICATION\":\"2020-12-17T00:00:00Z\"" +
                 "}";
 
-            var expectedUpdatedRawData =
+            const string ExpectedUpdatedRawData =
                 "{" +
                 "\"DAILY_NOTIFICATION\":\"2020-12-14T11:00:00Z\"," +
                 "\"REQUEST_REMINDER\":\"2020-12-16T00:00:00Z\"," +
@@ -72,16 +73,16 @@
                 "\"WEEKLY_NOTIFICATION\":\"2020-12-17T00:00:00Z\"" +
                 "}";
 
-            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+            var mockStorageProvider = new Mock<IStorageProvider>(MockBehavior.Strict);
 
-            mockRawItemRepository
-                .Setup(r => r.GetSchedules())
-                .ReturnsAsync(initialRawData);
-            mockRawItemRepository
-                .Setup(r => r.SaveSchedules(expectedUpdatedRawData))
+            mockStorageProvider
+                .Setup(p => p.GetSchedules())
+                .ReturnsAsync(InitialRawData);
+            mockStorageProvider
+                .Setup(r => r.SaveSchedules(ExpectedUpdatedRawData))
                 .Returns(Task.CompletedTask);
 
-            var scheduleRepository = new ScheduleRepository(mockRawItemRepository.Object);
+            var scheduleRepository = new ScheduleRepository(mockStorageProvider.Object);
 
             var updatedSchedule = new Schedule(
                 ScheduledTaskType.ReservationReminder,
@@ -89,7 +90,7 @@
 
             await scheduleRepository.UpdateSchedule(updatedSchedule);
 
-            mockRawItemRepository.VerifyAll();
+            mockStorageProvider.VerifyAll();
         }
     }
 }

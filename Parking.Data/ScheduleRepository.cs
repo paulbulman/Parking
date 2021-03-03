@@ -5,6 +5,7 @@
     using System.Runtime.Serialization;
     using System.Text.Json;
     using System.Threading.Tasks;
+    using Aws;
     using Business.Data;
     using Model;
     using NodaTime;
@@ -12,7 +13,7 @@
 
     public class ScheduleRepository : IScheduleRepository
     {
-        private readonly IRawItemRepository rawItemRepository;
+        private readonly IStorageProvider storageProvider;
 
         private static IDictionary<ScheduledTaskType, string> RawScheduledTaskTypes =>
             new Dictionary<ScheduledTaskType, string>
@@ -23,14 +24,14 @@
                 {ScheduledTaskType.WeeklyNotification, "WEEKLY_NOTIFICATION"}
             };
 
-        public ScheduleRepository(IRawItemRepository rawItemRepository)
+        public ScheduleRepository(IStorageProvider storageProvider)
         {
-            this.rawItemRepository = rawItemRepository;
+            this.storageProvider = storageProvider;
         }
 
         public async Task<IReadOnlyCollection<Schedule>> GetSchedules()
         {
-            var rawData = await this.rawItemRepository.GetSchedules();
+            var rawData = await this.storageProvider.GetSchedules();
 
             var data = JsonSerializer.Deserialize<IDictionary<string, string>>(rawData);
 
@@ -63,7 +64,7 @@
 
             var rawData = JsonSerializer.Serialize(data);
 
-            await rawItemRepository.SaveSchedules(rawData);
+            await this.storageProvider.SaveSchedules(rawData);
         }
 
         private static Schedule ParseSchedule(KeyValuePair<string, string> rawData) =>

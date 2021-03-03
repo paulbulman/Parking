@@ -1,34 +1,35 @@
 ﻿namespace Parking.Data.UnitTests
 {
     using System.Threading.Tasks;
+    using Aws;
     using Moq;
     using Xunit;
 
     public static class TriggerRepositoryTests
     {
         [Fact]
-        public static async Task Calls_raw_item_repository_to_add_new_trigger()
+        public static async Task Calls_storage_provider_to_add_new_trigger()
         {
-            var mockRawItemRepository = new Mock<IRawItemRepository>();
+            var mockStorageProvider = new Mock<IStorageProvider>();
 
-            var triggerRepository = new TriggerRepository(mockRawItemRepository.Object);
+            var triggerRepository = new TriggerRepository(mockStorageProvider.Object);
 
             await triggerRepository.AddTrigger();
 
-            mockRawItemRepository.Verify(r => r.SaveTrigger(), Times.Once);
+            mockStorageProvider.Verify(p => p.SaveTrigger(), Times.Once);
         }
 
         [Fact]
-        public static async Task Returns_file_keys_from_raw_item_repository()
+        public static async Task Returns_file_keys_from_storage_provider()
         {
             var keys = new[] {"key1", "key2"};
 
-            var mockRawItemRepository = new Mock<IRawItemRepository>();
-            mockRawItemRepository
-                .Setup(r => r.GetTriggerFileKeys())
+            var mockStorageProvider = new Mock<IStorageProvider>();
+            mockStorageProvider
+                .Setup(p => p.GetTriggerFileKeys())
                 .ReturnsAsync(keys);
 
-            var triggerRepository = new TriggerRepository(mockRawItemRepository.Object);
+            var triggerRepository = new TriggerRepository(mockStorageProvider.Object);
 
             var result = await triggerRepository.GetKeys();
 
@@ -36,17 +37,17 @@
         }
 
         [Fact]
-        public static async Task Passes_file_keys_to_raw_item_repository()
+        public static async Task Passes_file_keys_to_storage_provider()
         {
             var keys = new[] { "key1", "key2" };
 
-            var mockRawItemRepository = new Mock<IRawItemRepository>();
+            var mockStorageProvider = new Mock<IStorageProvider>();
            
-            var triggerRepository = new TriggerRepository(mockRawItemRepository.Object);
+            var triggerRepository = new TriggerRepository(mockStorageProvider.Object);
 
             await triggerRepository.DeleteKeys(keys);
 
-            mockRawItemRepository.Verify(r => r.DeleteTriggerFiles(keys), Times.Once);
+            mockStorageProvider.Verify(p => p.DeleteTriggerFiles(keys), Times.Once);
         }
     }
 }

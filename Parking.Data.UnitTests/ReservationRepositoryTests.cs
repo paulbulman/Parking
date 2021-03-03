@@ -4,6 +4,7 @@ namespace Parking.Data.UnitTests
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Aws;
     using Model;
     using Moq;
     using NodaTime;
@@ -15,12 +16,12 @@ namespace Parking.Data.UnitTests
         [Fact]
         public static async Task GetReservations_returns_empty_collection_when_no_matching_raw_item_exists()
         {
-            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
-            SetupMockRepository(mockRawItemRepository, new YearMonth(2020, 8));
-            SetupMockRepository(mockRawItemRepository, new YearMonth(2020, 9));
+            SetupMockRepository(mockDatabaseProvider, new YearMonth(2020, 8));
+            SetupMockRepository(mockDatabaseProvider, new YearMonth(2020, 9));
 
-            var reservationRepository = new ReservationRepository(mockRawItemRepository.Object);
+            var reservationRepository = new ReservationRepository(mockDatabaseProvider.Object);
 
             var result = await reservationRepository.GetReservations(1.August(2020), 30.September(2020));
 
@@ -31,22 +32,22 @@ namespace Parking.Data.UnitTests
         [Fact]
         public static async Task GetReservations_converts_raw_items_to_reservations()
         {
-            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
             SetupMockRepository(
-                mockRawItemRepository,
+                mockDatabaseProvider,
                 new YearMonth(2020, 8),
                 CreateRawItem(
                     "2020-08",
                     KeyValuePair.Create("02", new List<string> {"User1", "User2"}),
                     KeyValuePair.Create("13", new List<string> {"User1"})));
             SetupMockRepository(
-                mockRawItemRepository,
+                mockDatabaseProvider,
                 new YearMonth(2020, 9),
                 CreateRawItem(
                     "2020-09",KeyValuePair.Create("02", new List<string> { "User1" })));
 
-            var reservationRepository = new ReservationRepository(mockRawItemRepository.Object);
+            var reservationRepository = new ReservationRepository(mockDatabaseProvider.Object);
 
             var result = await reservationRepository.GetReservations(1.August(2020), 30.September(2020));
 
@@ -63,14 +64,14 @@ namespace Parking.Data.UnitTests
         [Fact]
         public static async Task GetReservations_filters_reservations_outside_specified_date_range()
         {
-            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
             SetupMockRepository(
-                mockRawItemRepository,
+                mockDatabaseProvider,
                 new YearMonth(2020, 8),
                 CreateRawItem("2020-08", KeyValuePair.Create("02", new List<string> { "User1", "User2" })));
 
-            var reservationRepository = new ReservationRepository(mockRawItemRepository.Object);
+            var reservationRepository = new ReservationRepository(mockDatabaseProvider.Object);
 
             var result = await reservationRepository.GetReservations(3.August(2020), 31.August(2020));
 
@@ -81,27 +82,27 @@ namespace Parking.Data.UnitTests
         [Fact]
         public static async Task SaveReservations_handles_empty_list()
         {
-            var mockRawItemRepository = new Mock<IRawItemRepository>();
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>();
 
-            var reservationRepository = new ReservationRepository(mockRawItemRepository.Object);
+            var reservationRepository = new ReservationRepository(mockDatabaseProvider.Object);
 
             await reservationRepository.SaveReservations(new List<Reservation>());
 
-            mockRawItemRepository.VerifyNoOtherCalls();
+            mockDatabaseProvider.VerifyNoOtherCalls();
         }
 
         [Fact]
         public static async Task SaveReservations_converts_reservations_to_raw_items()
         {
-            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
-            mockRawItemRepository
-                .Setup(r => r.GetReservations(It.IsAny<YearMonth>()))
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
+            mockDatabaseProvider
+                .Setup(p => p.GetReservations(It.IsAny<YearMonth>()))
                 .ReturnsAsync(new List<RawItem>());
-            mockRawItemRepository
-                .Setup(r => r.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
+            mockDatabaseProvider
+                .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
                 .Returns(Task.CompletedTask);
 
-            var reservationRepository = new ReservationRepository(mockRawItemRepository.Object);
+            var reservationRepository = new ReservationRepository(mockDatabaseProvider.Object);
             await reservationRepository.SaveReservations(
                 new[]
                 {
@@ -122,33 +123,33 @@ namespace Parking.Data.UnitTests
                     KeyValuePair.Create("01", new List<string> {"User1", "User2"}))
             };
 
-            mockRawItemRepository.Verify(r => r.SaveItems(
-                    It.Is<IEnumerable<RawItem>>(actual => CheckRawItems(expectedRawItems, actual.ToList()))),
+            mockDatabaseProvider.Verify(
+                p => p.SaveItems(It.Is<IEnumerable<RawItem>>(actual => CheckRawItems(expectedRawItems, actual.ToList()))),
                 Times.Once);
         }
 
         [Fact]
         public static async Task SaveReservations_combines_new_and_existing_reservations()
         {
-            var mockRawItemRepository = new Mock<IRawItemRepository>(MockBehavior.Strict);
-            mockRawItemRepository
-                .Setup(r => r.GetReservations(new YearMonth(2021, 3)))
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
+            mockDatabaseProvider
+                .Setup(p => p.GetReservations(new YearMonth(2021, 3)))
                 .ReturnsAsync(new[]
                 {
                     CreateRawItem("2021-03", KeyValuePair.Create("01", new List<string>{"User1", "User2"})),
                     CreateRawItem("2021-03", KeyValuePair.Create("02", new List<string>{"User1"}))
                 });
-            mockRawItemRepository
-                .Setup(r => r.GetReservations(new YearMonth(2021, 4)))
+            mockDatabaseProvider
+                .Setup(p => p.GetReservations(new YearMonth(2021, 4)))
                 .ReturnsAsync(new[]
                 {
                     CreateRawItem("2021-04", KeyValuePair.Create("03", new List<string>{"User1", "User2"}))
                 });
-            mockRawItemRepository
-                .Setup(r => r.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
+            mockDatabaseProvider
+                .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
                 .Returns(Task.CompletedTask);
 
-            var reservationRepository = new ReservationRepository(mockRawItemRepository.Object);
+            var reservationRepository = new ReservationRepository(mockDatabaseProvider.Object);
             await reservationRepository.SaveReservations(
                 new[]
                 {
@@ -170,17 +171,17 @@ namespace Parking.Data.UnitTests
                     KeyValuePair.Create("03", new List<string> {"User3"}))
             };
 
-            mockRawItemRepository.Verify(r => r.SaveItems(
-                    It.Is<IEnumerable<RawItem>>(actual => CheckRawItems(expectedRawItems, actual.ToList()))),
+            mockDatabaseProvider.Verify(
+                p => p.SaveItems(It.Is<IEnumerable<RawItem>>(actual => CheckRawItems(expectedRawItems, actual.ToList()))),
                 Times.Once);
         }
 
         private static void SetupMockRepository(
-            Mock<IRawItemRepository> mockRawItemRepository,
+            Mock<IDatabaseProvider> mockDatabaseProvider,
             YearMonth yearMonth,
             params RawItem[] mockResult) =>
-            mockRawItemRepository
-                .Setup(r => r.GetReservations(yearMonth))
+            mockDatabaseProvider
+                .Setup(p => p.GetReservations(yearMonth))
                 .Returns(Task.FromResult((IReadOnlyCollection<RawItem>)mockResult));
 
         private static RawItem CreateRawItem(

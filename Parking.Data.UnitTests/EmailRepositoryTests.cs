@@ -1,6 +1,7 @@
 ﻿namespace Parking.Data.UnitTests
 {
     using System.Threading.Tasks;
+    using Aws;
     using Business.EmailTemplates;
     using Moq;
     using Xunit;
@@ -10,9 +11,9 @@
         [Fact]
         public static async Task Converts_email_to_raw_data()
         {
-            var mockRawItemRepository = new Mock<IRawItemRepository>();
+            var mockStorageProvider = new Mock<IStorageProvider>();
 
-            var emailRepository = new EmailRepository(mockRawItemRepository.Object, Mock.Of<IEmailSender>());
+            var emailRepository = new EmailRepository(mockStorageProvider.Object, Mock.Of<IEmailSender>());
 
             await emailRepository.Send(
                 Mock.Of<IEmailTemplate>(e =>
@@ -29,8 +30,8 @@
                 "\"HtmlBody\":\"Test HTML body\"" +
                 "}";
 
-            mockRawItemRepository.Verify(r => r.SaveEmail(ExpectedJson), Times.Once);
-            mockRawItemRepository.VerifyNoOtherCalls();
+            mockStorageProvider.Verify(p => p.SaveEmail(ExpectedJson), Times.Once);
+            mockStorageProvider.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -38,7 +39,7 @@
         {
             var mockEmailSender = new Mock<IEmailSender>();
 
-            var emailRepository = new EmailRepository(Mock.Of<IRawItemRepository>(), mockEmailSender.Object);
+            var emailRepository = new EmailRepository(Mock.Of<IStorageProvider>(), mockEmailSender.Object);
 
             var emailTemplate = Mock.Of<IEmailTemplate>();
 
