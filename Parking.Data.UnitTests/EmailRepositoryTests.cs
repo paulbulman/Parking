@@ -13,7 +13,7 @@
         {
             var mockStorageProvider = new Mock<IStorageProvider>();
 
-            var emailRepository = new EmailRepository(mockStorageProvider.Object, Mock.Of<IEmailSender>());
+            var emailRepository = new EmailRepository(Mock.Of<IEmailProvider>(), mockStorageProvider.Object);
 
             await emailRepository.Send(
                 Mock.Of<IEmailTemplate>(e =>
@@ -37,16 +37,16 @@
         [Fact]
         public static async Task Sends_email()
         {
-            var mockEmailSender = new Mock<IEmailSender>();
+            var mockEmailProvider = new Mock<IEmailProvider>();
 
-            var emailRepository = new EmailRepository(Mock.Of<IStorageProvider>(), mockEmailSender.Object);
+            var emailRepository = new EmailRepository(mockEmailProvider.Object, Mock.Of<IStorageProvider>());
 
             var emailTemplate = Mock.Of<IEmailTemplate>();
 
             await emailRepository.Send(emailTemplate);
 
-            mockEmailSender.Verify(s => s.Send(emailTemplate), Times.Once);
-            mockEmailSender.VerifyNoOtherCalls();
+            mockEmailProvider.Verify(s => s.Send(emailTemplate), Times.Once);
+            mockEmailProvider.VerifyNoOtherCalls();
         }
     }
 }

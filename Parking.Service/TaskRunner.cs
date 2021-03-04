@@ -5,6 +5,7 @@
     using Amazon.CognitoIdentityProvider;
     using Amazon.DynamoDBv2;
     using Amazon.S3;
+    using Amazon.SimpleEmail;
     using Amazon.SimpleNotificationService;
     using Amazon.SimpleSystemsManagement;
     using Business;
@@ -70,13 +71,14 @@
             services.AddScoped<IAmazonCognitoIdentityProvider, AmazonCognitoIdentityProviderClient>();
             services.AddScoped<IAmazonDynamoDB, AmazonDynamoDBClient>();
             services.AddScoped<IAmazonS3, AmazonS3Client>();
+            services.AddScoped<IAmazonSimpleEmailService>(provider => new AmazonSimpleEmailServiceClient(EmailProvider.Config));
             services.AddScoped<IAmazonSimpleNotificationService, AmazonSimpleNotificationServiceClient>();
             services.AddScoped<IAmazonSimpleSystemsManagement, AmazonSimpleSystemsManagementClient>();
 
+            services.AddScoped<IEmailProvider, EmailProvider>();
             services.AddScoped<IDatabaseProvider, DatabaseProvider>();
             services.AddScoped<IIdentityProvider, IdentityProvider>();
             services.AddScoped<INotificationProvider, NotificationProvider>();
-            services.AddScoped<ISecretProvider, SecretProvider>();
             services.AddScoped<IStorageProvider, StorageProvider>();
 
             services.AddScoped<IAllocationCreator, AllocationCreator>();
@@ -85,7 +87,6 @@
             services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
             services.AddScoped<IDateCalculator, DateCalculator>();
             services.AddScoped<IEmailRepository, EmailRepository>();
-            services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<Random>();
             services.AddScoped<IRequestRepository, RequestRepository>();

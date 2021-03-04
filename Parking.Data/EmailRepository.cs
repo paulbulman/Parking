@@ -8,20 +8,20 @@
 
     public class EmailRepository : IEmailRepository
     {
+        private readonly IEmailProvider emailProvider;
         private readonly IStorageProvider storageProvider;
-        private readonly IEmailSender emailSender;
 
-        public EmailRepository(IStorageProvider storageProvider, IEmailSender emailSender)
+        public EmailRepository(IEmailProvider emailProvider, IStorageProvider storageProvider)
         {
             this.storageProvider = storageProvider;
-            this.emailSender = emailSender;
+            this.emailProvider = emailProvider;
         }
 
         public async Task Send(IEmailTemplate emailTemplate)
         {
             await this.storageProvider.SaveEmail(JsonSerializer.Serialize(emailTemplate));
 
-            await this.emailSender.Send(emailTemplate);
+            await this.emailProvider.Send(emailTemplate);
         }
     }
 }
