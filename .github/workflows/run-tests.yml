@@ -23,3 +23,5 @@ jobs:
       run: dotnet test Parking.Business.UnitTests/Parking.Business.UnitTests.csproj
     - name: Data unit tests
       run: dotnet test Parking.Data.UnitTests/Parking.Data.UnitTests.csproj
+    - name: API integration tests
+      run: dotnet test Parking.Api.IntegrationTests/Parking.Api.IntegrationTests.csproj
