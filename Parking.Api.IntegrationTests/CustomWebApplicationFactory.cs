@@ -11,6 +11,8 @@
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.AspNetCore.TestHost;
     using Microsoft.Extensions.DependencyInjection;
+    using NodaTime;
+    using NodaTime.Testing;
 
     public class CustomWebApplicationFactory<TStartup>
         : WebApplicationFactory<TStartup> where TStartup : class
@@ -22,10 +24,12 @@
 
             builder.ConfigureTestServices(services =>
             {
+                services.AddSingleton<IClock>(new FakeClock(Instant.FromUtc(2021, 3, 1, 0, 0)));
+
                 services.AddScoped<IAmazonCognitoIdentityProvider>(
                     provider => new AmazonCognitoIdentityProviderClient(credentials, region));
                 services.AddScoped<IAmazonDynamoDB>(
-                    provider => new AmazonDynamoDBClient(credentials, region));
+                    provider => DatabaseClientFactory.Create());
                 services.AddScoped<IAmazonS3>(
                     provider => new AmazonS3Client(credentials, region));
                 services.AddScoped<IAmazonSimpleEmailService>(

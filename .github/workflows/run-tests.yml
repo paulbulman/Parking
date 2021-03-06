@@ -1,4 +1,6 @@
 name: Run tests
+env:
+  TABLE_NAME: parking-table
 
 on:
   push:
@@ -10,6 +12,14 @@ jobs:
   run-tests:
 
     runs-on: ubuntu-latest
+
+    services:
+      localstack:
+        image: localstack/localstack
+        ports:
+          - 4566:4566
+        env:
+          SERVICES: dynamodb,s3,ses,sns
 
     steps:
     - uses: actions/checkout@v2
