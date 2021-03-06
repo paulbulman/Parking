@@ -7,6 +7,7 @@
     using Amazon.DynamoDBv2;
     using Amazon.DynamoDBv2.DocumentModel;
     using Amazon.DynamoDBv2.Model;
+    using Model;
 
     public static class DatabaseHelpers
     {
@@ -21,7 +22,7 @@
             await CreateTable(client);
         }
 
-        public static async Task CreateUser(string userId, string firstName, string lastName)
+        public static async Task CreateUser(User user)
         {
             using var client = DatabaseClientFactory.Create();
 
@@ -29,13 +30,35 @@
 
             var document = new Document
             {
-                ["PK"] = $"USER#{userId}", 
+                ["PK"] = $"USER#{user.UserId}", 
                 ["SK"] = "PROFILE",
-                ["firstName"] = firstName,
-                ["lastName"] = lastName
+                ["alternativeRegistrationNumber"] = user.AlternativeRegistrationNumber,
+                ["commuteDistance"] = user.CommuteDistance,
+                ["emailAddress"] = user.EmailAddress,
+                ["firstName"] = user.FirstName,
+                ["lastName"] = user.LastName,
+                ["registrationNumber"] = user.RegistrationNumber
             };
 
             await table.PutItemAsync(document);
+        }
+
+        public static async Task<User> ReadUser(string userId)
+        {
+            using var client = DatabaseClientFactory.Create();
+
+            var table = Table.LoadTable(client, TableName);
+
+            var document = await table.GetItemAsync(new Primitive($"USER#{userId}"), new Primitive("PROFILE"));
+
+            return new User(
+                userId,
+                document["alternativeRegistrationNumber"],
+                decimal.Parse(document["commuteDistance"]),
+                document["emailAddress"],
+                document["firstName"],
+                document["lastName"],
+                document["registrationNumber"]);
         }
 
         public static async Task CreateRequests(string userId, string monthKey, Dictionary<string, string> requests)

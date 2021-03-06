@@ -19,7 +19,7 @@ jobs:
         ports:
           - 4566:4566
         env:
-          SERVICES: dynamodb,s3,ses,sns
+          SERVICES: dynamodb,s3,ses
 
     steps:
     - uses: actions/checkout@v2
