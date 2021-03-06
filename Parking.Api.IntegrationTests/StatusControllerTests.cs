@@ -5,11 +5,11 @@ namespace Parking.Api.IntegrationTests
     using Microsoft.AspNetCore.Mvc.Testing;
     using Xunit;
 
-    public class StatusControllerTests : IClassFixture<WebApplicationFactory<Startup>>
+    public class StatusControllerTests : IClassFixture<CustomWebApplicationFactory<Startup>>
     {
         private readonly WebApplicationFactory<Startup> factory;
 
-        public StatusControllerTests(WebApplicationFactory<Startup> factory) => this.factory = factory;
+        public StatusControllerTests(CustomWebApplicationFactory<Startup> factory) => this.factory = factory;
 
         [Fact]
         public async Task Returns_success()

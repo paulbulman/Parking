@@ -5,7 +5,6 @@ namespace Parking.Api
     using Amazon.S3;
     using Amazon.SimpleEmail;
     using Amazon.SimpleNotificationService;
-    using Amazon.SimpleSystemsManagement;
     using Authentication;
     using Business;
     using Business.Data;
@@ -54,7 +53,6 @@ namespace Parking.Api
             services.AddScoped<IAmazonS3, AmazonS3Client>();
             services.AddScoped<IAmazonSimpleEmailService>(provider => new AmazonSimpleEmailServiceClient(EmailProvider.Config));
             services.AddScoped<IAmazonSimpleNotificationService, AmazonSimpleNotificationServiceClient>();
-            services.AddScoped<IAmazonSimpleSystemsManagement, AmazonSimpleSystemsManagementClient>();
 
             services.AddScoped<IEmailProvider, EmailProvider>();
             services.AddScoped<IDatabaseProvider, DatabaseProvider>();
