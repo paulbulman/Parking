@@ -1,6 +1,7 @@
 name: Run tests
 env:
   TABLE_NAME: parking-table
+  TOPIC_NAME: arn:aws:sns:eu-west-2:0123456789ab:parking-notifications
 
 on:
   push:
@@ -19,7 +20,8 @@ jobs:
         ports:
           - 4566:4566
         env:
-          SERVICES: dynamodb,s3,ses
+          DEFAULT_REGION: eu-west-2
+          SERVICES: dynamodb,s3,ses,sns
 
     steps:
     - uses: actions/checkout@v2

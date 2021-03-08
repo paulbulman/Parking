@@ -7,15 +7,25 @@
     using Amazon.DynamoDBv2;
     using Amazon.DynamoDBv2.DocumentModel;
     using Amazon.DynamoDBv2.Model;
+    using Amazon.Runtime;
     using Model;
 
     public static class DatabaseHelpers
     {
         private static string TableName => Environment.GetEnvironmentVariable("TABLE_NAME");
 
+        public static AmazonDynamoDBClient CreateClient()
+        {
+            var credentials = new BasicAWSCredentials("__ACCESS_KEY__", "__SECRET_KEY__");
+
+            var config = new AmazonDynamoDBConfig { ServiceURL = "http://localhost:4566" };
+
+            return new AmazonDynamoDBClient(credentials, config);
+        }
+
         public static async Task ResetDatabase()
         {
-            using var client = DatabaseClientFactory.Create();
+            using var client = CreateClient();
 
             await DeleteTableIfExists(client);
 
@@ -24,13 +34,13 @@
 
         public static async Task CreateUser(User user)
         {
-            using var client = DatabaseClientFactory.Create();
+            using var client = CreateClient();
 
             var table = Table.LoadTable(client, TableName);
 
             var document = new Document
             {
-                ["PK"] = $"USER#{user.UserId}", 
+                ["PK"] = $"USER#{user.UserId}",
                 ["SK"] = "PROFILE",
                 ["alternativeRegistrationNumber"] = user.AlternativeRegistrationNumber,
                 ["commuteDistance"] = user.CommuteDistance,
@@ -45,7 +55,7 @@
 
         public static async Task<User> ReadUser(string userId)
         {
-            using var client = DatabaseClientFactory.Create();
+            using var client = CreateClient();
 
             var table = Table.LoadTable(client, TableName);
 
@@ -63,7 +73,7 @@
 
         public static async Task CreateRequests(string userId, string monthKey, Dictionary<string, string> requests)
         {
-            using var client = DatabaseClientFactory.Create();
+            using var client = CreateClient();
 
             var table = Table.LoadTable(client, TableName);
 
@@ -72,7 +82,7 @@
                 ["PK"] = $"USER#{userId}",
                 ["SK"] = $"REQUESTS#{monthKey}",
                 ["requests"] = new Document(requests.ToDictionary(
-                    day => day.Key, 
+                    day => day.Key,
                     day => (DynamoDBEntry)new Primitive(day.Value)))
             };
 
