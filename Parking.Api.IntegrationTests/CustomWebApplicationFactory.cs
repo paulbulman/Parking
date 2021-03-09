@@ -6,7 +6,6 @@
     using Amazon.CognitoIdentityProvider.Model;
     using Amazon.DynamoDBv2;
     using Amazon.Runtime;
-    using Amazon.S3;
     using Amazon.SimpleEmail;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc.Testing;
@@ -36,9 +35,8 @@
                 services.AddScoped(provider => mockAmazonCognitoIdentityProvider.Object);
                 services.AddScoped<IAmazonDynamoDB>(provider => DatabaseHelpers.CreateClient());
                 services.AddScoped(provider => NotificationHelpers.CreateClient());
-                
-                services.AddScoped<IAmazonS3>(
-                    provider => new AmazonS3Client(credentials, region));
+                services.AddScoped(provider => StorageHelpers.CreateClient());
+
                 services.AddScoped<IAmazonSimpleEmailService>(
                     provider => new AmazonSimpleEmailServiceClient(credentials, region));
             });

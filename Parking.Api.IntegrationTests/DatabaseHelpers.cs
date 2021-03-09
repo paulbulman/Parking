@@ -89,6 +89,41 @@
             await table.PutItemAsync(document);
         }
 
+        public static async Task CreateReservations(string monthKey, Dictionary<string, List<string>> reservations)
+        {
+            using var client = CreateClient();
+
+            var table = Table.LoadTable(client, TableName);
+
+            var document = new Document
+            {
+                ["PK"] = "GLOBAL",
+                ["SK"] = $"RESERVATIONS#{monthKey}",
+                ["reservations"] = new Document(reservations.ToDictionary(
+                    day => day.Key,
+                    day => (DynamoDBEntry)new DynamoDBList(day.Value.Select(r => new Primitive(r)))))
+            };
+
+            await table.PutItemAsync(document);
+        }
+
+        public static async Task<IDictionary<string, IReadOnlyCollection<string>>> ReadReservations(string monthKey)
+        {
+            using var client = CreateClient();
+
+            var table = Table.LoadTable(client, TableName);
+
+            var document = await table.GetItemAsync(new Primitive("GLOBAL"), new Primitive($"RESERVATIONS#{monthKey}"));
+
+            return document["reservations"].AsDocument().ToDictionary(
+                dailyData => dailyData.Key,
+                dailyData => (IReadOnlyCollection<string>)dailyData.Value
+                    .AsDynamoDBList()
+                    .Entries
+                    .Select(e => e.AsString())
+                    .ToArray());
+        }
+
         private static async Task DeleteTableIfExists(IAmazonDynamoDB client)
         {
             var tables = await client.ListTablesAsync();

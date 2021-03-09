@@ -1,5 +1,6 @@
 name: Run tests
 env:
+  DATA_BUCKET_NAME: parking-data
   TABLE_NAME: parking-table
   TOPIC_NAME: arn:aws:sns:eu-west-2:0123456789ab:parking-notifications
 
