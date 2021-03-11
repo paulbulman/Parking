@@ -4,13 +4,14 @@ namespace Parking.Api.IntegrationTests
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Helpers;
     using Json.Overview;
     using Microsoft.AspNetCore.Mvc.Testing;
     using NodaTime.Testing.Extensions;
     using TestHelpers;
     using UnitTests.Json.Calendar;
     using Xunit;
-    using static HttpClientHelpers;
+    using static Helpers.HttpClientHelpers;
 
     [Collection("Database tests")]
     public class OverviewTests : IAsyncLifetime
@@ -36,9 +37,7 @@ namespace Parking.Api.IntegrationTests
 
             response.EnsureSuccessStatusCode();
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-
-            var overviewResponse = JsonHelpers.Deserialize<OverviewResponse>(responseContent);
+            var overviewResponse = await response.DeserializeAsType<OverviewResponse>();
 
             var day1Data = CalendarHelpers.GetDailyData(overviewResponse.Overview, 1.March(2021));
             var day2Data = CalendarHelpers.GetDailyData(overviewResponse.Overview, 2.March(2021));

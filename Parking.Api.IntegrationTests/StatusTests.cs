@@ -3,7 +3,7 @@ namespace Parking.Api.IntegrationTests
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Xunit;
-    using static HttpClientHelpers;
+    using static Helpers.HttpClientHelpers;
 
     public class StatusTests : IClassFixture<CustomWebApplicationFactory<Startup>>
     {

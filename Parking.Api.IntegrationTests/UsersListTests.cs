@@ -3,10 +3,11 @@
     using System.Linq;
     using System.Net;
     using System.Threading.Tasks;
+    using Helpers;
     using Json.UsersList;
     using TestHelpers;
     using Xunit;
-    using static HttpClientHelpers;
+    using static Helpers.HttpClientHelpers;
 
     [Collection("Database tests")]
     public class UsersListTests : IAsyncLifetime
@@ -51,9 +52,7 @@
 
             response.EnsureSuccessStatusCode();
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-
-            var multipleUsersResponse = JsonHelpers.Deserialize<UsersListResponse>(responseContent);
+            var multipleUsersResponse = await response.DeserializeAsType<UsersListResponse>();
 
             var actualUsers = multipleUsersResponse.Users.ToArray();
 

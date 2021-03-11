@@ -1,4 +1,4 @@
-﻿namespace Parking.Api.IntegrationTests
+﻿namespace Parking.Api.IntegrationTests.Helpers
 {
     using System;
     using System.Collections.Generic;
@@ -87,6 +87,19 @@
             };
 
             await table.PutItemAsync(document);
+        }
+
+        public static async Task<IDictionary<string, string>> ReadRequests(string userId, string monthKey)
+        {
+            using var client = CreateClient();
+
+            var table = Table.LoadTable(client, TableName);
+
+            var document = await table.GetItemAsync(new Primitive($"USER#{userId}"), new Primitive($"REQUESTS#{monthKey}"));
+
+            return document["requests"].AsDocument().ToDictionary(
+                dailyData => dailyData.Key,
+                dailyData => dailyData.Value.AsString());
         }
 
         public static async Task CreateReservations(string monthKey, Dictionary<string, List<string>> reservations)

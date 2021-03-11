@@ -3,16 +3,13 @@ namespace Parking.Api.IntegrationTests
 {
     using System.Linq;
     using System.Net;
-    using System.Net.Http;
-    using System.Net.Http.Json;
-    using System.Text;
-    using System.Text.Json;
     using System.Threading.Tasks;
+    using Helpers;
     using Json.Users;
     using Microsoft.AspNetCore.Mvc.Testing;
     using TestHelpers;
     using Xunit;
-    using static HttpClientHelpers;
+    using static Helpers.HttpClientHelpers;
 
     [Collection("Database tests")]
     public class UsersTests : IAsyncLifetime
@@ -69,9 +66,7 @@ namespace Parking.Api.IntegrationTests
 
             response.EnsureSuccessStatusCode();
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-
-            var multipleUsersResponse = JsonHelpers.Deserialize<MultipleUsersResponse>(responseContent);
+            var multipleUsersResponse = await response.DeserializeAsType<MultipleUsersResponse>();
 
             var actualUsers = multipleUsersResponse.Users.ToArray();
 
@@ -101,9 +96,7 @@ namespace Parking.Api.IntegrationTests
 
             response.EnsureSuccessStatusCode();
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-
-            var multipleUsersResponse = JsonHelpers.Deserialize<SingleUserResponse>(responseContent);
+            var multipleUsersResponse = await response.DeserializeAsType<SingleUserResponse>();
 
             var actualUser = multipleUsersResponse.User;
 
@@ -162,9 +155,7 @@ namespace Parking.Api.IntegrationTests
                 "__LAST_NAME__",
                 "__REG__");
 
-            var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
-
-            var response = await client.PatchAsync("/users/User2", content);
+            var response = await client.PatchAsJsonAsync("/users/User2", request);
 
             response.EnsureSuccessStatusCode();
 

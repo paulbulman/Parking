@@ -1,14 +1,12 @@
 ﻿namespace Parking.Api.IntegrationTests
 {
-    using System.Net.Http;
-    using System.Text;
-    using System.Text.Json;
     using System.Threading.Tasks;
+    using Helpers;
     using Json.Profiles;
     using Microsoft.AspNetCore.Mvc.Testing;
     using TestHelpers;
     using Xunit;
-    using static HttpClientHelpers;
+    using static Helpers.HttpClientHelpers;
 
     [Collection("Database tests")]
     public class ProfilesTests : IAsyncLifetime
@@ -36,9 +34,7 @@
 
             response.EnsureSuccessStatusCode();
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-
-            var multipleUsersResponse = JsonHelpers.Deserialize<ProfileResponse>(responseContent);
+            var multipleUsersResponse = await response.DeserializeAsType<ProfileResponse>();
 
             var actualProfile = multipleUsersResponse.Profile;
 
@@ -62,9 +58,7 @@
 
             var request = new ProfilePatchRequest("__ALTERNATIVE_REG__", "__REG__");
 
-            var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
-
-            var response = await client.PatchAsync("/profiles", content);
+            var response = await client.PatchAsJsonAsync("/profiles", request);
 
             response.EnsureSuccessStatusCode();
 

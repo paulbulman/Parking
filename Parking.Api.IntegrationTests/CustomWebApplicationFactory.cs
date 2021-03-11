@@ -7,6 +7,7 @@
     using Amazon.DynamoDBv2;
     using Amazon.Runtime;
     using Amazon.SimpleEmail;
+    using Helpers;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.AspNetCore.TestHost;

@@ -1,4 +1,4 @@
-﻿namespace Parking.Api.IntegrationTests
+﻿namespace Parking.Api.IntegrationTests.Helpers
 {
     using System;
     using System.Net.Http;

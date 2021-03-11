@@ -3,10 +3,11 @@ namespace Parking.Api.IntegrationTests
 {
     using System.Linq;
     using System.Threading.Tasks;
+    using Helpers;
     using Json.RegistrationNumbers;
     using TestHelpers;
     using Xunit;
-    using static HttpClientHelpers;
+    using static Helpers.HttpClientHelpers;
 
     [Collection("Database tests")]
     public class RegistrationNumbersTests : IAsyncLifetime
@@ -44,9 +45,7 @@ namespace Parking.Api.IntegrationTests
 
             response.EnsureSuccessStatusCode();
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-
-            var registrationNumbersResponse = JsonHelpers.Deserialize<RegistrationNumbersResponse>(responseContent);
+            var registrationNumbersResponse = await response.DeserializeAsType<RegistrationNumbersResponse>();
 
             var actualRegistrationNumbers = registrationNumbersResponse.RegistrationNumbers.ToArray();
 
