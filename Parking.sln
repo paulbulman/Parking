@@ -21,7 +21,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Parking.Api.UnitTests", "Pa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Parking.TestHelpers", "Parking.TestHelpers\Parking.TestHelpers.csproj", "{C13D6CB2-4E75-4128-98C8-0A63F59AA42B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parking.Api.IntegrationTests", "Parking.Api.IntegrationTests\Parking.Api.IntegrationTests.csproj", "{F269FA77-49E4-4120-82AC-C8AE9AE78FDA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Parking.Api.IntegrationTests", "Parking.Api.IntegrationTests\Parking.Api.IntegrationTests.csproj", "{F269FA77-49E4-4120-82AC-C8AE9AE78FDA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Parking.Service.IntegrationTests", "Parking.Service.IntegrationTests\Parking.Service.IntegrationTests.csproj", "{2BF32A59-2347-4452-A641-6E8A24A30D0D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +71,10 @@ Global
 		{F269FA77-49E4-4120-82AC-C8AE9AE78FDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F269FA77-49E4-4120-82AC-C8AE9AE78FDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F269FA77-49E4-4120-82AC-C8AE9AE78FDA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2BF32A59-2347-4452-A641-6E8A24A30D0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BF32A59-2347-4452-A641-6E8A24A30D0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BF32A59-2347-4452-A641-6E8A24A30D0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BF32A59-2347-4452-A641-6E8A24A30D0D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

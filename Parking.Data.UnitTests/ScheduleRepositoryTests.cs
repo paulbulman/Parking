@@ -9,7 +9,7 @@
     using NodaTime.Testing.Extensions;
     using Xunit;
 
-    public static class ScheduledTaskRepositoryTests
+    public static class ScheduleRepositoryTests
     {
         [Fact]
         public static async Task Converts_raw_data_to_scheduled_tasks()

@@ -3,9 +3,9 @@
     using System.Linq;
     using System.Net;
     using System.Threading.Tasks;
-    using Helpers;
     using Json.UsersList;
     using TestHelpers;
+    using TestHelpers.Aws;
     using Xunit;
     using static Helpers.HttpClientHelpers;
 

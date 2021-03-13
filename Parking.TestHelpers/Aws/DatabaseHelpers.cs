@@ -1,4 +1,4 @@
-﻿namespace Parking.Api.IntegrationTests.Helpers
+﻿namespace Parking.TestHelpers.Aws
 {
     using System;
     using System.Collections.Generic;
@@ -14,7 +14,7 @@
     {
         private static string TableName => Environment.GetEnvironmentVariable("TABLE_NAME");
 
-        public static AmazonDynamoDBClient CreateClient()
+        public static IAmazonDynamoDB CreateClient()
         {
             var credentials = new BasicAWSCredentials("__ACCESS_KEY__", "__SECRET_KEY__");
 

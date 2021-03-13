@@ -1,10 +1,10 @@
 ﻿namespace Parking.Api.IntegrationTests
 {
     using System.Threading.Tasks;
-    using Helpers;
     using Json.Profiles;
     using Microsoft.AspNetCore.Mvc.Testing;
     using TestHelpers;
+    using TestHelpers.Aws;
     using Xunit;
     using static Helpers.HttpClientHelpers;
 

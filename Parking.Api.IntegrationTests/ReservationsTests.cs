@@ -5,10 +5,10 @@ namespace Parking.Api.IntegrationTests
     using System.Linq;
     using System.Net;
     using System.Threading.Tasks;
-    using Helpers;
     using Json.Reservations;
     using NodaTime.Testing.Extensions;
     using TestHelpers;
+    using TestHelpers.Aws;
     using UnitTests.Json.Calendar;
     using Xunit;
     using static Helpers.HttpClientHelpers;

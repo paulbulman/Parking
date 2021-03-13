@@ -1,9 +1,13 @@
 name: Run tests
 env:
   DATA_BUCKET_NAME: parking-data
-  TRIGGER_BUCKET_NAME: parking-trigger
+  EMAIL_BUCKET_NAME: parking-emails
+  FROM_EMAIL_ADDRESS: parking@example.com
+  SMTP_CONFIG_SET: parking-config-set
   TABLE_NAME: parking-table
   TOPIC_NAME: arn:aws:sns:eu-west-2:0123456789ab:parking-notifications
+  TRIGGER_BUCKET_NAME: parking-trigger
+  USER_POOL_ID: eu-west-2_parking
 
 on:
   push:
@@ -39,3 +43,5 @@ jobs:
       run: dotnet test Parking.Data.UnitTests/Parking.Data.UnitTests.csproj
     - name: API integration tests
       run: dotnet test Parking.Api.IntegrationTests/Parking.Api.IntegrationTests.csproj
+    - name: Service integration tests
+      run: dotnet test Parking.Service.IntegrationTests/Parking.Service.IntegrationTests.csproj

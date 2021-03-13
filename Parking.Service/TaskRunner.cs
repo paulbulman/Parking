@@ -2,42 +2,28 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Amazon.CognitoIdentityProvider;
-    using Amazon.DynamoDBv2;
-    using Amazon.S3;
-    using Amazon.SimpleEmail;
-    using Amazon.SimpleNotificationService;
     using Business;
     using Business.Data;
     using Business.ScheduledTasks;
-    using Data;
-    using Data.Aws;
     using Microsoft.Extensions.DependencyInjection;
-    using NodaTime;
 
-    public class TaskRunner
+    public static class TaskRunner
     {
-        private readonly ServiceProvider serviceProvider;
-
-        public TaskRunner() => this.serviceProvider = BuildServiceProvider();
-
-        public async Task RunTasksAsync()
+        public static async Task RunTasksAsync(IServiceProvider provider)
         {
-            using var scope = this.serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
-
-            var triggerManager = scope.ServiceProvider.GetRequiredService<TriggerManager>();
+            var triggerManager = provider.GetRequiredService<TriggerManager>();
 
             try
             {
                 if (await triggerManager.ShouldRun())
                 {
-                    var requestUpdater = scope.ServiceProvider.GetRequiredService<RequestUpdater>();
+                    var requestUpdater = provider.GetRequiredService<RequestUpdater>();
                     var allocatedRequests = await requestUpdater.Update();
 
-                    var allocationNotifier = scope.ServiceProvider.GetRequiredService<AllocationNotifier>();
+                    var allocationNotifier = provider.GetRequiredService<AllocationNotifier>();
                     await allocationNotifier.Notify(allocatedRequests);
 
-                    var scheduledTaskRunner = scope.ServiceProvider.GetRequiredService<ScheduledTaskRunner>();
+                    var scheduledTaskRunner = provider.GetRequiredService<ScheduledTaskRunner>();
                     await scheduledTaskRunner.RunScheduledTasks();
                 }
 
@@ -45,7 +31,7 @@
             }
             catch (Exception initialException)
             {
-                var notificationRepository = scope.ServiceProvider.GetRequiredService<INotificationRepository>();
+                var notificationRepository = provider.GetRequiredService<INotificationRepository>();
 
                 try
                 {
@@ -59,50 +45,6 @@
 
                 throw;
             }
-        }
-
-        private static ServiceProvider BuildServiceProvider()
-        {
-            var services = new ServiceCollection();
-
-            services.AddSingleton<IClock>(SystemClock.Instance);
-
-            services.AddScoped<IAmazonCognitoIdentityProvider, AmazonCognitoIdentityProviderClient>();
-            services.AddScoped<IAmazonDynamoDB, AmazonDynamoDBClient>();
-            services.AddScoped<IAmazonS3, AmazonS3Client>();
-            services.AddScoped<IAmazonSimpleEmailService>(provider => new AmazonSimpleEmailServiceClient(EmailProvider.Config));
-            services.AddScoped<IAmazonSimpleNotificationService, AmazonSimpleNotificationServiceClient>();
-
-            services.AddScoped<IEmailProvider, EmailProvider>();
-            services.AddScoped<IDatabaseProvider, DatabaseProvider>();
-            services.AddScoped<IIdentityProvider, IdentityProvider>();
-            services.AddScoped<INotificationProvider, NotificationProvider>();
-            services.AddScoped<IStorageProvider, StorageProvider>();
-
-            services.AddScoped<IAllocationCreator, AllocationCreator>();
-            services.AddScoped<AllocationNotifier>();
-            services.AddScoped<IBankHolidayRepository, BankHolidayRepository>();
-            services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
-            services.AddScoped<IDateCalculator, DateCalculator>();
-            services.AddScoped<IEmailRepository, EmailRepository>();
-            services.AddScoped<INotificationRepository, NotificationRepository>();
-            services.AddScoped<Random>();
-            services.AddScoped<IRequestRepository, RequestRepository>();
-            services.AddScoped<IRequestSorter, RequestSorter>();
-            services.AddScoped<RequestUpdater>();
-            services.AddScoped<IReservationRepository, ReservationRepository>();
-            services.AddScoped<IScheduleRepository, ScheduleRepository>();
-            services.AddScoped<ScheduledTaskRunner>();
-            services.AddScoped<TriggerManager>();
-            services.AddScoped<ITriggerRepository, TriggerRepository>();
-            services.AddScoped<IUserRepository, UserRepository>();
-
-            services.AddScoped<IScheduledTask, DailyNotification>();
-            services.AddScoped<IScheduledTask, RequestReminder>();
-            services.AddScoped<IScheduledTask, ReservationReminder>();
-            services.AddScoped<IScheduledTask, WeeklyNotification>();
-
-            return services.BuildServiceProvider();
         }
     }
 }

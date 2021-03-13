@@ -4,11 +4,11 @@ namespace Parking.Api.IntegrationTests
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Helpers;
     using Json.Overview;
     using Microsoft.AspNetCore.Mvc.Testing;
     using NodaTime.Testing.Extensions;
     using TestHelpers;
+    using TestHelpers.Aws;
     using UnitTests.Json.Calendar;
     using Xunit;
     using static Helpers.HttpClientHelpers;

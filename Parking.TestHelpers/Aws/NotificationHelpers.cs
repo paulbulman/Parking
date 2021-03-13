@@ -1,4 +1,4 @@
-﻿namespace Parking.Api.IntegrationTests.Helpers
+﻿namespace Parking.TestHelpers.Aws
 {
     using System;
     using System.Linq;
