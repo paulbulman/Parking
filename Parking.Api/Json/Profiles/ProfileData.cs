@@ -2,14 +2,14 @@
 {
     public class ProfileData
     {
-        public ProfileData(string registrationNumber, string alternativeRegistrationNumber)
+        public ProfileData(string? registrationNumber, string? alternativeRegistrationNumber)
         {
             this.RegistrationNumber = registrationNumber;
             this.AlternativeRegistrationNumber = alternativeRegistrationNumber;
         }
 
-        public string RegistrationNumber { get; }
+        public string? RegistrationNumber { get; }
         
-        public string AlternativeRegistrationNumber { get; }
+        public string? AlternativeRegistrationNumber { get; }
     }
 }

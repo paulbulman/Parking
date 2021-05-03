@@ -6,12 +6,12 @@
     {
         public static User With(
             string userId,
-            string alternativeRegistrationNumber = null,
+            string? alternativeRegistrationNumber = null,
             decimal? commuteDistance = null,
             string emailAddress = "john.doe@example.com",
             string firstName = "John",
             string lastName = "Doe",
-            string registrationNumber = null) =>
+            string? registrationNumber = null) =>
             new User(
                 userId,
                 alternativeRegistrationNumber,

@@ -33,11 +33,11 @@
 
         public StorageProvider(IAmazonS3 s3Client) => this.s3Client = s3Client;
 
-        private static string DataBucketName => Environment.GetEnvironmentVariable("DATA_BUCKET_NAME");
+        private static string DataBucketName => Helpers.GetRequiredEnvironmentVariable("DATA_BUCKET_NAME");
 
-        private static string EmailBucketName => Environment.GetEnvironmentVariable("EMAIL_BUCKET_NAME");
+        private static string EmailBucketName => Helpers.GetRequiredEnvironmentVariable("EMAIL_BUCKET_NAME");
 
-        private static string TriggerBucketName => Environment.GetEnvironmentVariable("TRIGGER_BUCKET_NAME");
+        private static string TriggerBucketName => Helpers.GetRequiredEnvironmentVariable("TRIGGER_BUCKET_NAME");
 
         public async Task<string> GetConfiguration() => await this.GetBucketData(DataBucketName, "configuration.json");
 

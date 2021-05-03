@@ -35,21 +35,14 @@
         }
 
         private static IEnumerable<RegistrationNumbersData> CreateRegistrationNumbersData(User user) =>
-            new[]
-            {
-                new RegistrationNumbersData(
-                    FormatRegistrationNumber(user.RegistrationNumber),
-                    user.DisplayName()),
-                new RegistrationNumbersData(
-                    FormatRegistrationNumber(user.AlternativeRegistrationNumber),
-                    user.DisplayName())
-            };
+            new[] { user.RegistrationNumber, user.AlternativeRegistrationNumber }
+                .Where(r => !string.IsNullOrEmpty(r))
+                .Select(r => FormatRegistrationNumber(r!))
+                .Select(r => new RegistrationNumbersData(r, user.DisplayName()));
 
         private static string FormatRegistrationNumber(string rawRegistrationNumber) =>
-            string.IsNullOrEmpty(rawRegistrationNumber)
-                ? null
-                : rawRegistrationNumber
-                    .Replace(" ", string.Empty)
-                    .ToUpper(CultureInfo.InvariantCulture);
+            rawRegistrationNumber
+                .Replace(" ", string.Empty)
+                .ToUpper(CultureInfo.InvariantCulture);
     }
 }

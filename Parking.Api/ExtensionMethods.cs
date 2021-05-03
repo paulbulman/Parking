@@ -9,7 +9,7 @@
     public static class ExtensionMethods
     {
         public static string GetCognitoUserId(this ControllerBase controller) => 
-            controller.User?.Claims.SingleOrDefault(c => c.Type == "cognito:username")?.Value;
+            controller.User.Claims.Single(c => c.Type == "cognito:username").Value;
 
         public static IOrderedEnumerable<User> OrderForDisplay(this IEnumerable<User> users) => users
             .OrderBy(u => u.LastName, StringComparer.InvariantCultureIgnoreCase)

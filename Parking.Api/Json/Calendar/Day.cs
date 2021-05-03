@@ -8,7 +8,7 @@
         {
         }
 
-        private Day(LocalDate localDate, T data, bool hidden)
+        private Day(LocalDate localDate, T? data, bool hidden)
         {
             this.LocalDate = localDate;
             this.Data = data;
@@ -19,7 +19,7 @@
 
         public LocalDate LocalDate { get; }
         
-        public T Data { get; }
+        public T? Data { get; }
 
         public bool Hidden { get; }
     }

@@ -1,6 +1,5 @@
 ﻿namespace Parking.Data.Aws
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -18,7 +17,7 @@
         
         Task<IReadOnlyCollection<RawItem>> GetReservations(YearMonth yearMonth);
         
-        Task<RawItem> GetUser(string userId);
+        Task<RawItem?> GetUser(string userId);
         
         Task<IReadOnlyCollection<RawItem>> GetUsers();
         
@@ -33,7 +32,7 @@
 
         public DatabaseProvider(IAmazonDynamoDB dynamoDbClient) => this.dynamoDbClient = dynamoDbClient;
         
-        private static string TableName => Environment.GetEnvironmentVariable("TABLE_NAME");
+        private static string TableName => Helpers.GetRequiredEnvironmentVariable("TABLE_NAME");
 
         public async Task<IReadOnlyCollection<RawItem>> GetRequests(YearMonth yearMonth)
         {
@@ -57,7 +56,7 @@
 
             return await this.QueryPartitionKey(HashKeyValue, conditionValue);
         }
-        public async Task<RawItem> GetUser(string userId)
+        public async Task<RawItem?> GetUser(string userId)
         {
             var hashKeyValue = $"USER#{userId}";
             const string ConditionValue = "PROFILE";

@@ -1,6 +1,5 @@
 ﻿namespace Parking.TestHelpers.Aws
 {
-    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
@@ -8,14 +7,15 @@
     using Amazon.Runtime;
     using Amazon.S3;
     using Amazon.S3.Model;
+    using Data;
 
     public static class StorageHelpers
     {
-        private static string DataBucketName => Environment.GetEnvironmentVariable("DATA_BUCKET_NAME");
+        private static string DataBucketName => Helpers.GetRequiredEnvironmentVariable("DATA_BUCKET_NAME");
 
-        private static string EmailBucketName => Environment.GetEnvironmentVariable("EMAIL_BUCKET_NAME");
+        private static string EmailBucketName => Helpers.GetRequiredEnvironmentVariable("EMAIL_BUCKET_NAME");
 
-        private static string TriggerBucketName => Environment.GetEnvironmentVariable("TRIGGER_BUCKET_NAME");
+        private static string TriggerBucketName => Helpers.GetRequiredEnvironmentVariable("TRIGGER_BUCKET_NAME");
 
         public static IAmazonS3 CreateClient()
         {

@@ -2,7 +2,7 @@
 {
     public class UsersData
     {
-        public UsersData(string userId, string alternativeRegistrationNumber, decimal? commuteDistance, string firstName, string lastName, string registrationNumber)
+        public UsersData(string userId, string? alternativeRegistrationNumber, decimal? commuteDistance, string firstName, string lastName, string? registrationNumber)
         {
             this.UserId = userId;
             this.AlternativeRegistrationNumber = alternativeRegistrationNumber;
@@ -14,7 +14,7 @@
         
         public string UserId { get; }
         
-        public string AlternativeRegistrationNumber { get; }
+        public string? AlternativeRegistrationNumber { get; }
         
         public decimal? CommuteDistance { get; }
         
@@ -22,6 +22,6 @@
         
         public string LastName { get; }
         
-        public string RegistrationNumber { get; }
+        public string? RegistrationNumber { get; }
     }
 }

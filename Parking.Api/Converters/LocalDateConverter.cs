@@ -8,7 +8,7 @@
 
     public class LocalDateConverter : JsonConverter<LocalDate>
     {
-        public override LocalDate Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override LocalDate Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions? options)
         {
             var rawValue = reader.GetString();
 
@@ -20,7 +20,7 @@
             return LocalDatePattern.Iso.Parse(rawValue).GetValueOrThrow();
         }
 
-        public override void Write(Utf8JsonWriter writer, LocalDate value, JsonSerializerOptions options) =>
+        public override void Write(Utf8JsonWriter writer, LocalDate value, JsonSerializerOptions? options) =>
             writer.WriteStringValue(LocalDatePattern.Iso.Format(value));
     }
 }

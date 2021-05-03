@@ -20,11 +20,11 @@ namespace Parking.Data.UnitTests
             var userRepository = new UserRepository(Mock.Of<IDatabaseProvider>(), mockIdentityProvider.Object);
 
             var user = CreateUser.With(
-                userId: string.Empty, 
-                emailAddress: "john.doe@example.com", 
-                firstName: "John", 
+                userId: string.Empty,
+                emailAddress: "john.doe@example.com",
+                firstName: "John",
                 lastName: "Doe");
-            
+
             await userRepository.CreateUser(user);
 
             mockIdentityProvider.Verify(p => p.CreateUser("john.doe@example.com", "John", "Doe"), Times.Once);
@@ -102,7 +102,19 @@ namespace Parking.Data.UnitTests
 
             var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
-            mockDatabaseProvider.Setup(p => p.GetUser(UserId)).ReturnsAsync(new RawItem());
+            var rawItem = RawItem.CreateUser(
+                primaryKey: "USER#User1",
+                sortKey: "PROFILE",
+                alternativeRegistrationNumber: "W789XYZ",
+                commuteDistance: 1.23m,
+                emailAddress: "1@abc.com",
+                firstName: "Sean",
+                lastName: "Cantera",
+                registrationNumber: "AB12CDE");
+
+            mockDatabaseProvider
+                .Setup(p => p.GetUser(UserId))
+                .ReturnsAsync(rawItem);
 
             var userRepository = new UserRepository(mockDatabaseProvider.Object, Mock.Of<IIdentityProvider>());
 
@@ -118,7 +130,7 @@ namespace Parking.Data.UnitTests
 
             var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
-            mockDatabaseProvider.Setup(p => p.GetUser(UserId)).ReturnsAsync((RawItem)null);
+            mockDatabaseProvider.Setup(p => p.GetUser(UserId)).ReturnsAsync((RawItem?)null);
 
             var userRepository = new UserRepository(mockDatabaseProvider.Object, Mock.Of<IIdentityProvider>());
 
@@ -132,7 +144,7 @@ namespace Parking.Data.UnitTests
         {
             var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
-            mockDatabaseProvider.Setup(p => p.GetUser(It.IsAny<string>())).ReturnsAsync((RawItem)null);
+            mockDatabaseProvider.Setup(p => p.GetUser(It.IsAny<string>())).ReturnsAsync((RawItem?)null);
 
             var userRepository = new UserRepository(mockDatabaseProvider.Object, Mock.Of<IIdentityProvider>());
 
@@ -148,17 +160,15 @@ namespace Parking.Data.UnitTests
 
             var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
-            var rawItem = new RawItem
-            {
-                PrimaryKey = "USER#User1",
-                SortKey = "PROFILE",
-                AlternativeRegistrationNumber = "W789XYZ",
-                CommuteDistance = 1.23m,
-                EmailAddress = "1@abc.com",
-                FirstName = "Sean",
-                LastName = "Cantera",
-                RegistrationNumber = "AB12CDE"
-            };
+            var rawItem = RawItem.CreateUser(
+                primaryKey: "USER#User1",
+                sortKey: "PROFILE",
+                alternativeRegistrationNumber: "W789XYZ",
+                commuteDistance: 1.23m,
+                emailAddress: "1@abc.com",
+                firstName: "Sean",
+                lastName: "Cantera",
+                registrationNumber: "AB12CDE");
 
             mockDatabaseProvider.Setup(p => p.GetUser(UserId)).ReturnsAsync(rawItem);
 
@@ -168,7 +178,7 @@ namespace Parking.Data.UnitTests
 
             Assert.NotNull(result);
 
-            CheckUser(new[] { result }, UserId, "W789XYZ", 1.23m, "1@abc.com", "Sean", "Cantera", "AB12CDE");
+            CheckUser(new[] { result! }, UserId, "W789XYZ", 1.23m, "1@abc.com", "Sean", "Cantera", "AB12CDE");
         }
 
         [Fact]
@@ -178,9 +188,9 @@ namespace Parking.Data.UnitTests
 
             var rawItems = new[]
             {
-                new RawItem { PrimaryKey = "USER#Id1", SortKey = "PROFILE", AlternativeRegistrationNumber = "W789XYZ", CommuteDistance = 1.23m, EmailAddress = "1@abc.com", FirstName = "Sean", LastName = "Cantera", RegistrationNumber = "AB12CDE"},
-                new RawItem { PrimaryKey = "USER#Id2", SortKey = "PROFILE", CommuteDistance = 2.34m, EmailAddress = "2@abc.com", FirstName = "Clyde", LastName = "Memory", RegistrationNumber = "FG34HIJ" },
-                new RawItem { PrimaryKey = "USER#Id3", SortKey = "PROFILE", EmailAddress = "3@xyz.co.uk", FirstName = "Kalle", LastName = "Rochewell" }
+                RawItem.CreateUser(primaryKey: "USER#Id1", sortKey: "PROFILE", alternativeRegistrationNumber: "W789XYZ", commuteDistance: 1.23m, emailAddress: "1@abc.com", firstName: "Sean", lastName: "Cantera", registrationNumber: "AB12CDE"),
+                RawItem.CreateUser(primaryKey: "USER#Id2", sortKey: "PROFILE", alternativeRegistrationNumber: null, commuteDistance: 2.34m, emailAddress: "2@abc.com", firstName: "Clyde", lastName: "Memory", registrationNumber: "FG34HIJ"),
+                RawItem.CreateUser(primaryKey: "USER#Id3", sortKey: "PROFILE", alternativeRegistrationNumber: null, commuteDistance: null, emailAddress: "3@xyz.co.uk", firstName: "Kalle", lastName: "Rochewell", registrationNumber: null)
             };
             mockDatabaseProvider.Setup(p => p.GetUsers()).ReturnsAsync(rawItems);
 
@@ -204,9 +214,9 @@ namespace Parking.Data.UnitTests
 
             var rawUsers = new[]
             {
-                new RawItem { PrimaryKey = "USER#Id1", SortKey = "PROFILE", EmailAddress = "1@abc.com", FirstName = "Shalom", LastName = "Georgiades" },
-                new RawItem { PrimaryKey = "USER#Id2", SortKey = "PROFILE", EmailAddress = "2@abc.com", FirstName = "Randolf", LastName = "Blogg" },
-                new RawItem { PrimaryKey = "USER#Id3", SortKey = "PROFILE", EmailAddress = "3@xyz.co.uk", FirstName = "Kris", LastName = "Whibley" }
+                RawItem.CreateUser(primaryKey: "USER#Id1", sortKey: "PROFILE", alternativeRegistrationNumber: null, commuteDistance: null, emailAddress: "1@abc.com", firstName: "Shalom", lastName: "Georgiades", registrationNumber: null),
+                RawItem.CreateUser(primaryKey: "USER#Id2", sortKey: "PROFILE", alternativeRegistrationNumber: null, commuteDistance: null, emailAddress: "2@abc.com", firstName: "Randolf", lastName: "Blogg", registrationNumber: null),
+                RawItem.CreateUser(primaryKey: "USER#Id3", sortKey: "PROFILE", alternativeRegistrationNumber: null, commuteDistance: null, emailAddress: "3@xyz.co.uk", firstName: "Kris", lastName: "Whibley", registrationNumber: null)
             };
             mockDatabaseProvider.Setup(p => p.GetUsers()).ReturnsAsync(rawUsers);
 
@@ -275,12 +285,12 @@ namespace Parking.Data.UnitTests
         private static void CheckUser(
             IEnumerable<User> result,
             string expectedUserId,
-            string expectedAlternativeRegistrationNumber,
+            string? expectedAlternativeRegistrationNumber,
             decimal? expectedCommuteDistance,
             string expectedEmailAddress,
             string expectedFirstName,
             string expectedLastName,
-            string expectedRegistrationNumber)
+            string? expectedRegistrationNumber)
         {
             var actual = result.Where(u =>
                 u.UserId == expectedUserId &&

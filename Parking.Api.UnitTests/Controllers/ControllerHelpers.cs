@@ -11,11 +11,11 @@
 
             Assert.NotNull(okObjectResult);
 
-            var value = okObjectResult.Value as T;
+            var value = okObjectResult!.Value as T;
 
             Assert.NotNull(value);
 
-            return value;
+            return value!;
         }
     }
 }

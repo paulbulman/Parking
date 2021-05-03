@@ -3,12 +3,12 @@
     public class UserPostRequest
     {
         public UserPostRequest(
-            string alternativeRegistrationNumber,
+            string? alternativeRegistrationNumber,
             decimal? commuteDistance,
             string emailAddress,
             string firstName,
             string lastName,
-            string registrationNumber)
+            string? registrationNumber)
         {
             this.AlternativeRegistrationNumber = alternativeRegistrationNumber;
             this.CommuteDistance = commuteDistance;
@@ -18,7 +18,7 @@
             this.RegistrationNumber = registrationNumber;
         }
         
-        public string AlternativeRegistrationNumber { get; }
+        public string? AlternativeRegistrationNumber { get; }
         
         public decimal? CommuteDistance { get; }
         
@@ -28,6 +28,6 @@
         
         public string LastName { get; }
         
-        public string RegistrationNumber { get; }
+        public string? RegistrationNumber { get; }
     }
 }

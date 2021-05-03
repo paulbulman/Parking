@@ -2,14 +2,14 @@
 {
     public class ProfilePatchRequest
     {
-        public ProfilePatchRequest(string alternativeRegistrationNumber, string registrationNumber)
+        public ProfilePatchRequest(string? alternativeRegistrationNumber, string? registrationNumber)
         {
             this.RegistrationNumber = registrationNumber;
             this.AlternativeRegistrationNumber = alternativeRegistrationNumber;
         }
         
-        public string AlternativeRegistrationNumber { get; }
+        public string? AlternativeRegistrationNumber { get; }
         
-        public string RegistrationNumber { get; }
+        public string? RegistrationNumber { get; }
     }
 }

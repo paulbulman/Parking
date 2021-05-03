@@ -177,18 +177,18 @@ namespace Parking.Data.UnitTests
                 It.Is<IEnumerable<RawItem>>(actual => CheckRawItems(expectedRawItems, actual.ToList()))),
                 Times.Once);
         }
-        
+
         [Fact]
         public static async Task SaveRequests_combines_new_and_existing_requests()
         {
             var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
             mockDatabaseProvider
                 .Setup(p => p.GetRequests(new YearMonth(2020, 9)))
-                .ReturnsAsync(new []
+                .ReturnsAsync(new[]
                 {
                     CreateRawItem(
-                        "User1", 
-                        "2020-09", 
+                        "User1",
+                        "2020-09",
                         KeyValuePair.Create("01", "A"),
                         KeyValuePair.Create("02", "R")),
                     CreateRawItem(
@@ -240,7 +240,7 @@ namespace Parking.Data.UnitTests
                     "2020-10",
                     KeyValuePair.Create("03", "C"),
                     KeyValuePair.Create("04", "R")),
-                
+
             };
 
             mockDatabaseProvider.Verify(
@@ -269,12 +269,10 @@ namespace Parking.Data.UnitTests
             string userId,
             string monthKey,
             params KeyValuePair<string, string>[] requestData) =>
-            new RawItem
-            {
-                PrimaryKey = $"USER#{userId}",
-                SortKey = $"REQUESTS#{monthKey}",
-                Requests = new Dictionary<string, string>(requestData)
-            };
+            RawItem.CreateRequests(
+                primaryKey: $"USER#{userId}",
+                sortKey: $"REQUESTS#{monthKey}",
+                requests: new Dictionary<string, string>(requestData));
 
         private static void CheckRequest(
             IEnumerable<Request> result,
@@ -297,14 +295,14 @@ namespace Parking.Data.UnitTests
 
         private class RawRequestsComparer : IEqualityComparer<RawItem>
         {
-            public bool Equals(RawItem first, RawItem second) =>
+            public bool Equals(RawItem? first, RawItem? second) =>
                 first != null &&
                 second != null &&
                 first.PrimaryKey == second.PrimaryKey &&
                 first.SortKey == second.SortKey &&
                 CompareRequests(first.Requests, second.Requests);
 
-            private static bool CompareRequests(IDictionary<string, string> first, IDictionary<string, string> second) =>
+            private static bool CompareRequests(IDictionary<string, string>? first, IDictionary<string, string>? second) =>
                 first != null &&
                 second != null &&
                 first.Keys.Count == second.Keys.Count &&

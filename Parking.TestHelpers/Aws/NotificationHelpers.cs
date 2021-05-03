@@ -6,10 +6,11 @@
     using Amazon.Runtime;
     using Amazon.SimpleNotificationService;
     using Amazon.SimpleNotificationService.Model;
+    using Data;
 
     public static class NotificationHelpers
     {
-        private static string TopicArn => Environment.GetEnvironmentVariable("TOPIC_NAME");
+        private static string TopicArn => Helpers.GetRequiredEnvironmentVariable("TOPIC_NAME");
 
         public static IAmazonSimpleNotificationService CreateClient()
         {
@@ -47,7 +48,7 @@
         private static async Task CreateTopic(IAmazonSimpleNotificationService client, string topicName) =>
             await client.CreateTopicAsync(topicName);
 
-        private static async Task<Topic> GetExistingTopic(IAmazonSimpleNotificationService client, string topicName)
+        private static async Task<Topic?> GetExistingTopic(IAmazonSimpleNotificationService client, string topicName)
         {
             var topics = await client.ListTopicsAsync();
 
@@ -57,6 +58,11 @@
         private static async Task OverrideConfigWithFakeArn(IAmazonSimpleNotificationService client, string topicName)
         {
             var newTopic = await GetExistingTopic(client, topicName);
+
+            if (newTopic == null)
+            {
+                throw new InvalidOperationException($"Topic {topicName} does not exist.");
+            }
 
             Environment.SetEnvironmentVariable("TOPIC_NAME", newTopic.TopicArn);
         }

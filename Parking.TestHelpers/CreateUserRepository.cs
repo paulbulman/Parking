@@ -18,7 +18,7 @@
             return mockUserRepository.Object;
         }
 
-        public static IUserRepository WithUser(string userId, User user)
+        public static IUserRepository WithUser(string userId, User? user)
         {
             var mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
 

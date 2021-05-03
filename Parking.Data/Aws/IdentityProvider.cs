@@ -1,6 +1,5 @@
 ﻿namespace Parking.Data.Aws
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -23,7 +22,7 @@
         public IdentityProvider(IAmazonCognitoIdentityProvider cognitoIdentityProvider) =>
             this.cognitoIdentityProvider = cognitoIdentityProvider;
 
-        private static string UserPoolId => Environment.GetEnvironmentVariable("USER_POOL_ID");
+        private static string UserPoolId => Helpers.GetRequiredEnvironmentVariable("USER_POOL_ID");
 
         public async Task<string> CreateUser(string emailAddress, string firstName, string lastName)
         {

@@ -31,18 +31,6 @@ namespace Parking.Api.UnitTests
         }
 
         [Fact]
-        public static void GetCognitoUserId_returns_null_when_no_matching_claim_exists()
-        {
-            var user = new ClaimsPrincipal(new ClaimsIdentity());
-
-            var controller = CreateController(user);
-
-            var result = controller.GetCognitoUserId();
-
-            Assert.Null(result);
-        }
-
-        [Fact]
         public static void OrderForDisplay_sorts_case_insensitively_by_last_name_then_first_name()
         {
             var users = new[]

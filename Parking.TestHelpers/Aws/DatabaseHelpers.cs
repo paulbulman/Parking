@@ -1,6 +1,5 @@
 ﻿namespace Parking.TestHelpers.Aws
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -8,11 +7,12 @@
     using Amazon.DynamoDBv2.DocumentModel;
     using Amazon.DynamoDBv2.Model;
     using Amazon.Runtime;
+    using Data;
     using Model;
 
     public static class DatabaseHelpers
     {
-        private static string TableName => Environment.GetEnvironmentVariable("TABLE_NAME");
+        private static string TableName => Helpers.GetRequiredEnvironmentVariable("TABLE_NAME");
 
         public static IAmazonDynamoDB CreateClient()
         {

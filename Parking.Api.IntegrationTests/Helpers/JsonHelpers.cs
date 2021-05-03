@@ -1,5 +1,6 @@
 ﻿namespace Parking.Api.IntegrationTests.Helpers
 {
+    using System;
     using System.Text.Json;
     using Converters;
 
@@ -20,7 +21,14 @@
 
             options.Converters.Add(new LocalDateConverter());
 
-            return JsonSerializer.Deserialize<T>(json, options);
+            var result = JsonSerializer.Deserialize<T>(json, options);
+
+            if (result == null)
+            {
+                throw new ArgumentException("Could not deserialize JSON string to requested type.", nameof(json));
+            }
+
+            return result;
         }
     }
 }

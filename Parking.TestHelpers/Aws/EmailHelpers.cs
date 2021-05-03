@@ -1,14 +1,14 @@
 ﻿namespace Parking.TestHelpers.Aws
 {
-    using System;
     using System.Threading.Tasks;
     using Amazon.Runtime;
     using Amazon.SimpleEmail;
     using Amazon.SimpleEmail.Model;
+    using Data;
 
     public static class EmailHelpers
     {
-        private static string FromEmailAddress => Environment.GetEnvironmentVariable("FROM_EMAIL_ADDRESS");
+        private static string FromEmailAddress => Helpers.GetRequiredEnvironmentVariable("FROM_EMAIL_ADDRESS");
 
         public static IAmazonSimpleEmailService CreateClient()
         {

@@ -1,5 +1,6 @@
 ﻿namespace Parking.Api.Controllers
 {
+    using System;
     using System.Threading.Tasks;
     using Business.Data;
     using Json.Profiles;
@@ -19,6 +20,11 @@
         {
             var user = await this.userRepository.GetUser(this.GetCognitoUserId());
 
+            if (user == null)
+            {
+                throw new InvalidOperationException("Could not determine current user.");
+            }
+
             var response = CreateResponse(user);
 
             return this.Ok(response);
@@ -28,6 +34,11 @@
         public async Task<IActionResult> PatchAsync([FromBody] ProfilePatchRequest request)
         {
             var existingUser = await this.userRepository.GetUser(this.GetCognitoUserId());
+
+            if (existingUser == null)
+            {
+                throw new InvalidOperationException("Could not determine current user.");
+            }
 
             var updatedUser = new User(
                 existingUser.UserId,

@@ -99,7 +99,7 @@ namespace Parking.Service.IntegrationTests
             
             Assert.NotNull(savedEmail);
 
-            Assert.Equal(expectedTo, savedEmail.To);
+            Assert.Equal(expectedTo, savedEmail!.To);
             Assert.Equal(expectedSubject, savedEmail.Subject);
         }
 

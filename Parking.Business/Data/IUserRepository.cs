@@ -10,7 +10,7 @@
         
         Task<bool> UserExists(string userId);
 
-        Task<User> GetUser(string userId);
+        Task<User?> GetUser(string userId);
 
         Task<IReadOnlyCollection<User>> GetUsers();
 

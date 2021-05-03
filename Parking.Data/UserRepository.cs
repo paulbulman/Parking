@@ -1,5 +1,6 @@
 ﻿namespace Parking.Data
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -45,7 +46,7 @@
             return queryResult != null;
         }
 
-        public async Task<User> GetUser(string userId)
+        public async Task<User?> GetUser(string userId)
         {
             var queryResult = await this.databaseProvider.GetUser(userId);
 
@@ -79,8 +80,24 @@
                 .ToArray();
         }
 
-        private static User CreateUser(RawItem rawItem) =>
-            new User(
+        private static User CreateUser(RawItem rawItem)
+        {
+            if (rawItem.EmailAddress == null)
+            {
+                throw new InvalidOperationException("Email address cannot be null.");
+            }
+
+            if (rawItem.FirstName == null)
+            {
+                throw new InvalidOperationException("First name cannot be null.");
+            }
+
+            if (rawItem.LastName == null)
+            {
+                throw new InvalidOperationException("Last name cannot be null.");
+            }
+
+            return new User(
                 rawItem.PrimaryKey.Split('#')[1],
                 rawItem.AlternativeRegistrationNumber,
                 rawItem.CommuteDistance,
@@ -88,18 +105,17 @@
                 rawItem.FirstName,
                 rawItem.LastName,
                 rawItem.RegistrationNumber);
+        }
 
         private static RawItem CreateRawItem(User user) =>
-            new RawItem
-            {
-                PrimaryKey = $"USER#{user.UserId}",
-                SortKey = "PROFILE",
-                AlternativeRegistrationNumber = user.AlternativeRegistrationNumber,
-                CommuteDistance = user.CommuteDistance,
-                EmailAddress = user.EmailAddress,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                RegistrationNumber = user.RegistrationNumber
-            };
+            RawItem.CreateUser(
+                primaryKey: $"USER#{user.UserId}",
+                sortKey: "PROFILE",
+                alternativeRegistrationNumber: user.AlternativeRegistrationNumber,
+                commuteDistance: user.CommuteDistance,
+                emailAddress: user.EmailAddress,
+                firstName: user.FirstName,
+                lastName: user.LastName,
+                registrationNumber: user.RegistrationNumber);
     }
 }

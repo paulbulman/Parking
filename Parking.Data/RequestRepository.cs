@@ -93,16 +93,20 @@
             YearMonth yearMonth,
             LocalDate firstDate,
             LocalDate lastDate) =>
-            rawItems.SelectMany(r => CreateWholeMonthRequests(r.PrimaryKey, yearMonth, r.Requests))
+            rawItems.SelectMany(r => CreateWholeMonthRequests(r, yearMonth))
                 .Where(r => r.Date >= firstDate && r.Date <= lastDate)
                 .ToArray();
 
-        private static IEnumerable<Request> CreateWholeMonthRequests(
-            string primaryKey,
-            YearMonth yearMonth,
-            IDictionary<string, string> wholeMonthRawRequests)
+        private static IEnumerable<Request> CreateWholeMonthRequests(RawItem rawItem, YearMonth yearMonth)
         {
-            var userId = primaryKey.Split('#')[1];
+            var userId = rawItem.PrimaryKey.Split('#')[1];
+
+            var wholeMonthRawRequests = rawItem.Requests;
+
+            if (wholeMonthRawRequests == null)
+            {
+                throw new InvalidOperationException("Raw requests cannot be null.");
+            }
 
             return wholeMonthRawRequests.Select(singleDayRawRequest =>
                 CreateRequest(yearMonth, userId, singleDayRawRequest));
@@ -132,12 +136,10 @@
             new LocalDate(yearMonth.Year, yearMonth.Month, int.Parse(dayKey));
 
         private static RawItem CreateRawItem(string userId, IGrouping<YearMonth, Request> yearMonthRequests) =>
-            new RawItem
-            {
-                PrimaryKey = $"USER#{userId}",
-                SortKey = $"REQUESTS#{yearMonthRequests.Key.ToString("yyyy-MM", CultureInfo.InvariantCulture)}",
-                Requests = yearMonthRequests.ToDictionary(CreateRawRequestDayKey, CreateRawRequestStatus)
-            };
+            RawItem.CreateRequests(
+                primaryKey: $"USER#{userId}",
+                sortKey: $"REQUESTS#{yearMonthRequests.Key.ToString("yyyy-MM", CultureInfo.InvariantCulture)}",
+                requests: yearMonthRequests.ToDictionary(CreateRawRequestDayKey, CreateRawRequestStatus));
 
         private static string CreateRawRequestDayKey(Request request) =>
             request.Date.Day.ToString("D2", CultureInfo.InvariantCulture);

@@ -23,7 +23,10 @@ namespace Parking.Api.UnitTests.Controllers
             var controller = new OverviewController(
                 CreateDateCalculator.WithActiveDates(activeDates),
                 CreateRequestRepository.WithRequests(activeDates, new List<Request>()),
-                CreateUserRepository.WithUsers(new List<User>()));
+                CreateUserRepository.WithUsers(new List<User>()))
+            {
+                ControllerContext = CreateControllerContext.WithUsername("user1")
+            };
 
             var result = await controller.GetAsync();
 
@@ -60,7 +63,10 @@ namespace Parking.Api.UnitTests.Controllers
             var controller = new OverviewController(
                 CreateDateCalculator.WithActiveDates(activeDates),
                 CreateRequestRepository.WithRequests(activeDates, requests),
-                CreateUserRepository.WithUsers(users));
+                CreateUserRepository.WithUsers(users))
+            {
+                ControllerContext = CreateControllerContext.WithUsername("user1")
+            };
 
             var result = await controller.GetAsync();
 
@@ -80,7 +86,10 @@ namespace Parking.Api.UnitTests.Controllers
             var controller = new OverviewController(
                 CreateDateCalculator.WithActiveDates(activeDates),
                 CreateRequestRepository.WithRequests(activeDates, new List<Request>()),
-                CreateUserRepository.WithUsers(new List<User>()));
+                CreateUserRepository.WithUsers(new List<User>()))
+            {
+                ControllerContext = CreateControllerContext.WithUsername("user1")
+            };
 
             var result = await controller.GetAsync();
 
@@ -102,7 +111,10 @@ namespace Parking.Api.UnitTests.Controllers
             var controller = new OverviewController(
                 CreateDateCalculator.WithActiveDates(activeDates),
                 CreateRequestRepository.WithRequests(activeDates, requests),
-                CreateUserRepository.WithUsers(new List<User>()));
+                CreateUserRepository.WithUsers(new List<User>()))
+            {
+                ControllerContext = CreateControllerContext.WithUsername("user1")
+            };
 
             var result = await controller.GetAsync();
 

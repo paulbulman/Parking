@@ -277,7 +277,7 @@ namespace Parking.Api.UnitTests.Controllers
 
         private class ReservationsComparer : IEqualityComparer<Reservation>
         {
-            public bool Equals(Reservation first, Reservation second) =>
+            public bool Equals(Reservation? first, Reservation? second) =>
                 first != null &&
                 second != null &&
                 first.UserId == second.UserId &&

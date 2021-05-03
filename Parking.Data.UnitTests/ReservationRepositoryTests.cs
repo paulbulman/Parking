@@ -39,13 +39,13 @@ namespace Parking.Data.UnitTests
                 new YearMonth(2020, 8),
                 CreateRawItem(
                     "2020-08",
-                    KeyValuePair.Create("02", new List<string> {"User1", "User2"}),
-                    KeyValuePair.Create("13", new List<string> {"User1"})));
+                    KeyValuePair.Create("02", new List<string> { "User1", "User2" }),
+                    KeyValuePair.Create("13", new List<string> { "User1" })));
             SetupMockRepository(
                 mockDatabaseProvider,
                 new YearMonth(2020, 9),
                 CreateRawItem(
-                    "2020-09",KeyValuePair.Create("02", new List<string> { "User1" })));
+                    "2020-09", KeyValuePair.Create("02", new List<string> { "User1" })));
 
             var reservationRepository = new ReservationRepository(mockDatabaseProvider.Object);
 
@@ -187,12 +187,10 @@ namespace Parking.Data.UnitTests
         private static RawItem CreateRawItem(
             string monthKey,
             params KeyValuePair<string, List<string>>[] reservationData) =>
-            new RawItem
-            {
-                PrimaryKey = "GLOBAL",
-                SortKey = $"RESERVATIONS#{monthKey}",
-                Reservations = new Dictionary<string, List<string>>(reservationData)
-            };
+            RawItem.CreateReservations(
+                primaryKey: "GLOBAL",
+                sortKey: $"RESERVATIONS#{monthKey}",
+                reservations: new Dictionary<string, List<string>>(reservationData));
 
         private static void CheckReservation(
             IEnumerable<Reservation> result,
@@ -211,7 +209,7 @@ namespace Parking.Data.UnitTests
 
         private class RawReservationsComparer : IEqualityComparer<RawItem>
         {
-            public bool Equals(RawItem first, RawItem second) =>
+            public bool Equals(RawItem? first, RawItem? second) =>
                 first != null &&
                 second != null &&
                 first.PrimaryKey == second.PrimaryKey &&
@@ -219,8 +217,8 @@ namespace Parking.Data.UnitTests
                 CompareReservations(first.Reservations, second.Reservations);
 
             private static bool CompareReservations(
-                IDictionary<string, List<string>> first,
-                IDictionary<string, List<string>> second) =>
+                IDictionary<string, List<string>>? first,
+                IDictionary<string, List<string>>? second) =>
                 first != null &&
                 second != null &&
                 first.Keys.Count == second.Keys.Count &&

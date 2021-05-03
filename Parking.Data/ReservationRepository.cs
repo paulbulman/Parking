@@ -1,5 +1,6 @@
 ﻿namespace Parking.Data
 {
+    using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
@@ -25,7 +26,7 @@
                 var queryResult = await this.databaseProvider.GetReservations(yearMonth);
 
                 var wholeMonthReservations =
-                    queryResult.SelectMany(r => CreateWholeMonthReservations(yearMonth, r.Reservations));
+                    queryResult.SelectMany(r => CreateWholeMonthReservations(r, yearMonth));
 
                 matchingReservations.AddRange(
                     wholeMonthReservations.Where(r => r.Date >= firstDate && r.Date <= lastDate));
@@ -59,11 +60,18 @@
             await this.databaseProvider.SaveItems(rawItems);
         }
 
-        private static IEnumerable<Reservation> CreateWholeMonthReservations(
-            YearMonth yearMonth,
-            IDictionary<string, List<string>> wholeMonthRawReservations) =>
-            wholeMonthRawReservations.SelectMany(
+        private static IEnumerable<Reservation> CreateWholeMonthReservations(RawItem rawItem, YearMonth yearMonth)
+        {
+            var wholeMonthRawReservations = rawItem.Reservations;
+
+            if (wholeMonthRawReservations == null)
+            {
+                throw new InvalidOperationException("Raw reservations cannot be null.");
+            }
+
+            return wholeMonthRawReservations.SelectMany(
                 singleDayRawReservations => CreateSingleDayReservations(yearMonth, singleDayRawReservations));
+        }
 
         private static IEnumerable<Reservation> CreateSingleDayReservations(
             YearMonth yearMonth,
@@ -79,12 +87,10 @@
             newReservations.Any(updated => updated.Date == existingReservation.Date);
 
         private static RawItem CreateRawItem(IGrouping<YearMonth, Reservation> monthReservations) =>
-            new RawItem
-            {
-                PrimaryKey = "GLOBAL",
-                SortKey = $"RESERVATIONS#{monthReservations.Key.ToString("yyyy-MM", CultureInfo.InvariantCulture)}",
-                Reservations = CreateRawReservations(monthReservations)
-            };
+            RawItem.CreateReservations(
+                primaryKey: "GLOBAL",
+                sortKey: $"RESERVATIONS#{monthReservations.Key.ToString("yyyy-MM", CultureInfo.InvariantCulture)}",
+                reservations: CreateRawReservations(monthReservations));
 
         private static Dictionary<string, List<string>> CreateRawReservations(IEnumerable<Reservation> monthReservations) =>
             monthReservations

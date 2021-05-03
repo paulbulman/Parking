@@ -433,7 +433,7 @@
 
         private class RequestsComparer : IEqualityComparer<Request>
         {
-            public bool Equals(Request first, Request second) =>
+            public bool Equals(Request? first, Request? second) =>
                 first != null &&
                 second != null &&
                 first.UserId == second.UserId &&

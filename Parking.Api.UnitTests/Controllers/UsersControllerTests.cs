@@ -250,11 +250,11 @@ namespace Parking.Api.UnitTests.Controllers
         private static void CheckResult(
             UsersData actual,
             string expectedUserId,
-            string expectedAlternativeRegistrationNumber,
+            string? expectedAlternativeRegistrationNumber,
             decimal? expectedCommuteDistance,
             string expectedFirstName,
             string expectedLastName,
-            string expectedRegistrationNumber)
+            string? expectedRegistrationNumber)
         {
             Assert.Equal(expectedUserId, actual.UserId);
             Assert.Equal(expectedAlternativeRegistrationNumber, actual.AlternativeRegistrationNumber);

@@ -88,7 +88,7 @@
                 ? $"{header.Key}: {string.Join("; ", header.Value.Select(FormatAuthorizationHeaderValue))}"
                 : $"{header.Key}: {string.Join("; ", header.Value)}";
 
-        private static string FormatAuthorizationHeaderValue(string value) =>
+        private static string? FormatAuthorizationHeaderValue(string? value) =>
             value?.Length > 23 ? $"{value.Substring(0, 10)} *** {value[^10..]} (length {value.Length})" : value;
     }
 }

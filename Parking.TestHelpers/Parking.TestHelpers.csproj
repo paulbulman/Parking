@@ -2,14 +2,23 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.0.9" />
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.0.10" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.0.10" />
-    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.0.9" />
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.0.10" />
+    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.0.17" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.0.17" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.0.18" />
+    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.0.16" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
     <PackageReference Include="Moq" Version="4.16.1" />
     <PackageReference Include="NodaTime" Version="3.0.5" />
@@ -18,6 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Parking.Business\Parking.Business.csproj" />
+    <ProjectReference Include="..\Parking.Data\Parking.Data.csproj" />
     <ProjectReference Include="..\Parking.Model\Parking.Model.csproj" />
   </ItemGroup>
 
