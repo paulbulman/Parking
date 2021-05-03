@@ -4,6 +4,7 @@
     using System.Threading.Tasks;
     using Business.Data;
     using Json.Profiles;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Model;
 
@@ -16,6 +17,7 @@
         public ProfilesController(IUserRepository userRepository) => this.userRepository = userRepository;
 
         [HttpGet]
+        [ProducesResponseType(typeof(ProfileResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAsync()
         {
             var user = await this.userRepository.GetUser(this.GetCognitoUserId());
@@ -31,6 +33,7 @@
         }
 
         [HttpPatch]
+        [ProducesResponseType(typeof(ProfileResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> PatchAsync([FromBody] ProfilePatchRequest request)
         {
             var existingUser = await this.userRepository.GetUser(this.GetCognitoUserId());

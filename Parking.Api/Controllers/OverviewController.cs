@@ -7,6 +7,7 @@ namespace Parking.Api.Controllers
     using Business;
     using Business.Data;
     using Json.Overview;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Model;
     using NodaTime;
@@ -31,6 +32,7 @@ namespace Parking.Api.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(typeof(OverviewResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAsync()
         {
             var activeDates = this.dateCalculator.GetActiveDates();

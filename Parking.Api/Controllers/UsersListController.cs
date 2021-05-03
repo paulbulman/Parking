@@ -6,6 +6,7 @@
     using Business.Data;
     using Json.UsersList;
     using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Http;
 
     [Authorize(Policy = "IsTeamLeader")]
     [Route("[controller]")]
@@ -17,6 +18,7 @@
         public UsersListController(IUserRepository userRepository) => this.userRepository = userRepository;
 
         [HttpGet]
+        [ProducesResponseType(typeof(UsersListResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAsync()
         {
             var users = await this.userRepository.GetUsers();

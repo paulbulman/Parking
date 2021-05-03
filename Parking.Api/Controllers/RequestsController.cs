@@ -7,6 +7,7 @@
     using Business.Data;
     using Json.Requests;
     using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Model;
     using NodaTime;
@@ -37,6 +38,7 @@
         }
 
         [HttpGet]
+        [ProducesResponseType(typeof(RequestsResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAsync()
         {
             var userId = this.GetCognitoUserId();
@@ -48,6 +50,8 @@
 
         [Authorize(Policy = "IsTeamLeader")]
         [HttpGet("{userId}")]
+        [ProducesResponseType(typeof(RequestsResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetAsync(string userId)
         {
             if (!await this.userRepository.UserExists(userId))
@@ -61,6 +65,7 @@
         }
 
         [HttpPatch]
+        [ProducesResponseType(typeof(RequestsResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> PatchAsync([FromBody] RequestsPatchRequest request)
         {
             var userId = this.GetCognitoUserId();
@@ -74,6 +79,8 @@
 
         [Authorize(Policy = "IsTeamLeader")]
         [HttpPatch("{userId}")]
+        [ProducesResponseType(typeof(RequestsResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> PatchAsync(string userId, [FromBody] RequestsPatchRequest request)
         {
             if (!await this.userRepository.UserExists(userId))

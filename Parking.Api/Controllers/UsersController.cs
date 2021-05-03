@@ -5,6 +5,7 @@
     using Business.Data;
     using Json.Users;
     using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Model;
 
@@ -18,6 +19,7 @@
         public UsersController(IUserRepository userRepository) => this.userRepository = userRepository;
 
         [HttpGet]
+        [ProducesResponseType(typeof(MultipleUsersResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAsync()
         {
             var users = await this.userRepository.GetUsers();
@@ -30,6 +32,8 @@
         }
 
         [HttpGet("{userId}")]
+        [ProducesResponseType(typeof(SingleUserResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetAsync(string userId)
         {
             var user = await this.userRepository.GetUser(userId);
@@ -46,6 +50,8 @@
             return this.Ok(response);
         }
 
+        [HttpPost]
+        [ProducesResponseType(typeof(SingleUserResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> PostAsync([FromBody] UserPostRequest request)
         {
             var newUser = new User(
@@ -67,6 +73,8 @@
         }
 
         [HttpPatch("{userId}")]
+        [ProducesResponseType(typeof(SingleUserResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> PatchAsync(string userId, [FromBody] UserPatchRequest request)
         {
             var existingUser = await this.userRepository.GetUser(userId);

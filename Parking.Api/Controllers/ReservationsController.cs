@@ -8,6 +8,7 @@
     using Business.Data;
     using Json.Reservations;
     using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Http;
     using Model;
     using NodaTime;
     using static Json.Calendar.Helpers;
@@ -38,6 +39,7 @@
         }
 
         [HttpGet]
+        [ProducesResponseType(typeof(ReservationsResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAsync()
         {
             var response = await this.GetReservations();
@@ -46,6 +48,7 @@
         }
 
         [HttpPatch]
+        [ProducesResponseType(typeof(ReservationsResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> PatchAsync([FromBody] ReservationsPatchRequest request)
         {
             var activeDates = this.dateCalculator.GetActiveDates();

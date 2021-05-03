@@ -6,6 +6,7 @@
     using System.Threading.Tasks;
     using Business.Data;
     using Json.RegistrationNumbers;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Model;
 
@@ -18,6 +19,7 @@
         public RegistrationNumbersController(IUserRepository userRepository) => this.userRepository = userRepository;
 
         [HttpGet]
+        [ProducesResponseType(typeof(RegistrationNumbersResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAsync()
         {
             var users = await this.userRepository.GetUsers();

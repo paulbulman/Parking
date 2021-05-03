@@ -1,6 +1,7 @@
 ﻿namespace Parking.Api.Json.Reservations
 {
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
     using NodaTime;
 
     public class ReservationsPatchRequestDailyData
@@ -11,8 +12,10 @@
             this.UserIds = userIds;
         }
         
+        [Required]
         public LocalDate LocalDate { get; }
 
+        [Required]
         public IEnumerable<string> UserIds { get; }
     }
 }

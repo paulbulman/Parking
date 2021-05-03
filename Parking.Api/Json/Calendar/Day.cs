@@ -1,5 +1,6 @@
 ﻿namespace Parking.Api.Json.Calendar
 {
+    using System.ComponentModel.DataAnnotations;
     using NodaTime;
 
     public class Day<T> where T : class
@@ -17,10 +18,12 @@
 
         public static Day<T> CreateHidden(LocalDate localDate) => new Day<T>(localDate, null, hidden: true);
 
+        [Required]
         public LocalDate LocalDate { get; }
         
         public T? Data { get; }
 
+        [Required]
         public bool Hidden { get; }
     }
 }

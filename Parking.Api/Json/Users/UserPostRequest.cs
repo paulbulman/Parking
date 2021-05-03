@@ -1,5 +1,7 @@
 ﻿namespace Parking.Api.Json.Users
 {
+    using System.ComponentModel.DataAnnotations;
+
     public class UserPostRequest
     {
         public UserPostRequest(
@@ -22,10 +24,13 @@
         
         public decimal? CommuteDistance { get; }
         
+        [Required]
         public string EmailAddress { get; }
 
+        [Required]
         public string FirstName { get; }
         
+        [Required]
         public string LastName { get; }
         
         public string? RegistrationNumber { get; }
