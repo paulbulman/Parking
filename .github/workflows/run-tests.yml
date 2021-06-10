@@ -1,5 +1,6 @@
 name: Run tests
 env:
+  CORS_ORIGIN: https://example.com
   DATA_BUCKET_NAME: parking-data
   EMAIL_BUCKET_NAME: parking-emails
   FROM_EMAIL_ADDRESS: parking@example.com

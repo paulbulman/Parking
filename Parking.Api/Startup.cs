@@ -25,6 +25,16 @@ namespace Parking.Api
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            var corsOrigins = Helpers.GetRequiredEnvironmentVariable("CORS_ORIGIN").Split(",");
+
+            services.AddCors(options =>
+                options.AddDefaultPolicy(
+                    builder => builder
+                        .WithOrigins(corsOrigins)
+                        .AllowCredentials()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()));
+
             services
                 .AddControllers()
                 .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new LocalDateConverter()));
@@ -76,13 +86,15 @@ namespace Parking.Api
             {
                 app.UseDeveloperExceptionPage();
             }
-            
+
             app.UseMiddleware<HttpErrorMiddleware>();
             app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors();
 
             app.UseAuthentication();
             app.UseAuthorization();
