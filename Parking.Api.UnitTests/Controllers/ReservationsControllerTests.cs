@@ -219,6 +219,40 @@ namespace Parking.Api.UnitTests.Controllers
         }
 
         [Fact]
+        public static async Task Ignores_reservations_with_no_user_set()
+        {
+            var activeDates = new[] { 2.February(2021), 3.February(2021) };
+
+            var mockReservationRepository =
+                CreateReservationRepository.MockWithReservations(activeDates, new List<Reservation>());
+
+            mockReservationRepository
+                .Setup(r => r.SaveReservations(It.IsAny<IReadOnlyCollection<Reservation>>()))
+                .Returns(Task.CompletedTask);
+
+            var patchRequest = new ReservationsPatchRequest(new[]
+            {
+                new ReservationsPatchRequestDailyData(2.February(2021), new List<string> {"", "User1", "User2", ""}),
+            });
+
+            var controller = new ReservationsController(
+                CreateConfigurationRepository.WithDefaultConfiguration(),
+                CreateDateCalculator.WithActiveDates(activeDates),
+                mockReservationRepository.Object,
+                CreateUserRepository.WithUsers(new List<User>()));
+
+            await controller.PatchAsync(patchRequest);
+
+            var expectedSavedReservations = new[]
+            {
+                new Reservation("User1", 2.February(2021)),
+                new Reservation("User2", 2.February(2021)),
+            };
+
+            CheckSavedReservations(mockReservationRepository, expectedSavedReservations);
+        }
+
+        [Fact]
         public static async Task Returns_updated_reservations_after_saving()
         {
             var activeDates = new[] { 2.February(2021), 3.February(2021) };
