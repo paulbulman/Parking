@@ -98,8 +98,6 @@
         }
 
         private static IEnumerable<Reservation> CreateReservations(ReservationsPatchRequestDailyData dailyData) =>
-            dailyData.UserIds
-                .Where(userId => !string.IsNullOrEmpty(userId))
-                .Select(userId => new Reservation(userId, dailyData.LocalDate));
+            dailyData.UserIds.Select(userId => new Reservation(userId, dailyData.LocalDate));
     }
 }

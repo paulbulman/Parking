@@ -176,6 +176,40 @@ namespace Parking.Data.UnitTests
                 Times.Once);
         }
 
+        [Fact]
+        public static async Task SaveReservations_excludes_reservations_with_empty_user()
+        {
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
+            mockDatabaseProvider
+                .Setup(p => p.GetReservations(It.IsAny<YearMonth>()))
+                .ReturnsAsync(new List<RawItem>());
+            mockDatabaseProvider
+                .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
+                .Returns(Task.CompletedTask);
+
+            var reservationRepository = new ReservationRepository(mockDatabaseProvider.Object);
+            await reservationRepository.SaveReservations(
+                new[]
+                {
+                    new Reservation("User1", 1.March(2021)),
+                    new Reservation("", 1.March(2021)),
+                    new Reservation("", 2.March(2021)),
+                    new Reservation("User2", 2.March(2021)),
+                });
+
+            var expectedRawItems = new[]
+            {
+                CreateRawItem(
+                    "2021-03",
+                    KeyValuePair.Create("01", new List<string> {"User1"}),
+                    KeyValuePair.Create("02", new List<string> {"User2"})),
+            };
+
+            mockDatabaseProvider.Verify(
+                p => p.SaveItems(It.Is<IEnumerable<RawItem>>(actual => CheckRawItems(expectedRawItems, actual.ToList()))),
+                Times.Once);
+        }
+
         private static void SetupMockRepository(
             Mock<IDatabaseProvider> mockDatabaseProvider,
             YearMonth yearMonth,

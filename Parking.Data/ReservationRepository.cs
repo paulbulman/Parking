@@ -97,6 +97,6 @@
                 .GroupBy(r => r.Date)
                 .ToDictionary(
                     g => g.Key.Day.ToString("D2", CultureInfo.InvariantCulture),
-                    g => g.Select(r => r.UserId).ToList());
+                    g => g.Select(r => r.UserId).Where(u => !string.IsNullOrEmpty(u)).ToList());
     }
 }
