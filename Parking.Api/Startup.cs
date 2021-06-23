@@ -31,6 +31,7 @@ namespace Parking.Api
                 options.AddDefaultPolicy(
                     builder => builder
                         .WithOrigins(corsOrigins)
+                        .SetIsOriginAllowedToAllowWildcardSubdomains()
                         .AllowCredentials()
                         .AllowAnyHeader()
                         .AllowAnyMethod()));
