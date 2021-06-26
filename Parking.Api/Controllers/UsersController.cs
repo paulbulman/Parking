@@ -34,7 +34,7 @@
         [HttpGet("{userId}")]
         [ProducesResponseType(typeof(SingleUserResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetAsync(string userId)
+        public async Task<IActionResult> GetByIdAsync(string userId)
         {
             var user = await this.userRepository.GetUser(userId);
 

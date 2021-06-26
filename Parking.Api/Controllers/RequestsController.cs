@@ -52,7 +52,7 @@
         [HttpGet("{userId}")]
         [ProducesResponseType(typeof(RequestsResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetAsync(string userId)
+        public async Task<IActionResult> GetByIdAsync(string userId)
         {
             if (!await this.userRepository.UserExists(userId))
             {
@@ -81,7 +81,7 @@
         [HttpPatch("{userId}")]
         [ProducesResponseType(typeof(RequestsResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PatchAsync(string userId, [FromBody] RequestsPatchRequest request)
+        public async Task<IActionResult> PatchByIdAsync(string userId, [FromBody] RequestsPatchRequest request)
         {
             if (!await this.userRepository.UserExists(userId))
             {

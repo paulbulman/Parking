@@ -1,5 +1,7 @@
 namespace Parking.Api
 {
+    using System.Text.Json;
+    using System.Text.Json.Serialization;
     using Amazon.CognitoIdentityProvider;
     using Amazon.DynamoDBv2;
     using Amazon.S3;
@@ -38,7 +40,11 @@ namespace Parking.Api
 
             services
                 .AddControllers()
-                .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new LocalDateConverter()));
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new LocalDateConverter());
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+                });
 
             services.AddAuthentication("Default")
                 .AddScheme<AuthenticationSchemeOptions, DefaultAuthenticationHandler>("Default", null);

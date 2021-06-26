@@ -65,7 +65,7 @@ namespace Parking.Api.UnitTests.Controllers
 
             var controller = new UsersController(userRepository);
 
-            var result = await controller.GetAsync(UserId);
+            var result = await controller.GetByIdAsync(UserId);
 
             Assert.IsType<NotFoundResult>(result);
         }
@@ -87,7 +87,7 @@ namespace Parking.Api.UnitTests.Controllers
 
             var controller = new UsersController(userRepository);
 
-            var result = await controller.GetAsync(UserId);
+            var result = await controller.GetByIdAsync(UserId);
 
             var resultValue = GetResultValue<SingleUserResponse>(result);
 

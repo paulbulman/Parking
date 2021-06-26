@@ -2,6 +2,7 @@
 {
     using System;
     using System.Text.Json;
+    using System.Text.Json.Serialization;
     using Converters;
 
     public static class JsonHelpers
@@ -11,6 +12,7 @@
             var options = new JsonSerializerOptions();
 
             options.Converters.Add(new LocalDateConverter());
+            options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
 
             return JsonSerializer.Serialize(value, options);
         }
@@ -20,6 +22,7 @@
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
             options.Converters.Add(new LocalDateConverter());
+            options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
 
             var result = JsonSerializer.Deserialize<T>(json, options);
 

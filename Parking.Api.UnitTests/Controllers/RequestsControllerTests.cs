@@ -133,7 +133,7 @@
                 Mock.Of<ITriggerRepository>(),
                 CreateUserRepository.WithUserExists(UserId, true));
 
-            var result = await controller.GetAsync(UserId);
+            var result = await controller.GetByIdAsync(UserId);
 
             var resultValue = GetResultValue<RequestsResponse>(result);
 
@@ -151,7 +151,7 @@
                 Mock.Of<ITriggerRepository>(),
                 CreateUserRepository.WithUserExists(UserId, false));
 
-            var result = await controller.GetAsync(UserId);
+            var result = await controller.GetByIdAsync(UserId);
 
             Assert.IsType<NotFoundResult>(result);
         }
@@ -356,7 +356,7 @@
                 Mock.Of<ITriggerRepository>(),
                 CreateUserRepository.WithUserExists(UserId, true));
 
-            await controller.PatchAsync(UserId, patchRequest);
+            await controller.PatchByIdAsync(UserId, patchRequest);
 
             var expectedSavedRequests = new[] { new Request(UserId, 2.February(2021), RequestStatus.Requested) };
 
@@ -409,7 +409,7 @@
                 Mock.Of<ITriggerRepository>(),
                 CreateUserRepository.WithUserExists(UserId, false));
 
-            var result = await controller.PatchAsync(
+            var result = await controller.PatchByIdAsync(
                 UserId,
                 new RequestsPatchRequest(Enumerable.Empty<RequestsPatchRequestDailyData>()));
 
