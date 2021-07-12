@@ -14,11 +14,12 @@
                 .Where(d => !d.Hidden)
                 .ToArray();
 
-        public static T GetDailyData<T>(Calendar<T> calendar, LocalDate localDate) where T : class
+        public static T GetDailyData<T>(Calendar<T> calendar, LocalDate localDate) where T : class =>
+            GetDailyData(calendar.Weeks.SelectMany(w => w.Days), localDate);
+
+        public static T GetDailyData<T>(IEnumerable<Day<T>> days, LocalDate localDate) where T : class
         {
-            var day = calendar.Weeks
-                .SelectMany(w => w.Days)
-                .Single(d => d.LocalDate == localDate);
+            var day = days.Single(d => d.LocalDate == localDate);
 
             if (day.Data == null)
             {

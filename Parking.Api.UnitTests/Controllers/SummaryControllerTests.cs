@@ -5,9 +5,7 @@
     using System.Threading.Tasks;
     using Api.Controllers;
     using Api.Json.Summary;
-    using Business;
     using Model;
-    using Moq;
     using NodaTime.Testing.Extensions;
     using TestHelpers;
     using Xunit;
@@ -22,12 +20,12 @@
             var activeDates = new[] { 28.June(2021), 29.June(2021), 1.July(2021) };
             var longLeadTimeAllocationDates = new[] { 1.July(2021) };
 
-            var mockDateCalculator = new Mock<IDateCalculator>(MockBehavior.Strict);
-            mockDateCalculator.Setup(c => c.GetActiveDates()).Returns(activeDates);
-            mockDateCalculator.Setup(c => c.GetLongLeadTimeAllocationDates()).Returns(longLeadTimeAllocationDates);
+            var dateCalculator = CreateDateCalculator.WithActiveDatesAndLongLeadTimeAllocationDates(
+                activeDates,
+                longLeadTimeAllocationDates);
 
             var controller = new SummaryController(
-                mockDateCalculator.Object,
+                dateCalculator,
                 CreateRequestRepository.WithRequests("user1", activeDates, new List<Request>()))
             {
                 ControllerContext = CreateControllerContext.WithUsername("user1")
@@ -56,12 +54,12 @@
 
             var requests = new[] { new Request("user1", 28.June(2021), requestStatus) };
 
-            var mockDateCalculator = new Mock<IDateCalculator>(MockBehavior.Strict);
-            mockDateCalculator.Setup(c => c.GetActiveDates()).Returns(activeDates);
-            mockDateCalculator.Setup(c => c.GetLongLeadTimeAllocationDates()).Returns(longLeadTimeAllocationDates);
+            var dateCalculator = CreateDateCalculator.WithActiveDatesAndLongLeadTimeAllocationDates(
+                activeDates,
+                longLeadTimeAllocationDates);
 
             var controller = new SummaryController(
-                mockDateCalculator.Object,
+                dateCalculator,
                 CreateRequestRepository.WithRequests("user1", activeDates, requests))
             {
                 ControllerContext = CreateControllerContext.WithUsername("user1")
@@ -85,12 +83,12 @@
 
             var requests = new[] { new Request("user1", 28.June(2021), RequestStatus.Requested) };
 
-            var mockDateCalculator = new Mock<IDateCalculator>(MockBehavior.Strict);
-            mockDateCalculator.Setup(c => c.GetActiveDates()).Returns(activeDates);
-            mockDateCalculator.Setup(c => c.GetLongLeadTimeAllocationDates()).Returns(longLeadTimeAllocationDates);
+            var dateCalculator = CreateDateCalculator.WithActiveDatesAndLongLeadTimeAllocationDates(
+                activeDates,
+                longLeadTimeAllocationDates);
 
             var controller = new SummaryController(
-                mockDateCalculator.Object,
+                dateCalculator,
                 CreateRequestRepository.WithRequests("user1", activeDates, requests))
             {
                 ControllerContext = CreateControllerContext.WithUsername("user1")
@@ -112,12 +110,12 @@
             var activeDates = new[] { 28.June(2021) };
             var longLeadTimeAllocationDates = new[] { 1.July(2021) };
 
-            var mockDateCalculator = new Mock<IDateCalculator>(MockBehavior.Strict);
-            mockDateCalculator.Setup(c => c.GetActiveDates()).Returns(activeDates);
-            mockDateCalculator.Setup(c => c.GetLongLeadTimeAllocationDates()).Returns(longLeadTimeAllocationDates);
+            var dateCalculator = CreateDateCalculator.WithActiveDatesAndLongLeadTimeAllocationDates(
+                activeDates,
+                longLeadTimeAllocationDates);
 
             var controller = new SummaryController(
-                mockDateCalculator.Object,
+                dateCalculator,
                 CreateRequestRepository.WithRequests("user1", activeDates, new List<Request>()))
             {
                 ControllerContext = CreateControllerContext.WithUsername("user1")
@@ -141,12 +139,12 @@
 
             var requests = new[] { new Request("user1", 28.June(2021), RequestStatus.Cancelled) };
 
-            var mockDateCalculator = new Mock<IDateCalculator>(MockBehavior.Strict);
-            mockDateCalculator.Setup(c => c.GetActiveDates()).Returns(activeDates);
-            mockDateCalculator.Setup(c => c.GetLongLeadTimeAllocationDates()).Returns(longLeadTimeAllocationDates);
+            var dateCalculator = CreateDateCalculator.WithActiveDatesAndLongLeadTimeAllocationDates(
+                activeDates,
+                longLeadTimeAllocationDates);
 
             var controller = new SummaryController(
-                mockDateCalculator.Object,
+                dateCalculator,
                 CreateRequestRepository.WithRequests("user1", activeDates, requests))
             {
                 ControllerContext = CreateControllerContext.WithUsername("user1")
