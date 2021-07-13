@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.1.11" />
+    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.1.12" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.0.41" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.1.12" />
     <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.0.40" />
