@@ -1,9 +1,8 @@
 ﻿namespace Parking.Data
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Runtime.Serialization;
-    using System.Text.Json;
     using System.Threading.Tasks;
     using Aws;
     using Business.Data;
@@ -13,7 +12,7 @@
 
     public class ScheduleRepository : IScheduleRepository
     {
-        private readonly IStorageProvider storageProvider;
+        private readonly IDatabaseProvider databaseProvider;
 
         private static IDictionary<ScheduledTaskType, string> RawScheduledTaskTypes =>
             new Dictionary<ScheduledTaskType, string>
@@ -24,23 +23,18 @@
                 {ScheduledTaskType.WeeklyNotification, "WEEKLY_NOTIFICATION"}
             };
 
-        public ScheduleRepository(IStorageProvider storageProvider)
-        {
-            this.storageProvider = storageProvider;
-        }
+        public ScheduleRepository(IDatabaseProvider databaseProvider) => this.databaseProvider = databaseProvider;
 
         public async Task<IReadOnlyCollection<Schedule>> GetSchedules()
         {
-            var rawData = await this.storageProvider.GetSchedules();
+            var rawData = await this.databaseProvider.GetSchedules();
 
-            var data = JsonSerializer.Deserialize<IDictionary<string, string>>(rawData);
-
-            if (data == null)
+            if (rawData.Schedules == null)
             {
-                throw new SerializationException("Could not deserialize raw schedule data.");
+                throw new InvalidOperationException("No schedules data found.");
             }
 
-            return data
+            return rawData.Schedules
                 .Select(ParseSchedule)
                 .ToArray();
         }
@@ -62,9 +56,9 @@
                     t => RawScheduledTaskTypes[t.ScheduledTaskType],
                     t => InstantPattern.ExtendedIso.Format(t.NextRunTime));
 
-            var rawData = JsonSerializer.Serialize(data);
+            var rawItem = RawItem.CreateSchedules(data);
 
-            await this.storageProvider.SaveSchedules(rawData);
+            await this.databaseProvider.SaveItem(rawItem);
         }
 
         private static Schedule ParseSchedule(KeyValuePair<string, string> rawData) =>

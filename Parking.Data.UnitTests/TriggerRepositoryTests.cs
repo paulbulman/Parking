@@ -1,5 +1,7 @@
 ﻿namespace Parking.Data.UnitTests
 {
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Aws;
     using Moq;
@@ -8,46 +10,61 @@
     public static class TriggerRepositoryTests
     {
         [Fact]
-        public static async Task Calls_storage_provider_to_add_new_trigger()
+        public static async Task Calls_database_provider_to_add_new_trigger()
         {
-            var mockStorageProvider = new Mock<IStorageProvider>();
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>();
 
-            var triggerRepository = new TriggerRepository(mockStorageProvider.Object);
+            var triggerRepository = new TriggerRepository(mockDatabaseProvider.Object);
 
             await triggerRepository.AddTrigger();
 
-            mockStorageProvider.Verify(p => p.SaveTrigger(), Times.Once);
+            mockDatabaseProvider.Verify(
+                p => p.SaveItem(It.Is<RawItem>(r =>
+                    r.PrimaryKey == "TRIGGER" && 
+                    r.SortKey.Length == 36 &&
+                    r.Trigger == r.SortKey)),
+                Times.Once);
         }
 
         [Fact]
-        public static async Task Returns_file_keys_from_storage_provider()
+        public static async Task Returns_trigger_keys_from_database_provider()
         {
             var keys = new[] {"key1", "key2"};
 
-            var mockStorageProvider = new Mock<IStorageProvider>();
-            mockStorageProvider
-                .Setup(p => p.GetTriggerFileKeys())
-                .ReturnsAsync(keys);
+            var triggers = keys.Select(RawItem.CreateTrigger).ToArray();
 
-            var triggerRepository = new TriggerRepository(mockStorageProvider.Object);
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>();
+            mockDatabaseProvider
+                .Setup(p => p.GetTriggers())
+                .ReturnsAsync(triggers);
+
+            var triggerRepository = new TriggerRepository(mockDatabaseProvider.Object);
 
             var result = await triggerRepository.GetKeys();
 
-            Assert.Same(keys, result);
+            Assert.Equal(keys, result);
         }
 
         [Fact]
-        public static async Task Passes_file_keys_to_storage_provider()
+        public static async Task Passes_trigger_keys_to_database_provider()
         {
             var keys = new[] { "key1", "key2" };
 
-            var mockStorageProvider = new Mock<IStorageProvider>();
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>();
            
-            var triggerRepository = new TriggerRepository(mockStorageProvider.Object);
+            var triggerRepository = new TriggerRepository(mockDatabaseProvider.Object);
 
             await triggerRepository.DeleteKeys(keys);
 
-            mockStorageProvider.Verify(p => p.DeleteTriggerFiles(keys), Times.Once);
+            mockDatabaseProvider.Verify(
+                p => p.DeleteItems(It.Is<IEnumerable<RawItem>>(c => CheckTriggers(keys, c.ToArray()))), 
+                Times.Once);
         }
+
+        private static bool CheckTriggers(
+            IReadOnlyCollection<string> expectedKeys,
+            IReadOnlyCollection<RawItem> actualRawItems) => 
+            actualRawItems.All(r => r.PrimaryKey == "TRIGGER") &&
+            actualRawItems.Select(r => r.SortKey).SequenceEqual(expectedKeys);
     }
 }

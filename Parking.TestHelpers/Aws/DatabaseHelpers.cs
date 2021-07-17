@@ -1,5 +1,6 @@
 ﻿namespace Parking.TestHelpers.Aws
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -30,6 +31,24 @@
             await DeleteTableIfExists(client);
 
             await CreateTable(client);
+        }
+
+        public static async Task CreateConfiguration(Dictionary<string, string> configuration)
+        {
+            using var client = CreateClient();
+
+            var table = Table.LoadTable(client, TableName);
+
+            var document = new Document
+            {
+                ["PK"] = "GLOBAL",
+                ["SK"] = "CONFIGURATION",
+                ["configuration"] = new Document(configuration.ToDictionary(
+                    keyValuePair => keyValuePair.Key,
+                    keyValuePair => (DynamoDBEntry)new Primitive(keyValuePair.Value)))
+            };
+
+            await table.PutItemAsync(document);
         }
 
         public static async Task CreateUser(User user)
@@ -135,6 +154,55 @@
                     .Entries
                     .Select(e => e.AsString())
                     .ToArray());
+        }
+
+        public static async Task CreateSchedules(Dictionary<string, string> schedules)
+        {
+            using var client = CreateClient();
+
+            var table = Table.LoadTable(client, TableName);
+
+            var document = new Document
+            {
+                ["PK"] = "GLOBAL",
+                ["SK"] = "SCHEDULES",
+                ["schedules"] = new Document(schedules.ToDictionary(
+                    keyValuePair => keyValuePair.Key,
+                    keyValuePair => (DynamoDBEntry)new Primitive(keyValuePair.Value)))
+            };
+
+            await table.PutItemAsync(document);
+        }
+
+        public static async Task CreateTrigger()
+        {
+            using var client = CreateClient();
+
+            var table = Table.LoadTable(client, TableName);
+
+            var key = Guid.NewGuid().ToString();
+
+            var document = new Document
+            {
+                ["PK"] = "TRIGGER",
+                ["SK"] = key,
+                ["trigger"] = key
+            };
+
+            await table.PutItemAsync(document);
+        }
+
+        public static async Task<int> GetTriggerCount()
+        {
+            using var client = CreateClient();
+
+            var table = Table.LoadTable(client, TableName);
+
+            var query = table.Query(new Primitive("TRIGGER"), new QueryFilter());
+
+            var items = await query.GetRemainingAsync();
+
+            return items.Count;
         }
 
         private static async Task DeleteTableIfExists(IAmazonDynamoDB client)

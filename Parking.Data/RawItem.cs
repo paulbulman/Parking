@@ -23,10 +23,16 @@
             this.SortKey = sortKey;
         }
 
+        public static RawItem CreateConfiguration(Dictionary<string, string> configuration) =>
+            new RawItem("GLOBAL", "CONFIGURATION")
+            {
+                Configuration = configuration
+            };
+
         public static RawItem CreateRequests(
             string primaryKey,
             string sortKey,
-            Dictionary<string, string>? requests) => new RawItem(primaryKey, sortKey)
+            Dictionary<string, string> requests) => new RawItem(primaryKey, sortKey)
             {
                 Requests = requests
             };
@@ -37,6 +43,20 @@
             Dictionary<string, List<string>> reservations) => new RawItem(primaryKey, sortKey)
             {
                 Reservations = reservations
+            };
+
+        public static RawItem CreateSchedules(Dictionary<string, string> schedules) =>
+            new RawItem("GLOBAL", "SCHEDULES")
+            {
+                Schedules = schedules
+            };
+
+        public static RawItem CreateTrigger(string key) =>
+            new RawItem("TRIGGER", key)
+            {
+                // We need some non-key data to be able to save the record,
+                // so just arbitrarily duplicate the sort key to a field.
+                Trigger = key
             };
 
         public static RawItem CreateUser(
@@ -73,6 +93,9 @@
         [DynamoDBProperty("commuteDistance")]
         public decimal? CommuteDistance { get; set; }
 
+        [DynamoDBProperty("configuration")]
+        public Dictionary<string, string>? Configuration { get; set; }
+
         [DynamoDBProperty("emailAddress")]
         public string? EmailAddress { get; set; }
 
@@ -90,6 +113,12 @@
 
         [DynamoDBProperty("reservations", typeof(ReservationsConverter))]
         public Dictionary<string, List<string>>? Reservations { get; set; }
+
+        [DynamoDBProperty("schedules")]
+        public Dictionary<string, string>? Schedules { get; set; }
+
+        [DynamoDBProperty("trigger")]
+        public string? Trigger { get; set; }
     }
 
     public class ReservationsConverter : IPropertyConverter

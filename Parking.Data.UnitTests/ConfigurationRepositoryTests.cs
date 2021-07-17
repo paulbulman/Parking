@@ -1,5 +1,6 @@
 ﻿namespace Parking.Data.UnitTests
 {
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Aws;
     using Moq;
@@ -10,12 +11,20 @@
         [Fact]
         public static async Task Converts_raw_data_to_configuration()
         {
-            var mockStorageProvider = new Mock<IStorageProvider>(MockBehavior.Strict);
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
-            var rawData = "{\r\n  \"NearbyDistance\": 3.5,\r\n  \"ShortLeadTimeSpaces\": 2,\r\n  \"TotalSpaces\": 9\r\n}";
-            mockStorageProvider.Setup(p => p.GetConfiguration()).ReturnsAsync(rawData);
-            
-            var configurationRepository = new ConfigurationRepository(mockStorageProvider.Object);
+            var rawData = new Dictionary<string, string>
+            {
+                {"nearbyDistance", "3.5"},
+                {"shortLeadTimeSpaces", "2"},
+                {"totalSpaces", "9"}
+            };
+
+            mockDatabaseProvider
+                .Setup(p => p.GetConfiguration())
+                .ReturnsAsync(RawItem.CreateConfiguration(rawData));
+
+            var configurationRepository = new ConfigurationRepository(mockDatabaseProvider.Object);
 
             var result = await configurationRepository.GetConfiguration();
 

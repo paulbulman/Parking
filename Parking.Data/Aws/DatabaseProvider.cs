@@ -11,19 +11,27 @@
 
     public interface IDatabaseProvider
     {
+        Task<RawItem> GetConfiguration();
+
         Task<IReadOnlyCollection<RawItem>> GetRequests(YearMonth yearMonth);
-        
+
         Task<IReadOnlyCollection<RawItem>> GetRequests(string userId, YearMonth yearMonth);
-        
+
         Task<IReadOnlyCollection<RawItem>> GetReservations(YearMonth yearMonth);
-        
+
+        Task<RawItem> GetSchedules();
+
+        Task<IReadOnlyCollection<RawItem>> GetTriggers();
+
         Task<RawItem?> GetUser(string userId);
-        
+
         Task<IReadOnlyCollection<RawItem>> GetUsers();
-        
+
         Task SaveItem(RawItem rawItem);
-        
+
         Task SaveItems(IEnumerable<RawItem> rawItems);
+
+        Task DeleteItems(IEnumerable<RawItem> rawItems);
     }
 
     public class DatabaseProvider : IDatabaseProvider
@@ -31,8 +39,18 @@
         private readonly IAmazonDynamoDB dynamoDbClient;
 
         public DatabaseProvider(IAmazonDynamoDB dynamoDbClient) => this.dynamoDbClient = dynamoDbClient;
-        
+
         private static string TableName => Helpers.GetRequiredEnvironmentVariable("TABLE_NAME");
+
+        public async Task<RawItem> GetConfiguration()
+        {
+            const string HashKeyValue = "GLOBAL";
+            const string ConditionValue = "CONFIGURATION";
+
+            var rawItems = await this.QueryPartitionKey(HashKeyValue, ConditionValue);
+
+            return rawItems.Single();
+        }
 
         public async Task<IReadOnlyCollection<RawItem>> GetRequests(YearMonth yearMonth)
         {
@@ -47,6 +65,23 @@
             var conditionValue = $"REQUESTS#{YearMonthPattern.Iso.Format(yearMonth)}";
 
             return await this.QueryPartitionKey(hashKeyValue, conditionValue);
+        }
+
+        public async Task<RawItem> GetSchedules()
+        {
+            const string HashKeyValue = "GLOBAL";
+            const string ConditionValue = "SCHEDULES";
+
+            var rawItems = await this.QueryPartitionKey(HashKeyValue, ConditionValue);
+
+            return rawItems.Single();
+        }
+
+        public async Task<IReadOnlyCollection<RawItem>> GetTriggers()
+        {
+            const string HashKeyValue = "TRIGGER";
+
+            return await this.QueryPartitionKey(HashKeyValue);
         }
 
         public async Task<IReadOnlyCollection<RawItem>> GetReservations(YearMonth yearMonth)
@@ -92,6 +127,29 @@
             {
                 await context.SaveAsync(rawItem, config);
             }
+        }
+
+        public async Task DeleteItems(IEnumerable<RawItem> rawItems)
+        {
+            using var context = new DynamoDBContext(this.dynamoDbClient);
+
+            var config = new DynamoDBOperationConfig { OverrideTableName = TableName };
+
+            foreach (var rawItem in rawItems)
+            {
+                await context.DeleteAsync(rawItem, config);
+            }
+        }
+
+        private async Task<IReadOnlyCollection<RawItem>> QueryPartitionKey(string hashKeyValue)
+        {
+            using var context = new DynamoDBContext(this.dynamoDbClient);
+
+            var config = new DynamoDBOperationConfig { OverrideTableName = TableName };
+
+            var query = context.QueryAsync<RawItem>(hashKeyValue, config);
+
+            return await query.GetRemainingAsync();
         }
 
         private async Task<IReadOnlyCollection<RawItem>> QueryPartitionKey(string hashKeyValue, string conditionValue)

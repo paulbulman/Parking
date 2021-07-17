@@ -17,14 +17,14 @@
 
         public async Task<bool> ShouldRun()
         {
-            if (triggers.Any())
+            if (this.triggers.Any())
             {
                 throw new InvalidOperationException("Previous run not completed");
             }
 
-            triggers.AddRange(await this.triggerRepository.GetKeys());
+            this.triggers.AddRange(await this.triggerRepository.GetKeys());
 
-            return triggers.Any();
+            return this.triggers.Any();
         }
 
         public async Task MarkComplete()

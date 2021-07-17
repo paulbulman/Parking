@@ -24,7 +24,6 @@ namespace Parking.Api.IntegrationTests
         {
             await DatabaseHelpers.ResetDatabase();
             await NotificationHelpers.ResetNotifications();
-            await StorageHelpers.ResetStorage();
         }
 
         public Task DisposeAsync() => Task.CompletedTask;
@@ -72,7 +71,12 @@ namespace Parking.Api.IntegrationTests
                     {"02", new List<string> {"User2", "User3"}}
                 });
 
-            await StorageHelpers.CreateConfiguration("{\"ShortLeadTimeSpaces\": 2}");
+            await DatabaseHelpers.CreateConfiguration(new Dictionary<string, string>
+            {
+                {"shortLeadTimeSpaces", "2"},
+                {"totalSpaces", "9"},
+                {"nearbyDistance", "1.5"}
+            });
 
             var client = this.factory.CreateClient();
 

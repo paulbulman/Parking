@@ -11,11 +11,7 @@
 
     public static class StorageHelpers
     {
-        private static string DataBucketName => Helpers.GetRequiredEnvironmentVariable("DATA_BUCKET_NAME");
-
         private static string EmailBucketName => Helpers.GetRequiredEnvironmentVariable("EMAIL_BUCKET_NAME");
-
-        private static string TriggerBucketName => Helpers.GetRequiredEnvironmentVariable("TRIGGER_BUCKET_NAME");
 
         public static IAmazonS3 CreateClient()
         {
@@ -32,20 +28,7 @@
 
             await DeleteBuckets(client);
 
-            await client.PutBucketAsync(DataBucketName);
             await client.PutBucketAsync(EmailBucketName);
-            await client.PutBucketAsync(TriggerBucketName);
-        }
-
-        public static async Task CreateTrigger()
-        {
-            using var client = CreateClient();
-
-            await client.PutObjectAsync(new PutObjectRequest
-            {
-                BucketName = TriggerBucketName,
-                Key = "__TRIGGER__"
-            });
         }
 
         public static async Task<IReadOnlyCollection<string>> GetSavedEmails()
@@ -62,39 +45,6 @@
             }
 
             return result;
-        }
-
-        public static async Task<int> GetTriggerFileCount()
-        {
-            using var client = CreateClient();
-
-            var contents = await GetBucketContents(client, TriggerBucketName);
-
-            return contents.S3Objects.Count;
-        }
-
-        public static async Task SaveSchedules(string rawData)
-        {
-            using var client = CreateClient();
-
-            await client.PutObjectAsync(new PutObjectRequest
-            {
-                BucketName = DataBucketName,
-                Key = "schedules.json",
-                ContentBody = rawData
-            });
-        }
-
-        public static async Task SaveConfiguration(string rawData)
-        {
-            using var client = CreateClient();
-
-            await client.PutObjectAsync(new PutObjectRequest
-            {
-                BucketName = DataBucketName,
-                Key = "configuration.json",
-                ContentBody = rawData
-            });
         }
 
         private static async Task DeleteBuckets(IAmazonS3 client)
@@ -117,18 +67,6 @@
             }
 
             await client.DeleteBucketAsync(bucketName);
-        }
-
-        public static async Task CreateConfiguration(string configuration)
-        {
-            using var client = CreateClient();
-
-            await client.PutObjectAsync(new PutObjectRequest
-            {
-                BucketName = DataBucketName,
-                ContentBody = configuration,
-                Key = "configuration.json"
-            });
         }
 
         private static async Task<ListObjectsV2Response> GetBucketContents(IAmazonS3 client, string bucketName)
