@@ -9,6 +9,6 @@
     {
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult GetAsync() => this.Ok();
+        public IActionResult Get() => this.Ok();
     }
 }

@@ -26,7 +26,7 @@ namespace Parking.Service.IntegrationTests
         {
             await SetupSchedules();
 
-            await StorageHelpers.CreateTrigger();
+            await DatabaseHelpers.CreateTrigger();
 
             await DatabaseHelpers.CreateUser(
                 CreateUser.With(userId: "User1", emailAddress: "john.doe@example.com"));
@@ -39,7 +39,7 @@ namespace Parking.Service.IntegrationTests
 
             var savedRequests = await DatabaseHelpers.ReadRequests("User1", "2021-03");
 
-            Assert.Equal(new[] {"01"}, savedRequests.Keys);
+            Assert.Equal(new[] { "01" }, savedRequests.Keys);
             Assert.Equal("A", savedRequests["01"]);
 
             await CheckSingleEmail("john.doe@example.com", "Parking space allocated for Mon 01 Mar");
@@ -50,7 +50,7 @@ namespace Parking.Service.IntegrationTests
         {
             await SetupSchedules(dailyNotificationDue: true);
 
-            await StorageHelpers.CreateTrigger();
+            await DatabaseHelpers.CreateTrigger();
 
             await DatabaseHelpers.CreateUser(
                 CreateUser.With(userId: "User1", emailAddress: "john.doe@example.com"));
@@ -71,7 +71,7 @@ namespace Parking.Service.IntegrationTests
         {
             await SetupSchedules(weeklyNotificationDue: true);
 
-            await StorageHelpers.CreateTrigger();
+            await DatabaseHelpers.CreateTrigger();
 
             await DatabaseHelpers.CreateUser(
                 CreateUser.With(userId: "User1", emailAddress: "john.doe@example.com"));
@@ -92,28 +92,24 @@ namespace Parking.Service.IntegrationTests
             var savedEmails = await StorageHelpers.GetSavedEmails();
 
             Assert.Single(savedEmails);
-            
+
             var rawSavedEmail = savedEmails.Single();
 
             var savedEmail = JsonSerializer.Deserialize<EmailTemplate>(rawSavedEmail);
-            
+
             Assert.NotNull(savedEmail);
 
             Assert.Equal(expectedTo, savedEmail!.To);
             Assert.Equal(expectedSubject, savedEmail.Subject);
         }
 
-        private static async Task SetupConfiguration()
-        {
-            const string RawConfigurationData = 
-                "{" +
-                "\"NearbyDistance\":3.5," +
-                "\"ShortLeadTimeSpaces\":2," +
-                "\"TotalSpaces\":9" +
-                "}";
-
-            await StorageHelpers.SaveConfiguration(RawConfigurationData);
-        }
+        private static async Task SetupConfiguration() =>
+            await DatabaseHelpers.CreateConfiguration(new Dictionary<string, string>
+            {
+                {"nearbyDistance", "3.5"},
+                {"shortLeadTimeSpaces", "2"},
+                {"totalSpaces", "9"}
+            });
 
         private static async Task SetupSchedules(
             bool dailyNotificationDue = false,
@@ -129,15 +125,15 @@ namespace Parking.Service.IntegrationTests
             var reservationReminderTime = reservationReminderDue ? DueTime : NotDueTime;
             var weeklyNotificationTime = weeklyNotificationDue ? DueTime : NotDueTime;
 
-            var rawScheduleData =
-                "{" +
-                $"\"DAILY_NOTIFICATION\":\"{dailyNotificationTime}\"," +
-                $"\"REQUEST_REMINDER\":\"{requestReminderTime}\"," +
-                $"\"RESERVATION_REMINDER\":\"{reservationReminderTime}\"," +
-                $"\"WEEKLY_NOTIFICATION\":\"{weeklyNotificationTime}\"" +
-                "}";
+            var rawScheduleData = new Dictionary<string, string>
+            {
+                {"DAILY_NOTIFICATION", dailyNotificationTime},
+                {"REQUEST_REMINDER", requestReminderTime},
+                {"RESERVATION_REMINDER", reservationReminderTime},
+                {"WEEKLY_NOTIFICATION", weeklyNotificationTime}
+            };
 
-            await StorageHelpers.SaveSchedules(rawScheduleData);
+            await DatabaseHelpers.CreateSchedules(rawScheduleData);
         }
 
         private class EmailTemplate

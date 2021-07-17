@@ -23,7 +23,6 @@
         {
             await DatabaseHelpers.ResetDatabase();
             await NotificationHelpers.ResetNotifications();
-            await StorageHelpers.ResetStorage();
         }
 
         public Task DisposeAsync() => Task.CompletedTask;
@@ -155,7 +154,7 @@
         [Fact]
         public async Task Creates_recalculation_trigger_after_saving()
         {
-            var initialTriggerFileCount = await StorageHelpers.GetTriggerFileCount();
+            var initialTriggerFileCount = await DatabaseHelpers.GetTriggerCount();
 
             var client = this.factory.CreateClient();
 
@@ -165,7 +164,7 @@
 
             await client.PatchAsJsonAsync("/requests", request);
 
-            var subsequentTriggerFileCount = await StorageHelpers.GetTriggerFileCount();
+            var subsequentTriggerFileCount = await DatabaseHelpers.GetTriggerCount();
 
             Assert.Equal(0, initialTriggerFileCount);
             Assert.Equal(1, subsequentTriggerFileCount);
