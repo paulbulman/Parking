@@ -57,7 +57,11 @@
             var firstDate = orderedRequests.First().Date.With(DateAdjusters.StartOfMonth);
             var lastDate = orderedRequests.Last().Date.With(DateAdjusters.EndOfMonth);
 
-            var existingRequests = await GetRequests(firstDate, lastDate);
+            var isSingleUser = orderedRequests.Select(r => r.UserId).Distinct().Count() == 1;
+
+            var existingRequests = isSingleUser
+                ? await this.GetRequests(orderedRequests.First().UserId, firstDate, lastDate)
+                : await this.GetRequests(firstDate, lastDate);
 
             var combinedRequests = existingRequests
                 .Where(existingRequest => !IsOverwritten(existingRequest, requests))
@@ -129,6 +133,8 @@
                 "R" => RequestStatus.Requested,
                 "A" => RequestStatus.Allocated,
                 "C" => RequestStatus.Cancelled,
+                "S" => RequestStatus.SoftInterrupted,
+                "H" => RequestStatus.HardInterrupted,
                 _ => throw new ArgumentOutOfRangeException(nameof(rawRequestStatus))
             };
 
@@ -150,6 +156,8 @@
                 RequestStatus.Requested => "R",
                 RequestStatus.Allocated => "A",
                 RequestStatus.Cancelled => "C",
+                RequestStatus.SoftInterrupted => "S",
+                RequestStatus.HardInterrupted => "H",
                 _ => throw new ArgumentOutOfRangeException(nameof(request))
             };
     }

@@ -4,6 +4,8 @@
     {
         Requested,
         Allocated,
-        Cancelled
+        Cancelled,
+        SoftInterrupted,
+        HardInterrupted
     }
 }

@@ -29,6 +29,30 @@ namespace Parking.Data.UnitTests
             Assert.Empty(result);
         }
 
+        [Theory]
+        [InlineData("A", RequestStatus.Allocated)]
+        [InlineData("C", RequestStatus.Cancelled)]
+        [InlineData("R", RequestStatus.Requested)]
+        [InlineData("S", RequestStatus.SoftInterrupted)]
+        [InlineData("H", RequestStatus.HardInterrupted)]
+        public static async Task GetRequests_converts_raw_string_value_to_status_enum(
+            string rawValue,
+            RequestStatus expectedRequestStatus)
+        {
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
+
+            SetupMockRepository(
+                mockDatabaseProvider,
+                new YearMonth(2020, 9),
+                CreateRawItem("User1", "2020-09", KeyValuePair.Create("30", rawValue)));
+
+            var requestRepository = new RequestRepository(mockDatabaseProvider.Object);
+
+            var result = await requestRepository.GetRequests(30.September(2020), 30.September(2020));
+
+            CheckRequest(result, "User1", 30.September(2020), expectedRequestStatus);
+        }
+
         [Fact]
         public static async Task GetRequests_converts_raw_items_for_multiple_users_to_requests()
         {
@@ -133,6 +157,40 @@ namespace Parking.Data.UnitTests
             await requestRepository.SaveRequests(new List<Request>());
 
             mockDatabaseProvider.VerifyNoOtherCalls();
+        }
+
+        [Theory]
+        [InlineData(RequestStatus.Allocated, "A")]
+        [InlineData(RequestStatus.Cancelled, "C")]
+        [InlineData(RequestStatus.Requested, "R")]
+        [InlineData(RequestStatus.SoftInterrupted, "S")]
+        [InlineData(RequestStatus.HardInterrupted, "H")]
+        public static async Task SaveRequests_converts_status_enum_to_raw_string_value(
+            RequestStatus requestStatus,
+            string expectedRawValue)
+        {
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
+            mockDatabaseProvider
+                .Setup(p => p.GetRequests("User1", new YearMonth(2020, 9)))
+                .ReturnsAsync(new List<RawItem>());
+            mockDatabaseProvider
+                .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
+                .Returns(Task.CompletedTask);
+
+            var requestRepository = new RequestRepository(mockDatabaseProvider.Object);
+            
+            var requests = new[] { new Request("User1", 1.September(2020), requestStatus) };
+            
+            await requestRepository.SaveRequests(requests);
+
+            var expectedRawItems = new[]
+            {
+                CreateRawItem("User1", "2020-09", KeyValuePair.Create("01", expectedRawValue)),
+            };
+
+            mockDatabaseProvider.Verify(p => p.SaveItems(
+                    It.Is<IEnumerable<RawItem>>(actual => CheckRawItems(expectedRawItems, actual.ToList()))),
+                Times.Once);
         }
 
         [Fact]
@@ -241,6 +299,63 @@ namespace Parking.Data.UnitTests
                     KeyValuePair.Create("03", "C"),
                     KeyValuePair.Create("04", "R")),
 
+            };
+
+            mockDatabaseProvider.Verify(
+                p => p.SaveItems(It.Is<IEnumerable<RawItem>>(actual => CheckRawItems(expectedRawItems, actual.ToList()))),
+                Times.Once);
+        }
+
+        [Fact]
+        public static async Task SaveRequests_fetches_requests_by_user_when_all_updated_requests_are_for_same_user()
+        {
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
+            mockDatabaseProvider
+                .Setup(p => p.GetRequests("User1", new YearMonth(2020, 9)))
+                .ReturnsAsync(new[]
+                {
+                    CreateRawItem(
+                        "User1",
+                        "2020-09",
+                        KeyValuePair.Create("01", "A"),
+                        KeyValuePair.Create("02", "R")),
+                });
+            mockDatabaseProvider
+                .Setup(p => p.GetRequests("User1", new YearMonth(2020, 10)))
+                .ReturnsAsync(new[]
+                {
+                    CreateRawItem(
+                        "User1",
+                        "2020-10",
+                        KeyValuePair.Create("03", "R"))
+                });
+            mockDatabaseProvider
+                .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
+                .Returns(Task.CompletedTask);
+
+            var requestRepository = new RequestRepository(mockDatabaseProvider.Object);
+            await requestRepository.SaveRequests(
+                new[]
+                {
+                    new Request("User1", 2.September(2020), RequestStatus.Allocated),
+                    new Request("User1", 3.September(2020), RequestStatus.Requested),
+                    new Request("User1", 3.October(2020), RequestStatus.Cancelled),
+                    new Request("User1", 4.October(2020), RequestStatus.Requested)
+                });
+
+            var expectedRawItems = new[]
+            {
+                CreateRawItem(
+                    "User1",
+                    "2020-09",
+                    KeyValuePair.Create("01", "A"),
+                    KeyValuePair.Create("02", "A"),
+                    KeyValuePair.Create("03", "R")),
+                CreateRawItem(
+                    "User1",
+                    "2020-10",
+                    KeyValuePair.Create("03", "C"),
+                    KeyValuePair.Create("04", "R")),
             };
 
             mockDatabaseProvider.Verify(
