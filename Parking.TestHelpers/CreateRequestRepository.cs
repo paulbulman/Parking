@@ -28,6 +28,12 @@
             IReadOnlyCollection<Request> requests) =>
             MockWithRequests(userId, activeDates, requests).Object;
 
+        public static IRequestRepository WithRequests(
+            string userId,
+            LocalDate localDate,
+            IReadOnlyCollection<Request> requests) =>
+            MockWithRequests(userId, new[] {localDate}, requests).Object;
+
         public static Mock<IRequestRepository> MockWithRequests(
             string userId,
             IReadOnlyCollection<LocalDate> activeDates,
