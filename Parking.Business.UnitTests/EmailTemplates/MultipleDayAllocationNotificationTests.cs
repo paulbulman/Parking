@@ -39,8 +39,8 @@
             var requests = new[]
             {
                 new Request("user1", 21.December(2020), RequestStatus.Allocated),
-                new Request("user1", 22.December(2020), RequestStatus.Requested),
-                new Request("user1", 24.December(2020), RequestStatus.Requested),
+                new Request("user1", 22.December(2020), RequestStatus.Interrupted),
+                new Request("user1", 24.December(2020), RequestStatus.Interrupted),
             };
 
             var template = new MultipleDayAllocationNotification(

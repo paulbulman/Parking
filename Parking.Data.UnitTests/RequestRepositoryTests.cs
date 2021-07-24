@@ -32,7 +32,7 @@ namespace Parking.Data.UnitTests
         [Theory]
         [InlineData("A", RequestStatus.Allocated)]
         [InlineData("C", RequestStatus.Cancelled)]
-        [InlineData("R", RequestStatus.Requested)]
+        [InlineData("I", RequestStatus.Interrupted)]
         [InlineData("S", RequestStatus.SoftInterrupted)]
         [InlineData("H", RequestStatus.HardInterrupted)]
         public static async Task GetRequests_converts_raw_string_value_to_status_enum(
@@ -64,7 +64,7 @@ namespace Parking.Data.UnitTests
                 CreateRawItem(
                     "User1",
                     "2020-08",
-                    KeyValuePair.Create("02", "R"),
+                    KeyValuePair.Create("02", "I"),
                     KeyValuePair.Create("13", "A")),
                 CreateRawItem(
                     "User2",
@@ -86,7 +86,7 @@ namespace Parking.Data.UnitTests
 
             Assert.Equal(4, result.Count);
 
-            CheckRequest(result, "User1", 2.August(2020), RequestStatus.Requested);
+            CheckRequest(result, "User1", 2.August(2020), RequestStatus.Interrupted);
             CheckRequest(result, "User1", 13.August(2020), RequestStatus.Allocated);
             CheckRequest(result, "User2", 2.August(2020), RequestStatus.Cancelled);
             CheckRequest(result, "User1", 30.September(2020), RequestStatus.Allocated);
@@ -104,7 +104,7 @@ namespace Parking.Data.UnitTests
                 CreateRawItem(
                     "User1",
                     "2020-08",
-                    KeyValuePair.Create("02", "R"),
+                    KeyValuePair.Create("02", "I"),
                     KeyValuePair.Create("13", "A")));
             SetupMockRepository(
                 mockDatabaseProvider,
@@ -123,7 +123,7 @@ namespace Parking.Data.UnitTests
 
             Assert.Equal(3, result.Count);
 
-            CheckRequest(result, "User1", 2.August(2020), RequestStatus.Requested);
+            CheckRequest(result, "User1", 2.August(2020), RequestStatus.Interrupted);
             CheckRequest(result, "User1", 13.August(2020), RequestStatus.Allocated);
             CheckRequest(result, "User1", 30.September(2020), RequestStatus.Cancelled);
         }
@@ -136,7 +136,7 @@ namespace Parking.Data.UnitTests
             SetupMockRepository(
                 mockDatabaseProvider,
                 new YearMonth(2020, 8),
-                CreateRawItem("User1", "2020-08", KeyValuePair.Create("02", "R")),
+                CreateRawItem("User1", "2020-08", KeyValuePair.Create("02", "I")),
                 CreateRawItem("User2", "2020-08", KeyValuePair.Create("02", "C")));
 
             var requestRepository = new RequestRepository(mockDatabaseProvider.Object);
@@ -162,7 +162,7 @@ namespace Parking.Data.UnitTests
         [Theory]
         [InlineData(RequestStatus.Allocated, "A")]
         [InlineData(RequestStatus.Cancelled, "C")]
-        [InlineData(RequestStatus.Requested, "R")]
+        [InlineData(RequestStatus.Interrupted, "I")]
         [InlineData(RequestStatus.SoftInterrupted, "S")]
         [InlineData(RequestStatus.HardInterrupted, "H")]
         public static async Task SaveRequests_converts_status_enum_to_raw_string_value(
@@ -210,8 +210,8 @@ namespace Parking.Data.UnitTests
                 {
                     new Request("User1", 1.September(2020), RequestStatus.Allocated),
                     new Request("User1", 2.September(2020), RequestStatus.Cancelled),
-                    new Request("User1", 3.October(2020), RequestStatus.Requested),
-                    new Request("User2", 4.October(2020), RequestStatus.Requested)
+                    new Request("User1", 3.October(2020), RequestStatus.Interrupted),
+                    new Request("User2", 4.October(2020), RequestStatus.Interrupted)
                 });
 
             var expectedRawItems = new[]
@@ -224,11 +224,11 @@ namespace Parking.Data.UnitTests
                 CreateRawItem(
                     "User1",
                     "2020-10",
-                    KeyValuePair.Create("03", "R")),
+                    KeyValuePair.Create("03", "I")),
                 CreateRawItem(
                     "User2",
                     "2020-10",
-                    KeyValuePair.Create("04", "R")),
+                    KeyValuePair.Create("04", "I")),
             };
 
             mockDatabaseProvider.Verify(p => p.SaveItems(
@@ -248,7 +248,7 @@ namespace Parking.Data.UnitTests
                         "User1",
                         "2020-09",
                         KeyValuePair.Create("01", "A"),
-                        KeyValuePair.Create("02", "R")),
+                        KeyValuePair.Create("02", "I")),
                     CreateRawItem(
                         "User2",
                         "2020-09",
@@ -261,7 +261,7 @@ namespace Parking.Data.UnitTests
                     CreateRawItem(
                         "User1",
                         "2020-10",
-                        KeyValuePair.Create("03", "R"))
+                        KeyValuePair.Create("03", "I"))
                 });
             mockDatabaseProvider
                 .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
@@ -272,9 +272,9 @@ namespace Parking.Data.UnitTests
                 new[]
                 {
                     new Request("User1", 2.September(2020), RequestStatus.Allocated),
-                    new Request("User1", 3.September(2020), RequestStatus.Requested),
+                    new Request("User1", 3.September(2020), RequestStatus.Interrupted),
                     new Request("User2", 3.October(2020), RequestStatus.Cancelled),
-                    new Request("User2", 4.October(2020), RequestStatus.Requested)
+                    new Request("User2", 4.October(2020), RequestStatus.Interrupted)
                 });
 
             var expectedRawItems = new[]
@@ -284,7 +284,7 @@ namespace Parking.Data.UnitTests
                     "2020-09",
                     KeyValuePair.Create("01", "A"),
                     KeyValuePair.Create("02", "A"),
-                    KeyValuePair.Create("03", "R")),
+                    KeyValuePair.Create("03", "I")),
                 CreateRawItem(
                     "User2",
                     "2020-09",
@@ -292,12 +292,12 @@ namespace Parking.Data.UnitTests
                 CreateRawItem(
                     "User1",
                     "2020-10",
-                    KeyValuePair.Create("03", "R")),
+                    KeyValuePair.Create("03", "I")),
                 CreateRawItem(
                     "User2",
                     "2020-10",
                     KeyValuePair.Create("03", "C"),
-                    KeyValuePair.Create("04", "R")),
+                    KeyValuePair.Create("04", "I")),
 
             };
 
@@ -318,7 +318,7 @@ namespace Parking.Data.UnitTests
                         "User1",
                         "2020-09",
                         KeyValuePair.Create("01", "A"),
-                        KeyValuePair.Create("02", "R")),
+                        KeyValuePair.Create("02", "I")),
                 });
             mockDatabaseProvider
                 .Setup(p => p.GetRequests("User1", new YearMonth(2020, 10)))
@@ -327,7 +327,7 @@ namespace Parking.Data.UnitTests
                     CreateRawItem(
                         "User1",
                         "2020-10",
-                        KeyValuePair.Create("03", "R"))
+                        KeyValuePair.Create("03", "I"))
                 });
             mockDatabaseProvider
                 .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
@@ -338,9 +338,9 @@ namespace Parking.Data.UnitTests
                 new[]
                 {
                     new Request("User1", 2.September(2020), RequestStatus.Allocated),
-                    new Request("User1", 3.September(2020), RequestStatus.Requested),
+                    new Request("User1", 3.September(2020), RequestStatus.Interrupted),
                     new Request("User1", 3.October(2020), RequestStatus.Cancelled),
-                    new Request("User1", 4.October(2020), RequestStatus.Requested)
+                    new Request("User1", 4.October(2020), RequestStatus.Interrupted)
                 });
 
             var expectedRawItems = new[]
@@ -355,7 +355,7 @@ namespace Parking.Data.UnitTests
                     "User1",
                     "2020-10",
                     KeyValuePair.Create("03", "C"),
-                    KeyValuePair.Create("04", "R")),
+                    KeyValuePair.Create("04", "I")),
             };
 
             mockDatabaseProvider.Verify(

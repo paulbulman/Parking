@@ -99,12 +99,12 @@
         }
 
         [Theory]
-        [InlineData(RequestStatus.Requested, true)]
+        [InlineData(RequestStatus.Interrupted, true)]
         [InlineData(RequestStatus.Allocated, true)]
         [InlineData(RequestStatus.SoftInterrupted, true)]
         [InlineData(RequestStatus.HardInterrupted, true)]
         [InlineData(RequestStatus.Cancelled, false)]
-        public static void IsActive_returns_true_for_requested_and_allocated_statuses(RequestStatus requestStatus, bool expectedResult)
+        public static void IsActive_returns_true_for_non_cancelled_statuses(RequestStatus requestStatus, bool expectedResult)
         {
             var actual = requestStatus.IsActive();
 
@@ -112,12 +112,12 @@
         }
 
         [Theory]
-        [InlineData(RequestStatus.Requested, true)]
+        [InlineData(RequestStatus.Interrupted, true)]
         [InlineData(RequestStatus.Allocated, false)]
         [InlineData(RequestStatus.SoftInterrupted, true)]
         [InlineData(RequestStatus.HardInterrupted, false)]
         [InlineData(RequestStatus.Cancelled, false)]
-        public static void IsAllocatable_returns_true_for_requested_and_soft_interrupted_statuses(RequestStatus requestStatus, bool expectedResult)
+        public static void IsAllocatable_returns_true_for_interrupted_and_soft_interrupted_statuses(RequestStatus requestStatus, bool expectedResult)
         {
             var actual = requestStatus.IsAllocatable();
 

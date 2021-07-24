@@ -55,7 +55,7 @@ namespace Parking.Api.IntegrationTests
             await DatabaseHelpers.CreateUser(CreateUser.With(userId: "User2", firstName: "Kimball", lastName: "Ventom"));
 
             var user1Requests = new Dictionary<string, string> {{"01", "S"}, {"02", "A"}};
-            var user2Requests = new Dictionary<string, string> {{"02", "R"}};
+            var user2Requests = new Dictionary<string, string> {{"02", "I"}};
 
             await DatabaseHelpers.CreateRequests("User1", "2021-03", user1Requests);
             await DatabaseHelpers.CreateRequests("User2", "2021-03", user2Requests);

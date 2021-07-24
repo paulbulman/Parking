@@ -62,8 +62,8 @@ namespace Parking.Api.UnitTests.Controllers
             {
                 new Request("user1", 12.July(2021), RequestStatus.Allocated),
                 new Request("user2", 12.July(2021), RequestStatus.Allocated),
-                new Request("user3", 12.July(2021), RequestStatus.Requested),
-                new Request("user4", 12.July(2021), RequestStatus.Requested),
+                new Request("user3", 12.July(2021), RequestStatus.Interrupted),
+                new Request("user4", 12.July(2021), RequestStatus.Interrupted),
             };
 
             var controller = new DailyDetailsController(
@@ -103,8 +103,8 @@ namespace Parking.Api.UnitTests.Controllers
 
             var requests = new[]
             {
-                new Request("user3", 12.July(2021), RequestStatus.Requested),
-                new Request("user4", 12.July(2021), RequestStatus.Requested),
+                new Request("user3", 12.July(2021), RequestStatus.Interrupted),
+                new Request("user4", 12.July(2021), RequestStatus.Interrupted),
             };
 
             var controller = new DailyDetailsController(
@@ -189,10 +189,10 @@ namespace Parking.Api.UnitTests.Controllers
             var requests = new[]
             {
                 new Request("user1", 16.July(2021), RequestStatus.Allocated),
-                new Request("user2", 16.July(2021), RequestStatus.Requested),
-                new Request("user1", 17.July(2021), RequestStatus.Requested),
+                new Request("user2", 16.July(2021), RequestStatus.Interrupted),
+                new Request("user1", 17.July(2021), RequestStatus.Interrupted),
                 new Request("user2", 17.July(2021), RequestStatus.Allocated),
-                new Request("user2", 18.July(2021), RequestStatus.Requested),
+                new Request("user2", 18.July(2021), RequestStatus.Interrupted),
             };
 
             var controller = new DailyDetailsController(

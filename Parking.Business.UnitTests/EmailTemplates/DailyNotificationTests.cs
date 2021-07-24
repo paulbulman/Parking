@@ -43,7 +43,7 @@
 
         [Theory]
         [InlineData(RequestStatus.Allocated, "Parking status for Wed 01 Apr: Allocated")]
-        [InlineData(RequestStatus.Requested, "Parking status for Wed 01 Apr: INTERRUPTED")]
+        [InlineData(RequestStatus.Interrupted, "Parking status for Wed 01 Apr: INTERRUPTED")]
         public static void Subject_contains_request_status(RequestStatus requestStatus, string expectedSubject)
         {
             var user = CreateUser.With(userId: "user1", emailAddress: "1@abc.com");
@@ -83,7 +83,7 @@
             var user = CreateUser.With(userId: "user1", emailAddress: "1@abc.com");
             var localDate = 1.April(2020);
 
-            var requests = new[] { new Request(user.UserId, localDate, RequestStatus.Requested) };
+            var requests = new[] { new Request(user.UserId, localDate, RequestStatus.Interrupted) };
 
             var template = new DailyNotification(requests, user, localDate);
 
@@ -110,8 +110,8 @@
 
             var requests = new[]
             {
-                new Request(user.UserId, localDate, RequestStatus.Requested),
-                new Request("user2", localDate, RequestStatus.Requested),
+                new Request(user.UserId, localDate, RequestStatus.Interrupted),
+                new Request("user2", localDate, RequestStatus.Interrupted),
                 new Request("user3", localDate, RequestStatus.SoftInterrupted),
                 new Request("user4", localDate, RequestStatus.Allocated),
                 new Request("user5", localDate, RequestStatus.Cancelled),

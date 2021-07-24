@@ -49,7 +49,7 @@
 
         [Theory]
         [InlineData(RequestStatus.Allocated, SummaryStatus.Allocated)]
-        [InlineData(RequestStatus.Requested, SummaryStatus.Requested)]
+        [InlineData(RequestStatus.Interrupted, SummaryStatus.Requested)]
         public static async Task Get_summary_returns_request_status(
             RequestStatus requestStatus,
             SummaryStatus expectedSummaryStatus)
@@ -82,7 +82,7 @@
         }
 
         [Theory]
-        [InlineData(RequestStatus.Requested)]
+        [InlineData(RequestStatus.Interrupted)]
         [InlineData(RequestStatus.SoftInterrupted)]
         [InlineData(RequestStatus.HardInterrupted)]
         public static async Task Get_summary_returns_unallocated_requests_within_long_lead_time_as_interrupted(
@@ -174,7 +174,7 @@
         }
 
         [Theory]
-        [InlineData(RequestStatus.Requested, false, false)]
+        [InlineData(RequestStatus.Interrupted, false, false)]
         [InlineData(RequestStatus.Allocated, false, false)]
         [InlineData(RequestStatus.Cancelled, false, false)]
         [InlineData(RequestStatus.SoftInterrupted, true, false)]
@@ -190,7 +190,7 @@
             var requests = new[]
             {
                 new Request("user1", 28.June(2021), firstRequestStatus),
-                new Request("user1", 29.June(2021), RequestStatus.Requested),
+                new Request("user1", 29.June(2021), RequestStatus.Interrupted),
             };
 
             var dateCalculator = CreateDateCalculator.WithActiveDatesAndLongLeadTimeAllocationDates(
@@ -270,7 +270,7 @@
         [Theory]
         [InlineData(RequestStatus.Allocated, true)]
         [InlineData(RequestStatus.Cancelled, false)]
-        [InlineData(RequestStatus.Requested, true)]
+        [InlineData(RequestStatus.Interrupted, true)]
         public static async Task Update_interruption_status_returns_400_response_when_existing_request_cannot_be_updated(
             RequestStatus requestStatus,
             bool acceptInterruption)
@@ -391,7 +391,7 @@
             var updatedRequests = new[]
             {
                 new Request("user1", 28.June(2021), updatedRequestStatus),
-                new Request("user1", 29.June(2021), RequestStatus.Requested),
+                new Request("user1", 29.June(2021), RequestStatus.Interrupted),
             };
 
             var mockRequestRepository = CreateRequestRepository.MockWithRequests("user1", activeDates, updatedRequests);

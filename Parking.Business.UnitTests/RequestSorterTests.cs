@@ -31,7 +31,7 @@
         {
             var requests = new[]
             {
-                new Request("user1", SortDate, RequestStatus.Requested),
+                new Request("user1", SortDate, RequestStatus.Interrupted),
                 new Request("user2", SortDate, RequestStatus.SoftInterrupted),
                 new Request("user3", SortDate, RequestStatus.SoftInterrupted)
             };
@@ -46,8 +46,8 @@
         {
             var requests = new[]
             {
-                new Request("user1", SortDate.PlusDays(-1), RequestStatus.Requested),
-                new Request("user1", SortDate.PlusDays(1), RequestStatus.Requested)
+                new Request("user1", SortDate.PlusDays(-1), RequestStatus.Interrupted),
+                new Request("user1", SortDate.PlusDays(1), RequestStatus.Interrupted)
             };
 
             var result = SortRequests(requests, NoReservations, DefaultUsers);
@@ -71,7 +71,7 @@
         }
 
         [Theory]
-        [InlineData(RequestStatus.Requested)]
+        [InlineData(RequestStatus.Interrupted)]
         [InlineData(RequestStatus.SoftInterrupted)]
         [InlineData(RequestStatus.HardInterrupted)]
         public static void Gives_priority_to_more_interrupted_users_over_less_interrupted_users(
@@ -81,8 +81,8 @@
             {
                 new Request("user1", SortDate.PlusDays(-1), RequestStatus.Allocated),
                 new Request("user2", SortDate.PlusDays(-1), previousRequestStatus),
-                new Request("user1", SortDate, RequestStatus.Requested),
-                new Request("user2", SortDate, RequestStatus.Requested)
+                new Request("user1", SortDate, RequestStatus.Interrupted),
+                new Request("user2", SortDate, RequestStatus.Interrupted)
             };
 
             var result = SortRequests(requests, NoReservations, DefaultUsers);
@@ -96,12 +96,12 @@
             var requests = new[]
             {
                 new Request("user1", SortDate.PlusDays(-1), RequestStatus.Allocated),
-                new Request("user2", SortDate.PlusDays(-1), RequestStatus.Requested),
-                new Request("user1", SortDate, RequestStatus.Requested),
-                new Request("user2", SortDate, RequestStatus.Requested),
-                new Request("user1", SortDate.PlusDays(1), RequestStatus.Requested),
+                new Request("user2", SortDate.PlusDays(-1), RequestStatus.Interrupted),
+                new Request("user1", SortDate, RequestStatus.Interrupted),
+                new Request("user2", SortDate, RequestStatus.Interrupted),
+                new Request("user1", SortDate.PlusDays(1), RequestStatus.Interrupted),
                 new Request("user2", SortDate.PlusDays(1), RequestStatus.Allocated),
-                new Request("user1", SortDate.PlusDays(2), RequestStatus.Requested),
+                new Request("user1", SortDate.PlusDays(2), RequestStatus.Interrupted),
                 new Request("user2", SortDate.PlusDays(2), RequestStatus.Allocated)
             };
 
@@ -118,9 +118,9 @@
                 new Request("user2", SortDate.PlusDays(-3), RequestStatus.Cancelled),
                 new Request("user2", SortDate.PlusDays(-2), RequestStatus.Cancelled),
                 new Request("user1", SortDate.PlusDays(-1), RequestStatus.Allocated),
-                new Request("user2", SortDate.PlusDays(-1), RequestStatus.Requested),
-                new Request("user1", SortDate, RequestStatus.Requested),
-                new Request("user2", SortDate, RequestStatus.Requested)
+                new Request("user2", SortDate.PlusDays(-1), RequestStatus.Interrupted),
+                new Request("user1", SortDate, RequestStatus.Interrupted),
+                new Request("user2", SortDate, RequestStatus.Interrupted)
             };
 
             var result = SortRequests(requests, NoReservations, DefaultUsers);
@@ -133,9 +133,9 @@
         {
             var requests = new[]
             {
-                new Request("user1", SortDate, RequestStatus.Requested),
-                new Request("user2", SortDate, RequestStatus.Requested),
-                new Request("user3", SortDate, RequestStatus.Requested)
+                new Request("user1", SortDate, RequestStatus.Interrupted),
+                new Request("user2", SortDate, RequestStatus.Interrupted),
+                new Request("user3", SortDate, RequestStatus.Interrupted)
             };
 
             var result = SortRequests(requests, NoReservations, DefaultUsers);
@@ -149,10 +149,10 @@
             var requests = new[]
             {
                 new Request("user1", SortDate.PlusDays(-1), RequestStatus.Allocated),
-                new Request("user2", SortDate.PlusDays(-1), RequestStatus.Requested),
-                new Request("user1", SortDate, RequestStatus.Requested),
-                new Request("user2", SortDate, RequestStatus.Requested),
-                new Request("user3", SortDate, RequestStatus.Requested)
+                new Request("user2", SortDate.PlusDays(-1), RequestStatus.Interrupted),
+                new Request("user1", SortDate, RequestStatus.Interrupted),
+                new Request("user2", SortDate, RequestStatus.Interrupted),
+                new Request("user3", SortDate, RequestStatus.Interrupted)
             };
 
             var result = SortRequests(requests, NoReservations, DefaultUsers);
@@ -167,9 +167,9 @@
             {
                 new Request("user1", SortDate.PlusDays(-1), RequestStatus.Allocated),
                 new Request("user2", SortDate.PlusDays(-1), RequestStatus.Allocated),
-                new Request("user1", SortDate, RequestStatus.Requested),
-                new Request("user2", SortDate, RequestStatus.Requested),
-                new Request("user3", SortDate, RequestStatus.Requested)
+                new Request("user1", SortDate, RequestStatus.Interrupted),
+                new Request("user2", SortDate, RequestStatus.Interrupted),
+                new Request("user3", SortDate, RequestStatus.Interrupted)
             };
 
             var result = SortRequests(requests, NoReservations, DefaultUsers);
@@ -183,13 +183,13 @@
             var requests = new[]
             {
                 new Request("user1", SortDate.PlusDays(-3), RequestStatus.Allocated),
-                new Request("user2", SortDate.PlusDays(-3), RequestStatus.Requested),
-                new Request("user1", SortDate.PlusDays(-2), RequestStatus.Requested),
+                new Request("user2", SortDate.PlusDays(-3), RequestStatus.Interrupted),
+                new Request("user1", SortDate.PlusDays(-2), RequestStatus.Interrupted),
                 new Request("user2", SortDate.PlusDays(-2), RequestStatus.Allocated),
-                new Request("user1", SortDate.PlusDays(-1), RequestStatus.Requested),
+                new Request("user1", SortDate.PlusDays(-1), RequestStatus.Interrupted),
                 new Request("user2", SortDate.PlusDays(-1), RequestStatus.Allocated),
-                new Request("user1", SortDate, RequestStatus.Requested),
-                new Request("user2", SortDate, RequestStatus.Requested),
+                new Request("user1", SortDate, RequestStatus.Interrupted),
+                new Request("user2", SortDate, RequestStatus.Interrupted),
             };
 
             var reservations = new[]
@@ -214,10 +214,10 @@
 
             var requests = new[]
             {
-                new Request("user1", SortDate.PlusDays(-1), RequestStatus.Requested),
+                new Request("user1", SortDate.PlusDays(-1), RequestStatus.Interrupted),
                 new Request("user2", SortDate.PlusDays(-1), RequestStatus.Allocated),
-                new Request("user1", SortDate, RequestStatus.Requested),
-                new Request("user2", SortDate, RequestStatus.Requested)
+                new Request("user1", SortDate, RequestStatus.Interrupted),
+                new Request("user2", SortDate, RequestStatus.Interrupted)
             };
 
             var result = SortRequests(requests, NoReservations, users);
@@ -236,10 +236,10 @@
 
             var requests = new[]
             {
-                new Request("user1", SortDate.PlusDays(-1), RequestStatus.Requested),
+                new Request("user1", SortDate.PlusDays(-1), RequestStatus.Interrupted),
                 new Request("user2", SortDate.PlusDays(-1), RequestStatus.Allocated),
-                new Request("user1", SortDate, RequestStatus.Requested),
-                new Request("user2", SortDate, RequestStatus.Requested)
+                new Request("user1", SortDate, RequestStatus.Interrupted),
+                new Request("user2", SortDate, RequestStatus.Interrupted)
             };
 
             var result = SortRequests(requests, NoReservations, users);
@@ -258,10 +258,10 @@
 
             var requests = new[]
             {
-                new Request("user1", SortDate.PlusDays(-1), RequestStatus.Requested),
+                new Request("user1", SortDate.PlusDays(-1), RequestStatus.Interrupted),
                 new Request("user2", SortDate.PlusDays(-1), RequestStatus.Allocated),
-                new Request("user1", SortDate, RequestStatus.Requested),
-                new Request("user2", SortDate, RequestStatus.Requested)
+                new Request("user1", SortDate, RequestStatus.Interrupted),
+                new Request("user2", SortDate, RequestStatus.Interrupted)
             };
 
             var reservations = new[]

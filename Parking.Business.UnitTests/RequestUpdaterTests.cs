@@ -38,12 +38,12 @@
             new Request("user2", 1.December(2020), RequestStatus.Allocated),
             new Request("user1", 2.December(2020), RequestStatus.Allocated),
             new Request("user2", 2.December(2020), RequestStatus.Allocated),
-            new Request("user1", 3.December(2020), RequestStatus.Requested),
-            new Request("user2", 3.December(2020), RequestStatus.Requested),
-            new Request("user1", 4.December(2020), RequestStatus.Requested),
-            new Request("user1", 5.December(2020), RequestStatus.Requested),
-            new Request("user2", 5.December(2020), RequestStatus.Requested),
-            new Request("user1", 6.December(2020), RequestStatus.Requested)
+            new Request("user1", 3.December(2020), RequestStatus.Interrupted),
+            new Request("user2", 3.December(2020), RequestStatus.Interrupted),
+            new Request("user1", 4.December(2020), RequestStatus.Interrupted),
+            new Request("user1", 5.December(2020), RequestStatus.Interrupted),
+            new Request("user2", 5.December(2020), RequestStatus.Interrupted),
+            new Request("user1", 6.December(2020), RequestStatus.Interrupted)
         };
 
         private static readonly IReadOnlyCollection<Request> NewlyAllocatedRequests = new[]

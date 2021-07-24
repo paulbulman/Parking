@@ -55,8 +55,8 @@
             var requests = new[]
             {
                 new Request(user.UserId, 21.December(2020), RequestStatus.Allocated),
-                new Request(user.UserId, 22.December(2020), RequestStatus.Requested),
-                new Request(user.UserId, 23.December(2020), RequestStatus.Requested),
+                new Request(user.UserId, 22.December(2020), RequestStatus.Interrupted),
+                new Request(user.UserId, 23.December(2020), RequestStatus.Interrupted),
                 new Request(user.UserId, 24.December(2020), RequestStatus.Allocated)
             };
 
@@ -96,14 +96,14 @@
             var requests = new[]
             {
                 new Request(user.UserId, 21.December(2020), RequestStatus.Allocated),
-                new Request("OTHER_REQUESTED", 21.December(2020), RequestStatus.Requested),
+                new Request("OTHER_REQUESTED", 21.December(2020), RequestStatus.Interrupted),
                 new Request("OTHER_ALLOCATED", 21.December(2020), RequestStatus.Allocated),
-                new Request(user.UserId, 22.December(2020), RequestStatus.Requested),
-                new Request("OTHER_REQUESTED1", 22.December(2020), RequestStatus.Requested),
-                new Request("OTHER_REQUESTED2", 22.December(2020), RequestStatus.Requested),
+                new Request(user.UserId, 22.December(2020), RequestStatus.Interrupted),
+                new Request("OTHER_REQUESTED1", 22.December(2020), RequestStatus.Interrupted),
+                new Request("OTHER_REQUESTED2", 22.December(2020), RequestStatus.Interrupted),
                 new Request("OTHER_ALLOCATED", 22.December(2020), RequestStatus.Allocated),
-                new Request(user.UserId, 23.December(2020), RequestStatus.Requested),
-                new Request("OTHER_REQUESTED", 23.December(2020), RequestStatus.Requested),
+                new Request(user.UserId, 23.December(2020), RequestStatus.Interrupted),
+                new Request("OTHER_REQUESTED", 23.December(2020), RequestStatus.Interrupted),
                 new Request("OTHER_ALLOCATED", 23.December(2020), RequestStatus.Allocated)
             };
 

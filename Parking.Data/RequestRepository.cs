@@ -130,7 +130,7 @@
         private static RequestStatus CreateRequestStatus(string rawRequestStatus) =>
             rawRequestStatus switch
             {
-                "R" => RequestStatus.Requested,
+                "I" => RequestStatus.Interrupted,
                 "A" => RequestStatus.Allocated,
                 "C" => RequestStatus.Cancelled,
                 "S" => RequestStatus.SoftInterrupted,
@@ -153,7 +153,7 @@
         private static string CreateRawRequestStatus(Request request) =>
             request.Status switch
             {
-                RequestStatus.Requested => "R",
+                RequestStatus.Interrupted => "I",
                 RequestStatus.Allocated => "A",
                 RequestStatus.Cancelled => "C",
                 RequestStatus.SoftInterrupted => "S",

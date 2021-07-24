@@ -23,9 +23,9 @@ namespace Parking.Business.UnitTests
 
         private static readonly IReadOnlyCollection<Request> RequestSorterResult = new[]
         {
-            new Request("User3", AllocationDate, RequestStatus.Requested),
-            new Request("User1", AllocationDate, RequestStatus.Requested),
-            new Request("User2", AllocationDate, RequestStatus.Requested)
+            new Request("User3", AllocationDate, RequestStatus.Interrupted),
+            new Request("User1", AllocationDate, RequestStatus.Interrupted),
+            new Request("User2", AllocationDate, RequestStatus.Interrupted)
         };
 
         [Fact]
@@ -86,7 +86,7 @@ namespace Parking.Business.UnitTests
                 new Request("AlreadyAllocated1", AllocationDate, RequestStatus.Allocated),
                 new Request("AlreadyAllocated2", AllocationDate, RequestStatus.Allocated),
                 new Request("OtherStatus1", AllocationDate, RequestStatus.Cancelled),
-                new Request("OtherStatus2", AllocationDate, RequestStatus.Requested),
+                new Request("OtherStatus2", AllocationDate, RequestStatus.Interrupted),
                 new Request("OtherStatus3", AllocationDate, RequestStatus.SoftInterrupted),
                 new Request("OtherStatus4", AllocationDate, RequestStatus.HardInterrupted),
             };

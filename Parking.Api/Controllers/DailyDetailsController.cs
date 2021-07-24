@@ -65,9 +65,9 @@
             var allocatedRequests = filteredRequests
                 .Where(r => r.Status == RequestStatus.Allocated);
             var interruptedRequests = filteredRequests
-                .Where(r => r.Status == RequestStatus.Requested && r.Date <= lastLongLeadTimeDate);
+                .Where(r => r.Status == RequestStatus.Interrupted && r.Date <= lastLongLeadTimeDate);
             var requestedRequests = filteredRequests
-                .Where(r => r.Status == RequestStatus.Requested && r.Date > lastLongLeadTimeDate);
+                .Where(r => r.Status == RequestStatus.Interrupted && r.Date > lastLongLeadTimeDate);
 
             var data = new DailyDetailsData(
                 CreateDailyDetailUsers(currentUserId, allocatedRequests, users),

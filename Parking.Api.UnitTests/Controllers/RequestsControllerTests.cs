@@ -46,7 +46,7 @@
         }
 
         [Theory]
-        [InlineData(RequestStatus.Requested)]
+        [InlineData(RequestStatus.Interrupted)]
         [InlineData(RequestStatus.Allocated)]
         [InlineData(RequestStatus.SoftInterrupted)]
         [InlineData(RequestStatus.HardInterrupted)]
@@ -127,7 +127,7 @@
         {
             var activeDates = new[] { 2.February(2021) };
 
-            var requests = new[] { new Request(UserId, 2.February(2021), RequestStatus.Requested) };
+            var requests = new[] { new Request(UserId, 2.February(2021), RequestStatus.Interrupted) };
 
             var controller = new RequestsController(
                 CreateDateCalculator.WithActiveDates(activeDates),
@@ -189,7 +189,7 @@
 
             var expectedSavedRequests = new[]
             {
-                new Request(UserId, 2.February(2021), RequestStatus.Requested),
+                new Request(UserId, 2.February(2021), RequestStatus.Interrupted),
                 new Request(UserId, 3.February(2021), RequestStatus.Cancelled),
             };
 
@@ -261,7 +261,7 @@
 
             var expectedSavedRequests = new[]
             {
-                new Request(UserId, 2.February(2021), RequestStatus.Requested),
+                new Request(UserId, 2.February(2021), RequestStatus.Interrupted),
                 new Request(UserId, 3.February(2021), RequestStatus.Cancelled),
             };
 
@@ -360,7 +360,7 @@
 
             await controller.PatchByIdAsync(UserId, patchRequest);
 
-            var expectedSavedRequests = new[] { new Request(UserId, 2.February(2021), RequestStatus.Requested) };
+            var expectedSavedRequests = new[] { new Request(UserId, 2.February(2021), RequestStatus.Interrupted) };
 
             CheckSavedRequests(mockRequestRepository, expectedSavedRequests);
         }
@@ -370,7 +370,7 @@
         {
             var activeDates = new[] { 2.February(2021), 3.February(2021) };
 
-            var returnedRequests = new[] { new Request(UserId, 2.February(2021), RequestStatus.Requested) };
+            var returnedRequests = new[] { new Request(UserId, 2.February(2021), RequestStatus.Interrupted) };
 
             var mockRequestRepository =
                 CreateRequestRepository.MockWithRequests(UserId, activeDates, returnedRequests);

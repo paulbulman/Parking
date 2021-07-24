@@ -64,7 +64,7 @@
                 : $"<strong>Interrupted</strong> ({this.OtherInterruptedUsersCount(localDate)})") +
             "</li>";
 
-        private bool UserHasInterruptions => UserActiveDates.Any(d => UserRequestStatus(d) == RequestStatus.Requested);
+        private bool UserHasInterruptions => UserActiveDates.Any(d => UserRequestStatus(d) == RequestStatus.Interrupted);
 
         private IEnumerable<LocalDate> UserActiveDates => this.notificationDates.Where(UserIsActiveOnDate);
 
@@ -83,6 +83,6 @@
                 .Count(r =>
                     r.UserId != this.user.UserId &&
                     r.Date == localDate &&
-                    r.Status == RequestStatus.Requested);
+                    r.Status == RequestStatus.Interrupted);
     }
 }

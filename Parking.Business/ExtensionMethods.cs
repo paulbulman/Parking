@@ -35,7 +35,7 @@
             new[]
             {
                 RequestStatus.Allocated,
-                RequestStatus.Requested,
+                RequestStatus.Interrupted,
                 RequestStatus.SoftInterrupted,
                 RequestStatus.HardInterrupted
             };
@@ -43,7 +43,7 @@
         private static IEnumerable<RequestStatus> AllocatableStatuses =>
             new[]
             {
-                RequestStatus.Requested,
+                RequestStatus.Interrupted,
                 RequestStatus.SoftInterrupted,
             };
     }

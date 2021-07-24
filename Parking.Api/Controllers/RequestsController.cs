@@ -115,7 +115,7 @@
             var requestedStatuses = new[]
             {
                 RequestStatus.Allocated,
-                RequestStatus.Requested,
+                RequestStatus.Interrupted,
                 RequestStatus.SoftInterrupted,
                 RequestStatus.HardInterrupted
             };
@@ -152,7 +152,7 @@
 
         private static Request CreateRequest(string userId, RequestsPatchRequestDailyData data)
         {
-            var status = data.Requested ? RequestStatus.Requested : RequestStatus.Cancelled;
+            var status = data.Requested ? RequestStatus.Interrupted : RequestStatus.Cancelled;
 
             return new Request(userId, data.LocalDate, status);
         }

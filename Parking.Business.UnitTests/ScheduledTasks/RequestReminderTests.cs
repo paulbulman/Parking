@@ -73,7 +73,7 @@
             var requests = new[]
             {
                 new Request("user1", 18.December(2020), RequestStatus.Allocated),
-                new Request("user1", 21.December(2020), RequestStatus.Requested)
+                new Request("user1", 21.December(2020), RequestStatus.Interrupted)
             };
 
             var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);
@@ -114,7 +114,7 @@
             var requests = new[]
             {
                 new Request("user1", 18.December(2020), RequestStatus.Cancelled),
-                new Request("user2", 21.December(2020), RequestStatus.Requested)
+                new Request("user2", 21.December(2020), RequestStatus.Interrupted)
             };
 
             var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);

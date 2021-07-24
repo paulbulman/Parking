@@ -2,7 +2,7 @@
 {
     public enum RequestStatus
     {
-        Requested,
+        Interrupted,
         Allocated,
         Cancelled,
         SoftInterrupted,

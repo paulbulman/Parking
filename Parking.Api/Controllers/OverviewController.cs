@@ -63,7 +63,7 @@
 
             var interruptedStatuses = new[]
             {
-                RequestStatus.Requested,
+                RequestStatus.Interrupted,
                 RequestStatus.SoftInterrupted,
                 RequestStatus.HardInterrupted
             };

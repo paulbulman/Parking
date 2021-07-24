@@ -27,7 +27,7 @@
             var requests = new[]
             {
                 new Request("user1", nextWorkingDate, RequestStatus.Allocated),
-                new Request("user2", nextWorkingDate, RequestStatus.Requested)
+                new Request("user2", nextWorkingDate, RequestStatus.Interrupted)
             };
 
             var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);

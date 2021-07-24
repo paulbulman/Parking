@@ -26,7 +26,7 @@
             var requests = await this.requestRepository.GetRequests(nextWorkingDate, nextWorkingDate);
 
             var updatedRequests = requests
-                .Where(r => r.Status == RequestStatus.Requested)
+                .Where(r => r.Status == RequestStatus.Interrupted)
                 .Select(r => new Request(r.UserId, r.Date, RequestStatus.SoftInterrupted))
                 .ToArray();
 

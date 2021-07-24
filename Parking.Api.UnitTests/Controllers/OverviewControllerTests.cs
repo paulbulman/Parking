@@ -57,7 +57,7 @@ namespace Parking.Api.UnitTests.Controllers
                 new Request("user1", 15.February(2021), RequestStatus.Allocated),
                 new Request("user2", 15.February(2021), RequestStatus.Allocated),
                 new Request("user3", 15.February(2021), RequestStatus.HardInterrupted),
-                new Request("user4", 15.February(2021), RequestStatus.Requested),
+                new Request("user4", 15.February(2021), RequestStatus.Interrupted),
             };
 
             var controller = new OverviewController(
@@ -141,7 +141,7 @@ namespace Parking.Api.UnitTests.Controllers
             {
                 new Request("user1", 15.February(2021), RequestStatus.Allocated),
                 new Request("user2", 15.February(2021), RequestStatus.SoftInterrupted),
-                new Request("user1", 16.February(2021), RequestStatus.Requested),
+                new Request("user1", 16.February(2021), RequestStatus.Interrupted),
                 new Request("user2", 16.February(2021), RequestStatus.Allocated),
             };
 
