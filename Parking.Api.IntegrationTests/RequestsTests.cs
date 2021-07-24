@@ -62,7 +62,7 @@
         {
             var requests = new Dictionary<string, string>
             {
-                {"01", "R"}, {"02", "A"}, {"03", "C"}, {"04", "S"}, {"05", "H"}
+                {"01", "P"}, {"02", "A"}, {"03", "C"}, {"04", "S"}, {"05", "H"}, {"08", "I"}
             };
 
             await DatabaseHelpers.CreateRequests("User1", "2021-03", requests);
@@ -82,7 +82,8 @@
             CheckReturnedRequest(requestsResponse, 03.March(2021), false);
             CheckReturnedRequest(requestsResponse, 04.March(2021), true);
             CheckReturnedRequest(requestsResponse, 05.March(2021), true);
-            CheckReturnedRequest(requestsResponse, 08.March(2021), false);
+            CheckReturnedRequest(requestsResponse, 08.March(2021), true);
+            CheckReturnedRequest(requestsResponse, 09.March(2021), false);
         }
 
         [Fact]
@@ -90,7 +91,7 @@
         {
             await DatabaseHelpers.CreateUser(CreateUser.With(userId: "User2"));
 
-            var requests = new Dictionary<string, string> { { "01", "R" }, { "02", "A" } };
+            var requests = new Dictionary<string, string> { { "01", "I" }, { "02", "A" } };
 
             await DatabaseHelpers.CreateRequests("User2", "2021-03", requests);
 
@@ -128,7 +129,7 @@
 
             Assert.Equal(new[] { "01", "03" }, savedRequests.Keys);
 
-            Assert.Equal("R", savedRequests["01"]);
+            Assert.Equal("P", savedRequests["01"]);
             Assert.Equal("C", savedRequests["03"]);
         }
 
@@ -153,7 +154,7 @@
 
             Assert.Equal(new[] { "01", "03" }, savedRequests.Keys);
 
-            Assert.Equal("R", savedRequests["01"]);
+            Assert.Equal("P", savedRequests["01"]);
             Assert.Equal("C", savedRequests["03"]);
         }
 

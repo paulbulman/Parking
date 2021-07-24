@@ -46,10 +46,11 @@
         }
 
         [Theory]
-        [InlineData(RequestStatus.Interrupted)]
         [InlineData(RequestStatus.Allocated)]
-        [InlineData(RequestStatus.SoftInterrupted)]
         [InlineData(RequestStatus.HardInterrupted)]
+        [InlineData(RequestStatus.Interrupted)]
+        [InlineData(RequestStatus.Pending)]
+        [InlineData(RequestStatus.SoftInterrupted)]
         public static async Task Returns_true_when_space_has_been_requested(RequestStatus requestStatus)
         {
             var activeDates = new[] { 2.February(2021) };
@@ -189,7 +190,7 @@
 
             var expectedSavedRequests = new[]
             {
-                new Request(UserId, 2.February(2021), RequestStatus.Interrupted),
+                new Request(UserId, 2.February(2021), RequestStatus.Pending),
                 new Request(UserId, 3.February(2021), RequestStatus.Cancelled),
             };
 
@@ -261,7 +262,7 @@
 
             var expectedSavedRequests = new[]
             {
-                new Request(UserId, 2.February(2021), RequestStatus.Interrupted),
+                new Request(UserId, 2.February(2021), RequestStatus.Pending),
                 new Request(UserId, 3.February(2021), RequestStatus.Cancelled),
             };
 
@@ -360,7 +361,7 @@
 
             await controller.PatchByIdAsync(UserId, patchRequest);
 
-            var expectedSavedRequests = new[] { new Request(UserId, 2.February(2021), RequestStatus.Interrupted) };
+            var expectedSavedRequests = new[] { new Request(UserId, 2.February(2021), RequestStatus.Pending) };
 
             CheckSavedRequests(mockRequestRepository, expectedSavedRequests);
         }
@@ -370,7 +371,7 @@
         {
             var activeDates = new[] { 2.February(2021), 3.February(2021) };
 
-            var returnedRequests = new[] { new Request(UserId, 2.February(2021), RequestStatus.Interrupted) };
+            var returnedRequests = new[] { new Request(UserId, 2.February(2021), RequestStatus.Pending) };
 
             var mockRequestRepository =
                 CreateRequestRepository.MockWithRequests(UserId, activeDates, returnedRequests);

@@ -22,6 +22,36 @@ namespace Parking.Service.IntegrationTests
         public Task DisposeAsync() => Task.CompletedTask;
 
         [Fact]
+        public async Task PreProcesses_requests()
+        {
+            await SetupSchedules();
+
+            await DatabaseHelpers.CreateConfiguration(new Dictionary<string, string>
+            {
+                {"nearbyDistance", "3.5"},
+                {"shortLeadTimeSpaces", "0"},
+                {"totalSpaces", "0"}
+            });
+
+            await DatabaseHelpers.CreateTrigger();
+
+            await DatabaseHelpers.CreateUser(
+                CreateUser.With(userId: "User1", emailAddress: "john.doe@example.com"));
+
+            await DatabaseHelpers.CreateRequests(
+                "User1",
+                "2021-03",
+                new Dictionary<string, string> { { "02", "P" } });
+
+            await TaskRunner.RunTasksAsync(CustomProviderFactory.CreateServiceProvider());
+
+            var savedRequests = await DatabaseHelpers.ReadRequests("User1", "2021-03");
+
+            Assert.Equal(new[] { "02" }, savedRequests.Keys);
+            Assert.Equal("I", savedRequests["02"]);
+        }
+
+        [Fact]
         public async Task Allocates_requests()
         {
             await SetupSchedules();
@@ -33,7 +63,7 @@ namespace Parking.Service.IntegrationTests
             await DatabaseHelpers.CreateRequests(
                 "User1",
                 "2021-03",
-                new Dictionary<string, string> { { "01", "R" } });
+                new Dictionary<string, string> { { "01", "I" } });
 
             await TaskRunner.RunTasksAsync(CustomProviderFactory.CreateServiceProvider());
 
@@ -59,7 +89,7 @@ namespace Parking.Service.IntegrationTests
             await DatabaseHelpers.CreateRequests(
                 "User1",
                 "2021-03",
-                new Dictionary<string, string> { { "02", "R" } });
+                new Dictionary<string, string> { { "02", "I" } });
 
             await TaskRunner.RunTasksAsync(CustomProviderFactory.CreateServiceProvider());
 
@@ -87,7 +117,7 @@ namespace Parking.Service.IntegrationTests
             await DatabaseHelpers.CreateRequests(
                 "User1",
                 "2021-03",
-                new Dictionary<string, string> { { "02", "R" } });
+                new Dictionary<string, string> { { "02", "I" } });
 
             await TaskRunner.RunTasksAsync(CustomProviderFactory.CreateServiceProvider());
 
@@ -111,7 +141,7 @@ namespace Parking.Service.IntegrationTests
             await DatabaseHelpers.CreateRequests(
                 "User1",
                 "2021-03",
-                new Dictionary<string, string> { { "08", "R" }, { "12", "R" } });
+                new Dictionary<string, string> { { "08", "I" }, { "12", "I" } });
 
             await TaskRunner.RunTasksAsync(CustomProviderFactory.CreateServiceProvider());
 

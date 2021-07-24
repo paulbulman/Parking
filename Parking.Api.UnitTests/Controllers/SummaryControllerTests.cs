@@ -22,11 +22,8 @@
         public static async Task Get_summary_returns_summary_data_for_each_active_date()
         {
             var activeDates = new[] { 28.June(2021), 29.June(2021), 1.July(2021) };
-            var longLeadTimeAllocationDates = new[] { 1.July(2021) };
 
-            var dateCalculator = CreateDateCalculator.WithActiveDatesAndLongLeadTimeAllocationDates(
-                activeDates,
-                longLeadTimeAllocationDates);
+            var dateCalculator = CreateDateCalculator.WithActiveDates(activeDates);
 
             var controller = new SummaryController(
                 dateCalculator,
@@ -48,20 +45,21 @@
         }
 
         [Theory]
-        [InlineData(RequestStatus.Allocated, SummaryStatus.Allocated)]
-        [InlineData(RequestStatus.Interrupted, SummaryStatus.Requested)]
+        [InlineData(RequestStatus.Allocated, SummaryStatus.Allocated, false)]
+        [InlineData(RequestStatus.HardInterrupted, SummaryStatus.Interrupted, true)]
+        [InlineData(RequestStatus.Interrupted, SummaryStatus.Interrupted, true)]
+        [InlineData(RequestStatus.Pending, SummaryStatus.Pending, false)]
+        [InlineData(RequestStatus.SoftInterrupted, SummaryStatus.Interrupted, true)]
         public static async Task Get_summary_returns_request_status(
             RequestStatus requestStatus,
-            SummaryStatus expectedSummaryStatus)
+            SummaryStatus expectedSummaryStatus,
+            bool expectedIsProblem)
         {
             var activeDates = new[] { 28.June(2021) };
-            var longLeadTimeAllocationDates = new[] { 27.June(2021) };
 
             var requests = new[] { new Request("user1", 28.June(2021), requestStatus) };
 
-            var dateCalculator = CreateDateCalculator.WithActiveDatesAndLongLeadTimeAllocationDates(
-                activeDates,
-                longLeadTimeAllocationDates);
+            var dateCalculator = CreateDateCalculator.WithActiveDates(activeDates);
 
             var controller = new SummaryController(
                 dateCalculator,
@@ -78,41 +76,7 @@
             var data = GetDailyData(resultValue.Summary, 28.June(2021));
 
             Assert.Equal(expectedSummaryStatus, data.Status);
-            Assert.False(data.IsProblem);
-        }
-
-        [Theory]
-        [InlineData(RequestStatus.Interrupted)]
-        [InlineData(RequestStatus.SoftInterrupted)]
-        [InlineData(RequestStatus.HardInterrupted)]
-        public static async Task Get_summary_returns_unallocated_requests_within_long_lead_time_as_interrupted(
-            RequestStatus requestStatus)
-        {
-            var activeDates = new[] { 28.June(2021) };
-            var longLeadTimeAllocationDates = new[] { 1.July(2021) };
-
-            var requests = new[] { new Request("user1", 28.June(2021), requestStatus) };
-
-            var dateCalculator = CreateDateCalculator.WithActiveDatesAndLongLeadTimeAllocationDates(
-                activeDates,
-                longLeadTimeAllocationDates);
-
-            var controller = new SummaryController(
-                dateCalculator,
-                CreateRequestRepository.WithRequests("user1", activeDates, requests),
-                Mock.Of<ITriggerRepository>())
-            {
-                ControllerContext = CreateControllerContext.WithUsername("user1")
-            };
-
-            var result = await controller.GetSummaryAsync();
-
-            var resultValue = GetResultValue<SummaryResponse>(result);
-
-            var data = GetDailyData(resultValue.Summary, 28.June(2021));
-
-            Assert.Equal(SummaryStatus.Interrupted, data.Status);
-            Assert.True(data.IsProblem);
+            Assert.Equal(expectedIsProblem, data.IsProblem);
         }
 
         [Fact]
@@ -174,11 +138,12 @@
         }
 
         [Theory]
-        [InlineData(RequestStatus.Interrupted, false, false)]
         [InlineData(RequestStatus.Allocated, false, false)]
         [InlineData(RequestStatus.Cancelled, false, false)]
-        [InlineData(RequestStatus.SoftInterrupted, true, false)]
         [InlineData(RequestStatus.HardInterrupted, true, true)]
+        [InlineData(RequestStatus.Interrupted, false, false)]
+        [InlineData(RequestStatus.Pending, false, false)]
+        [InlineData(RequestStatus.SoftInterrupted, true, false)]
         public static async Task Get_summary_returns_stay_interrupted_status(
             RequestStatus firstRequestStatus,
             bool expectedIsAllowed,

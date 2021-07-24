@@ -36,14 +36,12 @@
         {
             var activeDates = this.dateCalculator.GetActiveDates();
 
-            var lastLongLeadTimeDate = this.dateCalculator.GetLongLeadTimeAllocationDates().Last();
-
             var requests = await this.requestRepository.GetRequests(activeDates.First(), activeDates.Last());
 
             var users = await this.userRepository.GetUsers();
 
             var data = activeDates
-                .Select(d => CreateDailyData(d, lastLongLeadTimeDate, this.GetCognitoUserId(), requests, users))
+                .Select(d => CreateDailyData(d, this.GetCognitoUserId(), requests, users))
                 .ToArray();
 
             var response = new DailyDetailsResponse(data);
@@ -53,7 +51,6 @@
 
         private static Day<DailyDetailsData> CreateDailyData(
             LocalDate localDate,
-            LocalDate lastLongLeadTimeDate,
             string currentUserId,
             IReadOnlyCollection<Request> requests,
             IReadOnlyCollection<User> users)
@@ -62,17 +59,24 @@
                 .Where(r => r.Date == localDate)
                 .ToArray();
 
+            var interruptedStatuses = new[]
+            {
+                RequestStatus.Interrupted,
+                RequestStatus.HardInterrupted,
+                RequestStatus.SoftInterrupted
+            };
+
             var allocatedRequests = filteredRequests
                 .Where(r => r.Status == RequestStatus.Allocated);
             var interruptedRequests = filteredRequests
-                .Where(r => r.Status == RequestStatus.Interrupted && r.Date <= lastLongLeadTimeDate);
-            var requestedRequests = filteredRequests
-                .Where(r => r.Status == RequestStatus.Interrupted && r.Date > lastLongLeadTimeDate);
+                .Where(r => interruptedStatuses.Contains(r.Status));
+            var pendingRequests = filteredRequests
+                .Where(r => r.Status == RequestStatus.Pending);
 
             var data = new DailyDetailsData(
-                CreateDailyDetailUsers(currentUserId, allocatedRequests, users),
-                CreateDailyDetailUsers(currentUserId, interruptedRequests, users),
-                CreateDailyDetailUsers(currentUserId, requestedRequests, users));
+                allocatedUsers: CreateDailyDetailUsers(currentUserId, allocatedRequests, users),
+                interruptedUsers: CreateDailyDetailUsers(currentUserId, interruptedRequests, users),
+                pendingUsers: CreateDailyDetailUsers(currentUserId, pendingRequests, users));
 
             return new Day<DailyDetailsData>(localDate, data);
         }

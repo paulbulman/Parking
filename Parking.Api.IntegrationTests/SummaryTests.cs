@@ -63,7 +63,7 @@
             Assert.Null(day8Data.Status);
             Assert.False(day8Data.IsProblem);
 
-            Assert.Equal(SummaryStatus.Requested, day31Data.Status);
+            Assert.Equal(SummaryStatus.Pending, day31Data.Status);
             Assert.False(day31Data.IsProblem);
 
             Assert.Equal(1.March(2021), summaryResponse.StayInterruptedStatus.LocalDate);
@@ -99,7 +99,7 @@
 
             var user1Requests = new Dictionary<string, string>
             {
-                { "01", "S" }, { "02", "A" }, { "03", "C"}, {"04", "S"}, {"05", "H"}, { "31", "R" }
+                { "01", "S" }, { "02", "A" }, { "03", "C"}, {"04", "S"}, {"05", "H"}, { "31", "P" }
             };
 
             await DatabaseHelpers.CreateRequests("User1", "2021-03", user1Requests);

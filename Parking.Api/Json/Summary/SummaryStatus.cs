@@ -4,6 +4,6 @@
     {
         Allocated,
         Interrupted,
-        Requested
+        Pending
     }
 }

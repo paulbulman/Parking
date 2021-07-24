@@ -130,11 +130,12 @@
         private static RequestStatus CreateRequestStatus(string rawRequestStatus) =>
             rawRequestStatus switch
             {
-                "I" => RequestStatus.Interrupted,
                 "A" => RequestStatus.Allocated,
                 "C" => RequestStatus.Cancelled,
-                "S" => RequestStatus.SoftInterrupted,
                 "H" => RequestStatus.HardInterrupted,
+                "I" => RequestStatus.Interrupted,
+                "P" => RequestStatus.Pending,
+                "S" => RequestStatus.SoftInterrupted,
                 _ => throw new ArgumentOutOfRangeException(nameof(rawRequestStatus))
             };
 
@@ -153,11 +154,12 @@
         private static string CreateRawRequestStatus(Request request) =>
             request.Status switch
             {
-                RequestStatus.Interrupted => "I",
                 RequestStatus.Allocated => "A",
                 RequestStatus.Cancelled => "C",
-                RequestStatus.SoftInterrupted => "S",
                 RequestStatus.HardInterrupted => "H",
+                RequestStatus.Interrupted => "I",
+                RequestStatus.Pending => "P",
+                RequestStatus.SoftInterrupted => "S",
                 _ => throw new ArgumentOutOfRangeException(nameof(request))
             };
     }

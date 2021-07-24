@@ -32,9 +32,10 @@ namespace Parking.Data.UnitTests
         [Theory]
         [InlineData("A", RequestStatus.Allocated)]
         [InlineData("C", RequestStatus.Cancelled)]
-        [InlineData("I", RequestStatus.Interrupted)]
-        [InlineData("S", RequestStatus.SoftInterrupted)]
         [InlineData("H", RequestStatus.HardInterrupted)]
+        [InlineData("I", RequestStatus.Interrupted)]
+        [InlineData("P", RequestStatus.Pending)]
+        [InlineData("S", RequestStatus.SoftInterrupted)]
         public static async Task GetRequests_converts_raw_string_value_to_status_enum(
             string rawValue,
             RequestStatus expectedRequestStatus)
@@ -162,9 +163,10 @@ namespace Parking.Data.UnitTests
         [Theory]
         [InlineData(RequestStatus.Allocated, "A")]
         [InlineData(RequestStatus.Cancelled, "C")]
-        [InlineData(RequestStatus.Interrupted, "I")]
-        [InlineData(RequestStatus.SoftInterrupted, "S")]
         [InlineData(RequestStatus.HardInterrupted, "H")]
+        [InlineData(RequestStatus.Interrupted, "I")]
+        [InlineData(RequestStatus.Pending, "P")]
+        [InlineData(RequestStatus.SoftInterrupted, "S")]
         public static async Task SaveRequests_converts_status_enum_to_raw_string_value(
             RequestStatus requestStatus,
             string expectedRawValue)
@@ -350,7 +352,7 @@ namespace Parking.Data.UnitTests
                     "2020-09",
                     KeyValuePair.Create("01", "A"),
                     KeyValuePair.Create("02", "A"),
-                    KeyValuePair.Create("03", "R")),
+                    KeyValuePair.Create("03", "I")),
                 CreateRawItem(
                     "User1",
                     "2020-10",

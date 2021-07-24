@@ -17,6 +17,9 @@
             {
                 if (await triggerManager.ShouldRun())
                 {
+                    var requestPreProcessor = provider.GetRequiredService<RequestPreProcessor>();
+                    await requestPreProcessor.Update();
+
                     var requestUpdater = provider.GetRequiredService<RequestUpdater>();
                     var allocatedRequests = await requestUpdater.Update();
 

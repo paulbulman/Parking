@@ -115,9 +115,10 @@
             var requestedStatuses = new[]
             {
                 RequestStatus.Allocated,
+                RequestStatus.HardInterrupted,
                 RequestStatus.Interrupted,
+                RequestStatus.Pending,
                 RequestStatus.SoftInterrupted,
-                RequestStatus.HardInterrupted
             };
 
             var matchingRequest = requests.SingleOrDefault(r => r.Date == localDate);
@@ -152,7 +153,7 @@
 
         private static Request CreateRequest(string userId, RequestsPatchRequestDailyData data)
         {
-            var status = data.Requested ? RequestStatus.Interrupted : RequestStatus.Cancelled;
+            var status = data.Requested ? RequestStatus.Pending : RequestStatus.Cancelled;
 
             return new Request(userId, data.LocalDate, status);
         }

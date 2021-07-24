@@ -1,5 +1,6 @@
 ﻿namespace Parking.Api.Controllers
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -40,7 +41,6 @@
         public async Task<IActionResult> GetSummaryAsync()
         {
             var activeDates = this.dateCalculator.GetActiveDates();
-            var lastLongLeadTimeAllocationDate = this.dateCalculator.GetLongLeadTimeAllocationDates().Last();
 
             var requests = await this.requestRepository.GetRequests(
                 this.GetCognitoUserId(),
@@ -49,7 +49,7 @@
 
             var data = activeDates.ToDictionary(
                 d => d,
-                d => CreateDailyData(d, requests, lastLongLeadTimeAllocationDate));
+                d => CreateDailyData(d, requests));
 
             var calendar = CreateCalendar(data);
 
@@ -100,25 +100,29 @@
 
         private static SummaryData CreateDailyData(
             LocalDate localDate,
-            IReadOnlyCollection<Request> requests,
-            LocalDate lastLongLeadTimeAllocationDate)
+            IReadOnlyCollection<Request> requests)
         {
-            var matchingRequest = requests.SingleOrDefault(r => r.Date == localDate);
+            var requestStatus = requests.SingleOrDefault(r => r.Date == localDate)?.Status;
+            
+            var summaryStatus = GetSummaryStatus(requestStatus);
 
-            if (matchingRequest == null || matchingRequest.Status == RequestStatus.Cancelled)
-            {
-                return new SummaryData(null, isProblem: false);
-            }
+            var isProblem = summaryStatus == SummaryStatus.Interrupted;
 
-            if (matchingRequest.Status == RequestStatus.Allocated)
-            {
-                return new SummaryData(SummaryStatus.Allocated, isProblem: false);
-            }
-
-            return matchingRequest.Date <= lastLongLeadTimeAllocationDate
-                ? new SummaryData(SummaryStatus.Interrupted, isProblem: true)
-                : new SummaryData(SummaryStatus.Requested, isProblem: false);
+            return new SummaryData(summaryStatus, isProblem);
         }
+
+        private static SummaryStatus? GetSummaryStatus(RequestStatus? requestStatus) =>
+            requestStatus switch
+            {
+                RequestStatus.Allocated => SummaryStatus.Allocated,
+                RequestStatus.Cancelled => null,
+                RequestStatus.HardInterrupted => SummaryStatus.Interrupted,
+                RequestStatus.Interrupted => SummaryStatus.Interrupted,
+                RequestStatus.Pending => SummaryStatus.Pending,
+                RequestStatus.SoftInterrupted => SummaryStatus.Interrupted,
+                null => null,
+                _ => throw new ArgumentOutOfRangeException(nameof(requestStatus), requestStatus, null)
+            };
 
         private static StayInterruptedStatus CreateStayInterruptedStatus(
             LocalDate localDate, 

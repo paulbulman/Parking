@@ -2,10 +2,11 @@
 {
     public enum RequestStatus
     {
-        Interrupted,
         Allocated,
         Cancelled,
+        HardInterrupted,
+        Interrupted,
+        Pending,
         SoftInterrupted,
-        HardInterrupted
     }
 }
