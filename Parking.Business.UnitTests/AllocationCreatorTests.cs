@@ -86,7 +86,9 @@ namespace Parking.Business.UnitTests
                 new Request("AlreadyAllocated1", AllocationDate, RequestStatus.Allocated),
                 new Request("AlreadyAllocated2", AllocationDate, RequestStatus.Allocated),
                 new Request("OtherStatus1", AllocationDate, RequestStatus.Cancelled),
-                new Request("OtherStatus2", AllocationDate, RequestStatus.Requested)
+                new Request("OtherStatus2", AllocationDate, RequestStatus.Requested),
+                new Request("OtherStatus3", AllocationDate, RequestStatus.SoftInterrupted),
+                new Request("OtherStatus4", AllocationDate, RequestStatus.HardInterrupted),
             };
 
             var actual = CreateAllocationCreator(existingRequests)

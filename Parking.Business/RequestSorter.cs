@@ -30,7 +30,7 @@
             decimal nearbyDistance)
         {
             var requestsToSort = requests
-                .Where(r => r.Date == date && r.Status == RequestStatus.Requested)
+                .Where(r => r.Date == date && r.Status.IsAllocatable())
                 .ToArray();
 
             var existingAllocationRatios = CalculateExistingAllocationRatios(requestsToSort, requests, reservations);
@@ -43,8 +43,8 @@
         }
 
         private IDictionary<Request, decimal> CalculateExistingAllocationRatios(
-            IReadOnlyCollection<Request> requestsToSort, 
-            IReadOnlyCollection<Request> allRequests, 
+            IReadOnlyCollection<Request> requestsToSort,
+            IReadOnlyCollection<Request> allRequests,
             IReadOnlyCollection<Reservation> reservations)
         {
             var existingAllocationRatios = requestsToSort.ToDictionary(
@@ -73,8 +73,8 @@
             IReadOnlyCollection<Reservation> reservations)
         {
             var userPreviousRequests = allRequests
-                .Where(r => 
-                    r.UserId == request.UserId && 
+                .Where(r =>
+                    r.UserId == request.UserId &&
                     r.Date < request.Date &&
                     !UserHasReservation(r, reservations))
                 .ToArray();

@@ -48,6 +48,8 @@
         [Theory]
         [InlineData(RequestStatus.Requested)]
         [InlineData(RequestStatus.Allocated)]
+        [InlineData(RequestStatus.SoftInterrupted)]
+        [InlineData(RequestStatus.HardInterrupted)]
         public static async Task Returns_true_when_space_has_been_requested(RequestStatus requestStatus)
         {
             var activeDates = new[] { 2.February(2021) };
@@ -430,17 +432,5 @@
             IReadOnlyCollection<Request> expected,
             IReadOnlyCollection<Request> actual) =>
             actual.Count == expected.Count && expected.All(e => actual.Contains(e, new RequestsComparer()));
-
-        private class RequestsComparer : IEqualityComparer<Request>
-        {
-            public bool Equals(Request? first, Request? second) =>
-                first != null &&
-                second != null &&
-                first.UserId == second.UserId &&
-                first.Date == second.Date &&
-                first.Status == second.Status;
-
-            public int GetHashCode(Request request) => request.Date.GetHashCode();
-        }
     }
 }

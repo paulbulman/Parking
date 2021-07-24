@@ -112,7 +112,13 @@
 
         private static RequestsData CreateDailyData(LocalDate localDate, IReadOnlyCollection<Request> requests)
         {
-            var requestedStatuses = new[] { RequestStatus.Allocated, RequestStatus.Requested };
+            var requestedStatuses = new[]
+            {
+                RequestStatus.Allocated,
+                RequestStatus.Requested,
+                RequestStatus.SoftInterrupted,
+                RequestStatus.HardInterrupted
+            };
 
             var matchingRequest = requests.SingleOrDefault(r => r.Date == localDate);
 

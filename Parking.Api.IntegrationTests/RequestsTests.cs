@@ -60,7 +60,10 @@
         [Fact]
         public async Task Returns_existing_requests()
         {
-            var requests = new Dictionary<string, string> { { "01", "R" }, { "02", "A" } };
+            var requests = new Dictionary<string, string>
+            {
+                {"01", "R"}, {"02", "A"}, {"03", "C"}, {"04", "S"}, {"05", "H"}
+            };
 
             await DatabaseHelpers.CreateRequests("User1", "2021-03", requests);
 
@@ -77,6 +80,9 @@
             CheckReturnedRequest(requestsResponse, 01.March(2021), true);
             CheckReturnedRequest(requestsResponse, 02.March(2021), true);
             CheckReturnedRequest(requestsResponse, 03.March(2021), false);
+            CheckReturnedRequest(requestsResponse, 04.March(2021), true);
+            CheckReturnedRequest(requestsResponse, 05.March(2021), true);
+            CheckReturnedRequest(requestsResponse, 08.March(2021), false);
         }
 
         [Fact]

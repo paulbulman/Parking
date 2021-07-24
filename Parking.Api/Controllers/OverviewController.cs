@@ -61,10 +61,17 @@
                 .Where(r => r.Date == localDate)
                 .ToArray();
 
+            var interruptedStatuses = new[]
+            {
+                RequestStatus.Requested,
+                RequestStatus.SoftInterrupted,
+                RequestStatus.HardInterrupted
+            };
+
             var allocatedRequests = filteredRequests
                 .Where(r => r.Status == RequestStatus.Allocated);
             var interruptedRequests = filteredRequests
-                .Where(r => r.Status == RequestStatus.Requested);
+                .Where(r => interruptedStatuses.Contains(r.Status));
 
             return new OverviewData(
                 CreateOverviewUsers(currentUserId, allocatedRequests, users),
