@@ -90,10 +90,12 @@
             const string ExpectedPlainTextBody =
                 "You have NOT been allocated a parking space for Wed 01 Apr.\r\n\r\n" +
                 "If someone else cancels their request you may be allocated one later, but otherwise you can NOT park at the office.\r\n\r\n" +
+                "Alternatively, if you make other arrangements TO COME IN to the office, you can choose to stay interrupted via the Summary page within the app.\r\n\r\n" +
                 "There are currently 0 other people also waiting for a space.";
             const string ExpectedHtmlBody =
                 "<p>You have <strong>not</strong> been allocated a parking space for Wed 01 Apr.</p>\r\n" +
                 "<p>If someone else cancels their request you may be allocated one later, but otherwise you can <strong>not</strong> park at the office.</p>\r\n" +
+                "<p>Alternatively, if you make other arrangements <strong>to come in</strong> to the office, you can choose to stay interrupted via the Summary page within the app.</p>\r\n" +
                 "<p>There are currently 0 other people also waiting for a space.</p>";
 
             Assert.Equal(ExpectedPlainTextBody, template.PlainTextBody);
@@ -110,8 +112,9 @@
             {
                 new Request(user.UserId, localDate, RequestStatus.Requested),
                 new Request("user2", localDate, RequestStatus.Requested),
-                new Request("user3", localDate, RequestStatus.Allocated),
-                new Request("user4", localDate, RequestStatus.Cancelled)
+                new Request("user3", localDate, RequestStatus.SoftInterrupted),
+                new Request("user4", localDate, RequestStatus.Allocated),
+                new Request("user5", localDate, RequestStatus.Cancelled),
             };
 
             var template = new DailyNotification(requests, user, localDate);
@@ -119,11 +122,13 @@
             const string ExpectedPlainTextBody =
                 "You have NOT been allocated a parking space for Wed 01 Apr.\r\n\r\n" +
                 "If someone else cancels their request you may be allocated one later, but otherwise you can NOT park at the office.\r\n\r\n" +
-                "There is currently 1 other person also waiting for a space.";
+                "Alternatively, if you make other arrangements TO COME IN to the office, you can choose to stay interrupted via the Summary page within the app.\r\n\r\n" +
+                "There are currently 2 other people also waiting for a space.";
             const string ExpectedHtmlBody =
                 "<p>You have <strong>not</strong> been allocated a parking space for Wed 01 Apr.</p>\r\n" +
                 "<p>If someone else cancels their request you may be allocated one later, but otherwise you can <strong>not</strong> park at the office.</p>\r\n" +
-                "<p>There is currently 1 other person also waiting for a space.</p>";
+                "<p>Alternatively, if you make other arrangements <strong>to come in</strong> to the office, you can choose to stay interrupted via the Summary page within the app.</p>\r\n" +
+                "<p>There are currently 2 other people also waiting for a space.</p>";
 
             Assert.Equal(ExpectedPlainTextBody, template.PlainTextBody);
             Assert.Equal(ExpectedHtmlBody, template.HtmlBody);

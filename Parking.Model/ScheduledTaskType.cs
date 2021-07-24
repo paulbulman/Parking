@@ -2,9 +2,10 @@
 {
     public enum ScheduledTaskType
     {
-        ReservationReminder,
-        RequestReminder,
         DailyNotification,
-        WeeklyNotification
+        RequestReminder,
+        ReservationReminder,
+        SoftInterruptionUpdater,
+        WeeklyNotification,
     }
 }

@@ -67,6 +67,37 @@ namespace Parking.Service.IntegrationTests
         }
 
         [Fact]
+        public async Task Updates_soft_interruption_status()
+        {
+            await SetupSchedules(softInterruptionUpdaterDue: true);
+
+            await DatabaseHelpers.CreateConfiguration(new Dictionary<string, string>
+            {
+                {"nearbyDistance", "3.5"},
+                {"shortLeadTimeSpaces", "0"},
+                {"totalSpaces", "0"}
+            });
+
+            await DatabaseHelpers.CreateTrigger();
+
+            await DatabaseHelpers.CreateUser(
+                CreateUser.With(userId: "User1", emailAddress: "john.doe@example.com"));
+
+            // Current instant is defined such that the next daily summary date is 02-Mar-2021
+            await DatabaseHelpers.CreateRequests(
+                "User1",
+                "2021-03",
+                new Dictionary<string, string> { { "02", "R" } });
+
+            await TaskRunner.RunTasksAsync(CustomProviderFactory.CreateServiceProvider());
+
+            var savedRequests = await DatabaseHelpers.ReadRequests("User1", "2021-03");
+
+            Assert.Equal(new[] { "02" }, savedRequests.Keys);
+            Assert.Equal("S", savedRequests["02"]);
+        }
+
+        [Fact]
         public async Task Sends_weekly_summary_email()
         {
             await SetupSchedules(weeklyNotificationDue: true);
@@ -115,6 +146,7 @@ namespace Parking.Service.IntegrationTests
             bool dailyNotificationDue = false,
             bool requestReminderDue = false,
             bool reservationReminderDue = false,
+            bool softInterruptionUpdaterDue = false,
             bool weeklyNotificationDue = false)
         {
             const string DueTime = "2020-01-01T00:00:00Z";
@@ -123,6 +155,7 @@ namespace Parking.Service.IntegrationTests
             var dailyNotificationTime = dailyNotificationDue ? DueTime : NotDueTime;
             var requestReminderTime = requestReminderDue ? DueTime : NotDueTime;
             var reservationReminderTime = reservationReminderDue ? DueTime : NotDueTime;
+            var softInterruptionUpdaterTime = softInterruptionUpdaterDue ? DueTime : NotDueTime;
             var weeklyNotificationTime = weeklyNotificationDue ? DueTime : NotDueTime;
 
             var rawScheduleData = new Dictionary<string, string>
@@ -130,6 +163,7 @@ namespace Parking.Service.IntegrationTests
                 {"DAILY_NOTIFICATION", dailyNotificationTime},
                 {"REQUEST_REMINDER", requestReminderTime},
                 {"RESERVATION_REMINDER", reservationReminderTime},
+                {"SOFT_INTERRUPTION_UPDATER", softInterruptionUpdaterTime},
                 {"WEEKLY_NOTIFICATION", weeklyNotificationTime}
             };
 

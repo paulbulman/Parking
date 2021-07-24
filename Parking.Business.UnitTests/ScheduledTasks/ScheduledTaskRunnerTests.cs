@@ -21,12 +21,14 @@
 
             var dailyNotificationSchedule = new Schedule(ScheduledTaskType.DailyNotification, dueTime);
             var requestReminderSchedule = new Schedule(ScheduledTaskType.RequestReminder, notDueTime);
+            var softInterruptionUpdaterSchedule = new Schedule(ScheduledTaskType.SoftInterruptionUpdater, notDueTime);
             var weeklyNotificationSchedule = new Schedule(ScheduledTaskType.WeeklyNotification, dueTime);
 
             var schedules = new[]
             {
                 dailyNotificationSchedule,
                 requestReminderSchedule,
+                softInterruptionUpdaterSchedule,
                 weeklyNotificationSchedule
             };
 
@@ -37,16 +39,19 @@
             var mockDateCalculator = new Mock<IDateCalculator>(MockBehavior.Strict);
             mockDateCalculator.Setup(d => d.ScheduleIsDue(dailyNotificationSchedule)).Returns(true);
             mockDateCalculator.Setup(d => d.ScheduleIsDue(requestReminderSchedule)).Returns(false);
+            mockDateCalculator.Setup(d => d.ScheduleIsDue(softInterruptionUpdaterSchedule)).Returns(false);
             mockDateCalculator.Setup(d => d.ScheduleIsDue(weeklyNotificationSchedule)).Returns(true);
 
             var mockDailyNotification = CreateMockScheduledTask(ScheduledTaskType.DailyNotification);
             var mockRequestReminder = CreateMockScheduledTask(ScheduledTaskType.RequestReminder);
+            var mockSoftInterruptionUpdater = CreateMockScheduledTask(ScheduledTaskType.SoftInterruptionUpdater);
             var mockWeeklyNotification = CreateMockScheduledTask(ScheduledTaskType.WeeklyNotification);
 
             var scheduledTasks = new[]
             {
                 mockDailyNotification.Object,
                 mockRequestReminder.Object,
+                mockSoftInterruptionUpdater.Object,
                 mockWeeklyNotification.Object
             };
 
@@ -59,6 +64,7 @@
 
             mockDailyNotification.Verify(s => s.Run(), Times.Once);
             mockRequestReminder.Verify(s => s.Run(), Times.Never);
+            mockSoftInterruptionUpdater.Verify(s => s.Run(), Times.Never);
             mockWeeklyNotification.Verify(s => s.Run(), Times.Once);
         }
 

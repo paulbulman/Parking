@@ -20,6 +20,7 @@
                 {"DAILY_NOTIFICATION", "2020-12-14T11:00:00Z"},
                 {"REQUEST_REMINDER", "2020-12-16T00:00:00Z"},
                 {"RESERVATION_REMINDER", "2020-12-14T10:00:00Z"},
+                {"SOFT_INTERRUPTION_UPDATER", "2020-12-14T11:00:00Z"},
                 {"WEEKLY_NOTIFICATION", "2020-12-17T00:00:00Z"}
             };
 
@@ -38,6 +39,7 @@
                 new Schedule(ScheduledTaskType.DailyNotification, 14.December(2020).At(11, 0, 0).Utc()),
                 new Schedule(ScheduledTaskType.RequestReminder, 16.December(2020).AtMidnight().Utc()),
                 new Schedule(ScheduledTaskType.ReservationReminder, 14.December(2020).At(10, 0, 0).Utc()),
+                new Schedule(ScheduledTaskType.SoftInterruptionUpdater, 14.December(2020).At(11, 0, 0).Utc()),
                 new Schedule(ScheduledTaskType.WeeklyNotification, 17.December(2020).AtMidnight().Utc())
             };
 
@@ -63,6 +65,7 @@
                 {"DAILY_NOTIFICATION", "2020-12-14T11:00:00Z"},
                 {"REQUEST_REMINDER", "2020-12-16T00:00:00Z"},
                 {"RESERVATION_REMINDER", "2020-12-14T10:00:00Z"},
+                {"SOFT_INTERRUPTION_UPDATER", "2020-12-14T11:00:00Z"},
                 {"WEEKLY_NOTIFICATION", "2020-12-17T00:00:00Z"}
             };
 
@@ -70,7 +73,8 @@
             {
                 {"DAILY_NOTIFICATION", "2020-12-14T11:00:00Z"},
                 {"REQUEST_REMINDER", "2020-12-16T00:00:00Z"},
-                {"RESERVATION_REMINDER", "2020-12-15T10:00:00Z"},
+                {"RESERVATION_REMINDER", "2020-12-14T10:00:00Z"},
+                {"SOFT_INTERRUPTION_UPDATER", "2020-12-15T11:00:00Z"},
                 {"WEEKLY_NOTIFICATION", "2020-12-17T00:00:00Z"}
             };
 
@@ -86,8 +90,8 @@
             var scheduleRepository = new ScheduleRepository(mockDatabaseProvider.Object);
 
             var updatedSchedule = new Schedule(
-                ScheduledTaskType.ReservationReminder,
-                15.December(2020).At(10, 0, 0).Utc());
+                ScheduledTaskType.SoftInterruptionUpdater,
+                15.December(2020).At(11, 0, 0).Utc());
 
             await scheduleRepository.UpdateSchedule(updatedSchedule);
 

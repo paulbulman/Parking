@@ -49,6 +49,7 @@
             services.AddScoped<IScheduledTask, DailyNotification>();
             services.AddScoped<IScheduledTask, RequestReminder>();
             services.AddScoped<IScheduledTask, ReservationReminder>();
+            services.AddScoped<IScheduledTask, SoftInterruptionUpdater>();
             services.AddScoped<IScheduledTask, WeeklyNotification>();
 
             return services.BuildServiceProvider();

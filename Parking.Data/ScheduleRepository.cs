@@ -20,6 +20,7 @@
                 {ScheduledTaskType.DailyNotification, "DAILY_NOTIFICATION"},
                 {ScheduledTaskType.RequestReminder, "REQUEST_REMINDER"},
                 {ScheduledTaskType.ReservationReminder, "RESERVATION_REMINDER"},
+                {ScheduledTaskType.SoftInterruptionUpdater, "SOFT_INTERRUPTION_UPDATER"},
                 {ScheduledTaskType.WeeklyNotification, "WEEKLY_NOTIFICATION"}
             };
 

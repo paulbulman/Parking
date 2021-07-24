@@ -28,7 +28,8 @@
 
         public string HtmlBody => string
             .Join("\r\n", this.BodyLines.Select(l => $"<p>{l}</p>"))
-            .Replace("NOT", "<strong>not</strong>");
+            .Replace("NOT", "<strong>not</strong>")
+            .Replace("TO COME IN", "<strong>to come in</strong>");
 
         private RequestStatus UserRequestStatus => this.requests
             .Single(r => r.UserId == user.UserId)
@@ -52,7 +53,7 @@
 
                 var otherInterruptedUsersCount = this
                     .requests
-                    .Count(r => r.UserId != this.user.UserId && r.Status == RequestStatus.Requested);
+                    .Count(r => r.UserId != this.user.UserId && r.Status.IsAllocatable());
                 
                 var isAre = otherInterruptedUsersCount == 1 ? "is" : "are";
                 var personPeople = otherInterruptedUsersCount == 1 ? "person" : "people";
@@ -61,6 +62,7 @@
                 {
                     $"You have NOT been allocated a parking space for {this.localDate.ToEmailDisplayString()}.",
                     "If someone else cancels their request you may be allocated one later, but otherwise you can NOT park at the office.",
+                    "Alternatively, if you make other arrangements TO COME IN to the office, you can choose to stay interrupted via the Summary page within the app.",
                     $"There {isAre} currently {otherInterruptedUsersCount} other {personPeople} also waiting for a space."
                 };
             }
