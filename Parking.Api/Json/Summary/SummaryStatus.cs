@@ -3,6 +3,7 @@
     public enum SummaryStatus
     {
         Allocated,
+        HardInterrupted,
         Interrupted,
         Pending
     }

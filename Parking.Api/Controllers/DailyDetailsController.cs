@@ -18,19 +18,28 @@
     {
         private readonly IDateCalculator dateCalculator;
         private readonly IRequestRepository requestRepository;
+        private readonly ITriggerRepository triggerRepository;
         private readonly IUserRepository userRepository;
+
+        private static readonly IReadOnlyCollection<RequestStatus> UpdateableStatuses = new[]
+        {
+            RequestStatus.SoftInterrupted,
+            RequestStatus.HardInterrupted
+        };
 
         public DailyDetailsController(
             IDateCalculator dateCalculator,
             IRequestRepository requestRepository,
+            ITriggerRepository triggerRepository,
             IUserRepository userRepository)
         {
             this.dateCalculator = dateCalculator;
             this.requestRepository = requestRepository;
+            this.triggerRepository = triggerRepository;
             this.userRepository = userRepository;
         }
 
-        [HttpGet]
+        [HttpGet("/DailyDetails")]
         [ProducesResponseType(typeof(DailyDetailsResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAsync()
         {
@@ -47,6 +56,42 @@
             var response = new DailyDetailsResponse(data);
 
             return this.Ok(response);
+        }
+
+        [HttpPatch("/StayInterrupted")]
+        [ProducesResponseType(typeof(DailyDetailsResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PatchAsync([FromBody] StayInterruptedPatchRequest patchRequest)
+        {
+            var requests = await this.requestRepository.GetRequests(
+                this.GetCognitoUserId(),
+                patchRequest.LocalDate,
+                patchRequest.LocalDate);
+
+            var request = requests.SingleOrDefault();
+
+            if (request == null)
+            {
+                return this.NotFound();
+            }
+
+            if (!UpdateableStatuses.Contains(request.Status))
+            {
+                return this.BadRequest();
+            }
+
+            var updatedRequestStatus = patchRequest.StayInterrupted
+                ? RequestStatus.HardInterrupted
+                : RequestStatus.SoftInterrupted;
+
+            var updatedRequest = new Request(request.UserId, request.Date, updatedRequestStatus);
+
+            await this.requestRepository.SaveRequests(new[] { updatedRequest });
+
+            await this.triggerRepository.AddTrigger();
+
+            return await this.GetAsync();
         }
 
         private static Day<DailyDetailsData> CreateDailyData(
@@ -73,10 +118,13 @@
             var pendingRequests = filteredRequests
                 .Where(r => r.Status == RequestStatus.Pending);
 
+            var stayInterruptedStatus = CreateStayInterruptedStatus(currentUserId, filteredRequests);
+
             var data = new DailyDetailsData(
                 allocatedUsers: CreateDailyDetailUsers(currentUserId, allocatedRequests, users),
                 interruptedUsers: CreateDailyDetailUsers(currentUserId, interruptedRequests, users),
-                pendingUsers: CreateDailyDetailUsers(currentUserId, pendingRequests, users));
+                pendingUsers: CreateDailyDetailUsers(currentUserId, pendingRequests, users),
+                stayInterruptedStatus: stayInterruptedStatus);
 
             return new Day<DailyDetailsData>(localDate, data);
         }
@@ -92,5 +140,17 @@
 
         private static DailyDetailsUser CreateDailyDetailsUser(string currentUserId, User user) =>
             new DailyDetailsUser(name: user.DisplayName(), isHighlighted: user.UserId == currentUserId);
+
+        private static StayInterruptedStatus CreateStayInterruptedStatus(
+            string currentUserId,
+            IEnumerable<Request> requests)
+        {
+            var currentUserRequestStatus = requests.SingleOrDefault(r => r.UserId == currentUserId)?.Status;
+
+            var isAllowed = currentUserRequestStatus.HasValue && UpdateableStatuses.Contains(currentUserRequestStatus.Value);
+            var isSet = currentUserRequestStatus == RequestStatus.HardInterrupted;
+
+            return new StayInterruptedStatus(isAllowed: isAllowed, isSet: isSet);
+        }
     }
 }

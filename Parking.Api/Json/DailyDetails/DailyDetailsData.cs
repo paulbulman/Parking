@@ -8,11 +8,13 @@
         public DailyDetailsData(
             IEnumerable<DailyDetailsUser> allocatedUsers,
             IEnumerable<DailyDetailsUser> interruptedUsers,
-            IEnumerable<DailyDetailsUser> pendingUsers)
+            IEnumerable<DailyDetailsUser> pendingUsers,
+            StayInterruptedStatus stayInterruptedStatus)
         {
             this.AllocatedUsers = allocatedUsers;
             this.InterruptedUsers = interruptedUsers;
             this.PendingUsers = pendingUsers;
+            this.StayInterruptedStatus = stayInterruptedStatus;
         }
 
         [Required]
@@ -23,5 +25,8 @@
         
         [Required]
         public IEnumerable<DailyDetailsUser> PendingUsers { get; }
+
+        [Required]
+        public StayInterruptedStatus StayInterruptedStatus { get; }
     }
 }

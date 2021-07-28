@@ -57,7 +57,7 @@
             Assert.Equal(SummaryStatus.Interrupted, day4Data.Status);
             Assert.True(day1Data.IsProblem);
 
-            Assert.Equal(SummaryStatus.Interrupted, day5Data.Status);
+            Assert.Equal(SummaryStatus.HardInterrupted, day5Data.Status);
             Assert.True(day1Data.IsProblem);
 
             Assert.Null(day8Data.Status);
@@ -65,32 +65,6 @@
 
             Assert.Equal(SummaryStatus.Pending, day31Data.Status);
             Assert.False(day31Data.IsProblem);
-
-            Assert.Equal(1.March(2021), summaryResponse.StayInterruptedStatus.LocalDate);
-            Assert.True(summaryResponse.StayInterruptedStatus.IsAllowed);
-            Assert.False(summaryResponse.StayInterruptedStatus.IsSet);
-        }
-
-        [Fact]
-        public async Task Updates_stay_updated_status()
-        {
-            await SeedDatabase();
-
-            var client = this.factory.CreateClient();
-
-            AddAuthorizationHeader(client, UserType.Normal);
-
-            var patchRequest = new StayInterruptedPatchRequest(1.March(2021), stayInterrupted: true);
-
-            var response = await client.PatchAsJsonAsync("/stayInterrupted", patchRequest);
-
-            response.EnsureSuccessStatusCode();
-
-            var summaryResponse = await response.DeserializeAsType<SummaryResponse>();
-
-            Assert.Equal(1.March(2021), summaryResponse.StayInterruptedStatus.LocalDate);
-            Assert.True(summaryResponse.StayInterruptedStatus.IsAllowed);
-            Assert.True(summaryResponse.StayInterruptedStatus.IsSet);
         }
 
         private static async Task SeedDatabase()

@@ -1,4 +1,4 @@
-﻿namespace Parking.Api.Json.Summary
+﻿namespace Parking.Api.Json.DailyDetails
 {
     using System.ComponentModel.DataAnnotations;
     using NodaTime;
