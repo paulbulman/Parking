@@ -14,7 +14,7 @@
     public static class RequestReminderTests
     {
         [Fact]
-        public static async Task Sends_emails_to_users_with_no_upcoming_active_requests()
+        public static async Task Sends_emails_to_users_with_no_upcoming_requests()
         {
             var nextWeeklyNotificationDates = new[] { 21.December(2020), 22.December(2020) };
 
@@ -59,7 +59,7 @@
         }
 
         [Fact]
-        public static async Task Does_not_send_emails_to_users_with_upcoming_active_requests()
+        public static async Task Does_not_send_emails_to_users_with_upcoming_requests()
         {
             var nextWeeklyNotificationDates = new[] { 21.December(2020), 22.December(2020) };
 
@@ -73,7 +73,7 @@
             var requests = new[]
             {
                 new Request("user1", 18.December(2020), RequestStatus.Allocated),
-                new Request("user1", 21.December(2020), RequestStatus.Interrupted)
+                new Request("user1", 21.December(2020), RequestStatus.Pending)
             };
 
             var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);
@@ -100,7 +100,7 @@
         }
 
         [Fact]
-        public static async Task Does_not_send_emails_to_users_with_no_recent_active_requests()
+        public static async Task Does_not_send_emails_to_users_with_no_recent_requests()
         {
             var nextWeeklyNotificationDates = new[] { 21.December(2020), 22.December(2020) };
 
@@ -114,7 +114,6 @@
             var requests = new[]
             {
                 new Request("user1", 18.December(2020), RequestStatus.Cancelled),
-                new Request("user2", 21.December(2020), RequestStatus.Interrupted)
             };
 
             var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);

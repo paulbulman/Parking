@@ -42,8 +42,8 @@
             var users = await userRepository.GetUsers();
 
             foreach (var user in users.Where(u =>
-                IsActive(u, requests) && 
-                !HasUpcomingActiveRequests(u, requests, nextWeeklyNotificationDates)))
+                UserIsActive(u, requests) && 
+                !HasUpcomingRequests(u, requests, nextWeeklyNotificationDates)))
             {
                 await emailRepository.Send(
                     new EmailTemplates.RequestReminder(user, nextWeeklyNotificationDates));
@@ -59,17 +59,17 @@
                 .InZoneStrictly(DateCalculator.LondonTimeZone)
                 .ToInstant();
 
-        private static bool IsActive(User user, IReadOnlyCollection<Request> requests) =>
+        private static bool UserIsActive(User user, IReadOnlyCollection<Request> requests) =>
             requests.Any(r =>
-                r.Status.IsActive() && 
+                r.Status.IsRequested() && 
                 r.UserId == user.UserId);
 
-        private static bool HasUpcomingActiveRequests(
+        private static bool HasUpcomingRequests(
             User user,
             IReadOnlyCollection<Request> requests,
             IReadOnlyCollection<LocalDate> nextWeeklyNotificationDates) =>
             requests.Any(r =>
-                r.Status.IsActive() && 
+                r.Status.IsRequested() && 
                 r.UserId == user.UserId && 
                 nextWeeklyNotificationDates.Contains(r.Date));
     }

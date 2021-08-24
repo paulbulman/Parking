@@ -32,7 +32,7 @@
 
         public string PlainTextBody =>
             $"You have been allocated parking spaces for the period {this.notificationDates.ToEmailDisplayString()} as follows:\r\n\r\n" +
-            string.Join("\r\n", this.UserActiveDates.Select(FormattedPlainTextStatus)) +
+            string.Join("\r\n", this.UserRequestDates.Select(FormattedPlainTextStatus)) +
             PlainTextPostAmble;
 
         private string PlainTextPostAmble =>
@@ -48,7 +48,7 @@
 
         public string HtmlBody =>
             $"<p>You have been allocated parking spaces for the period {this.notificationDates.ToEmailDisplayString()} as follows:</p>\r\n" +
-            "<ul>\r\n" + string.Join("\r\n", this.UserActiveDates.Select(FormattedHtmlStatus)) + "\r\n</ul>" +
+            "<ul>\r\n" + string.Join("\r\n", this.UserRequestDates.Select(FormattedHtmlStatus)) + "\r\n</ul>" +
             HtmlPostAmble;
 
         private string HtmlPostAmble =>
@@ -64,14 +64,14 @@
                 : $"<strong>Interrupted</strong> ({this.OtherInterruptedUsersCount(localDate)})") +
             "</li>";
 
-        private bool UserHasInterruptions => UserActiveDates.Any(d => UserRequestStatus(d) == RequestStatus.Interrupted);
+        private bool UserHasInterruptions => this.UserRequestDates.Any(d => UserRequestStatus(d) != RequestStatus.Allocated);
 
-        private IEnumerable<LocalDate> UserActiveDates => this.notificationDates.Where(UserIsActiveOnDate);
+        private IEnumerable<LocalDate> UserRequestDates => this.notificationDates.Where(this.UserRequestedSpaceOnDate);
 
-        private bool UserIsActiveOnDate(LocalDate localDate) => requests.Any(r =>
+        private bool UserRequestedSpaceOnDate(LocalDate localDate) => requests.Any(r =>
             r.UserId == this.user.UserId &&
             r.Date == localDate &&
-            r.Status.IsActive());
+            r.Status.IsRequested());
 
         private RequestStatus UserRequestStatus(LocalDate localDate) =>
             this.requests
