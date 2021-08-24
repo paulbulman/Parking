@@ -26,16 +26,17 @@
             return $"{orderedDates.First().ToEmailDisplayString()} - {orderedDates.Last().ToEmailDisplayString()}";
         }
 
-        public static bool IsActive(this RequestStatus requestStatus) => ActiveStatuses.Contains(requestStatus);
+        public static bool IsRequested(this RequestStatus requestStatus) => RequestedStatuses.Contains(requestStatus);
 
         public static bool IsAllocatable(this RequestStatus requestStatus) =>
             AllocatableStatuses.Contains(requestStatus);
 
-        private static IEnumerable<RequestStatus> ActiveStatuses =>
+        private static IEnumerable<RequestStatus> RequestedStatuses =>
             new[]
             {
                 RequestStatus.Allocated,
                 RequestStatus.Interrupted,
+                RequestStatus.Pending,
                 RequestStatus.SoftInterrupted,
                 RequestStatus.HardInterrupted
             };

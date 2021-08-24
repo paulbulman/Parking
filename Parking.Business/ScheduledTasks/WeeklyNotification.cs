@@ -38,7 +38,7 @@
 
             var users = await userRepository.GetUsers();
 
-            foreach (var userId in requests.Where(r => r.Status.IsActive()).Select(r => r.UserId).Distinct())
+            foreach (var userId in requests.Where(r => r.Status.IsRequested()).Select(r => r.UserId).Distinct())
             {
                 var user = users.Single(u => u.UserId == userId);
 
