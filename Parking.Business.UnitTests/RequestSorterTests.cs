@@ -15,7 +15,7 @@
 
         private const decimal NearbyDistance = 4;
 
-        private static readonly LocalDate SortDate = 17.September(2020);
+        private static readonly LocalDate SortDate = 15.October(2021);
 
         private static readonly IReadOnlyCollection<Reservation> NoReservations = new List<Reservation>();
 

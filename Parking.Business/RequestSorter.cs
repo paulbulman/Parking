@@ -76,6 +76,7 @@
                 .Where(r =>
                     r.UserId == request.UserId &&
                     r.Date < request.Date &&
+                    r.Date >= new LocalDate(2021, 9, 6) &&
                     !UserHasReservation(r, reservations))
                 .ToArray();
 
