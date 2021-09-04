@@ -83,6 +83,6 @@
                 .Count(r =>
                     r.UserId != this.user.UserId &&
                     r.Date == localDate &&
-                    r.Status == RequestStatus.Interrupted);
+                    r.Status.IsAllocatable());
     }
 }

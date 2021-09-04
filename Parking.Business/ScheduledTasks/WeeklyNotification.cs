@@ -9,11 +9,11 @@
     public class WeeklyNotification : IScheduledTask
     {
         private readonly IDateCalculator dateCalculator;
-        
+
         private readonly IEmailRepository emailRepository;
-        
+
         private readonly IRequestRepository requestRepository;
-        
+
         private readonly IUserRepository userRepository;
 
         public WeeklyNotification(
@@ -52,7 +52,7 @@
                 .InZone(DateCalculator.LondonTimeZone)
                 .Date
                 .Next(IsoDayOfWeek.Thursday)
-                .AtMidnight()
+                .At(new LocalTime(0, 2, 0))
                 .InZoneStrictly(DateCalculator.LondonTimeZone)
                 .ToInstant();
     }

@@ -11,9 +11,9 @@
     public class AllocationNotifier
     {
         private readonly IDateCalculator dateCalculator;
-        
+
         private readonly IEmailRepository emailRepository;
-        
+
         private readonly IScheduleRepository scheduleRepository;
 
         private readonly IUserRepository userRepository;
@@ -30,12 +30,12 @@
             this.userRepository = userRepository;
         }
 
-        public async Task Notify(IReadOnlyCollection<Request> allocatedRequests)
+        public async Task Notify(IReadOnlyCollection<Request> updatedRequests)
         {
             var users = await this.userRepository.GetUsers();
 
             var schedules = await this.scheduleRepository.GetSchedules();
-            
+
             var dailyNotificationSchedule =
                 schedules.Single(s => s.ScheduledTaskType == ScheduledTaskType.DailyNotification);
             var weeklyNotificationSchedule =
@@ -43,17 +43,18 @@
 
             var datesToExclude = new List<LocalDate>();
 
-            if (dateCalculator.ScheduleIsDue(dailyNotificationSchedule))
+            if (dateCalculator.ScheduleIsDue(dailyNotificationSchedule, within: Duration.FromMinutes(2)))
             {
                 datesToExclude.Add(this.dateCalculator.GetNextWorkingDate());
             }
 
-            if (dateCalculator.ScheduleIsDue(weeklyNotificationSchedule))
+            if (dateCalculator.ScheduleIsDue(weeklyNotificationSchedule, within: Duration.FromMinutes(2)))
             {
                 datesToExclude.AddRange(this.dateCalculator.GetWeeklyNotificationDates());
             }
 
-            var requestsToNotify = allocatedRequests.Where(r => !datesToExclude.Contains(r.Date));
+            var requestsToNotify = updatedRequests.Where(r =>
+                r.Status == RequestStatus.Allocated && !datesToExclude.Contains(r.Date));
 
             foreach (var requestsByUser in requestsToNotify.GroupBy(r => r.UserId))
             {

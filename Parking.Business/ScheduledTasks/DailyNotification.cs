@@ -49,7 +49,7 @@
 
         public Instant GetNextRunTime() =>
             this.dateCalculator.GetNextWorkingDate()
-                .At(new LocalTime(11, 0, 0))
+                .At(new LocalTime(11, 2, 0))
                 .InZoneStrictly(DateCalculator.LondonTimeZone)
                 .ToInstant();
     }

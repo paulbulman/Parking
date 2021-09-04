@@ -37,10 +37,10 @@
             mockScheduleRepository.Setup(r => r.UpdateSchedule(It.IsAny<Schedule>())).Returns(Task.CompletedTask);
 
             var mockDateCalculator = new Mock<IDateCalculator>(MockBehavior.Strict);
-            mockDateCalculator.Setup(d => d.ScheduleIsDue(dailyNotificationSchedule)).Returns(true);
-            mockDateCalculator.Setup(d => d.ScheduleIsDue(requestReminderSchedule)).Returns(false);
-            mockDateCalculator.Setup(d => d.ScheduleIsDue(softInterruptionUpdaterSchedule)).Returns(false);
-            mockDateCalculator.Setup(d => d.ScheduleIsDue(weeklyNotificationSchedule)).Returns(true);
+            mockDateCalculator.Setup(d => d.ScheduleIsDue(dailyNotificationSchedule, null)).Returns(true);
+            mockDateCalculator.Setup(d => d.ScheduleIsDue(requestReminderSchedule, null)).Returns(false);
+            mockDateCalculator.Setup(d => d.ScheduleIsDue(softInterruptionUpdaterSchedule, null)).Returns(false);
+            mockDateCalculator.Setup(d => d.ScheduleIsDue(weeklyNotificationSchedule, null)).Returns(true);
 
             var mockDailyNotification = CreateMockScheduledTask(ScheduledTaskType.DailyNotification);
             var mockRequestReminder = CreateMockScheduledTask(ScheduledTaskType.RequestReminder);
@@ -91,9 +91,9 @@
             mockScheduleRepository.Setup(r => r.GetSchedules()).ReturnsAsync(schedules);
 
             var mockDateCalculator = new Mock<IDateCalculator>(MockBehavior.Strict);
-            mockDateCalculator.Setup(d => d.ScheduleIsDue(dailyNotificationSchedule)).Returns(true);
-            mockDateCalculator.Setup(d => d.ScheduleIsDue(requestReminderSchedule)).Returns(false);
-            mockDateCalculator.Setup(d => d.ScheduleIsDue(weeklyNotificationSchedule)).Returns(true);
+            mockDateCalculator.Setup(d => d.ScheduleIsDue(dailyNotificationSchedule, null)).Returns(true);
+            mockDateCalculator.Setup(d => d.ScheduleIsDue(requestReminderSchedule, null)).Returns(false);
+            mockDateCalculator.Setup(d => d.ScheduleIsDue(weeklyNotificationSchedule, null)).Returns(true);
 
             var mockDailyNotification = CreateMockScheduledTask(ScheduledTaskType.DailyNotification);
             var mockRequestReminder = CreateMockScheduledTask(ScheduledTaskType.RequestReminder);

@@ -113,7 +113,7 @@
         [InlineData(24, 31)]
         public static void GetNextRunTime_returns_midnight_on_next_Thursday(int currentDay, int expectedNextDay)
         {
-            var dateCalculator = CreateDateCalculator(currentDay.December(2020).AtMidnight().Utc());
+            var dateCalculator = CreateDateCalculator(currentDay.December(2020).At(0, 2, 0).Utc());
 
             var actual = new WeeklyNotification(
                 dateCalculator,
@@ -121,7 +121,7 @@
                 Mock.Of<IRequestRepository>(),
                 Mock.Of<IUserRepository>()).GetNextRunTime();
 
-            var expected = expectedNextDay.December(2020).AtMidnight().Utc();
+            var expected = expectedNextDay.December(2020).At(0, 2, 0).Utc();
 
             Assert.Equal(expected, actual);
         }
@@ -129,7 +129,7 @@
         [Fact]
         public static void GetNextRunTime_uses_London_time_zone()
         {
-            var dateCalculator = CreateDateCalculator(27.March(2020).AtMidnight().Utc());
+            var dateCalculator = CreateDateCalculator(27.March(2020).At(0, 2, 0).Utc());
 
             var actual = new WeeklyNotification(
                 dateCalculator,
@@ -137,7 +137,7 @@
                 Mock.Of<IRequestRepository>(),
                 Mock.Of<IUserRepository>()).GetNextRunTime();
 
-            var expected = 1.April(2020).At(23, 0, 0).Utc();
+            var expected = 1.April(2020).At(23, 2, 0).Utc();
 
             Assert.Equal(expected, actual);
         }

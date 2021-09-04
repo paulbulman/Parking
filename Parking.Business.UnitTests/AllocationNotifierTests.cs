@@ -93,6 +93,39 @@
             mockEmailRepository.VerifyNoOtherCalls();
         }
 
+        [Theory]
+        [InlineData(RequestStatus.Cancelled)]
+        [InlineData(RequestStatus.HardInterrupted)]
+        [InlineData(RequestStatus.Interrupted)]
+        [InlineData(RequestStatus.Pending)]
+        [InlineData(RequestStatus.SoftInterrupted)]
+        public static async Task Does_not_notify_user_for_other_request_statuses(RequestStatus requestStatus)
+        {
+            var users = new[] { CreateUser.With(userId: "user1", emailAddress: "1@abc.com") };
+
+            var mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
+            mockUserRepository
+                .Setup(r => r.GetUsers())
+                .ReturnsAsync(users);
+
+            var requests = new[]
+            {
+                new Request("user1", 11.January(2021), requestStatus),
+            };
+
+            var mockEmailRepository = new Mock<IEmailRepository>();
+
+            var allocationNotifier = new AllocationNotifier(
+                CreateDummyDateCalculator(),
+                mockEmailRepository.Object,
+                CreateDummyScheduleRepository(),
+                mockUserRepository.Object);
+
+            await allocationNotifier.Notify(requests);
+
+            mockEmailRepository.VerifyNoOtherCalls();
+        }
+
         [Fact]
         public static async Task Does_not_notify_user_when_request_will_appear_on_scheduled_daily_notification()
         {
@@ -107,12 +140,14 @@
 
             var mockDateCalculator = new Mock<IDateCalculator>(MockBehavior.Strict);
             mockDateCalculator
-                .Setup(c => c.ScheduleIsDue(It.Is<Schedule>(s =>
-                    s.ScheduledTaskType == ScheduledTaskType.DailyNotification)))
+                .Setup(c => c.ScheduleIsDue(
+                    It.Is<Schedule>(s => s.ScheduledTaskType == ScheduledTaskType.DailyNotification), 
+                    Duration.FromMinutes(2)))
                 .Returns(true);
             mockDateCalculator
-                .Setup(c => c.ScheduleIsDue(It.Is<Schedule>(s =>
-                    s.ScheduledTaskType == ScheduledTaskType.WeeklyNotification)))
+                .Setup(c => c.ScheduleIsDue(
+                    It.Is<Schedule>(s => s.ScheduledTaskType == ScheduledTaskType.WeeklyNotification),
+                    Duration.FromMinutes(2)))
                 .Returns(false);
             mockDateCalculator
                 .Setup(c => c.GetNextWorkingDate())
@@ -149,12 +184,14 @@
 
             var mockDateCalculator = new Mock<IDateCalculator>(MockBehavior.Strict);
             mockDateCalculator
-                .Setup(c => c.ScheduleIsDue(It.Is<Schedule>(s =>
-                    s.ScheduledTaskType == ScheduledTaskType.DailyNotification)))
+                .Setup(c => c.ScheduleIsDue(
+                    It.Is<Schedule>(s => s.ScheduledTaskType == ScheduledTaskType.DailyNotification),
+                    Duration.FromMinutes(2)))
                 .Returns(false);
             mockDateCalculator
-                .Setup(c => c.ScheduleIsDue(It.Is<Schedule>(s =>
-                    s.ScheduledTaskType == ScheduledTaskType.WeeklyNotification)))
+                .Setup(c => c.ScheduleIsDue(
+                    It.Is<Schedule>(s => s.ScheduledTaskType == ScheduledTaskType.WeeklyNotification),
+                    Duration.FromMinutes(2)))
                 .Returns(true);
             mockDateCalculator
                 .Setup(c => c.GetWeeklyNotificationDates())
@@ -190,7 +227,7 @@
         private static IDateCalculator CreateDummyDateCalculator()
         {
             var mockDateCalculator = new Mock<IDateCalculator>(MockBehavior.Strict);
-            mockDateCalculator.Setup(d => d.ScheduleIsDue(It.IsAny<Schedule>())).Returns(false);
+            mockDateCalculator.Setup(d => d.ScheduleIsDue(It.IsAny<Schedule>(), It.IsAny<Duration>())).Returns(false);
             return mockDateCalculator.Object;
         }
     }

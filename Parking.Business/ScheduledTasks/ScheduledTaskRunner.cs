@@ -29,7 +29,7 @@
             var schedules = await this.scheduleRepository.GetSchedules();
 
             var dueTasks = schedules
-                .Where(this.dateCalculator.ScheduleIsDue)
+                .Where(s => this.dateCalculator.ScheduleIsDue(s))
                 .Select(GetScheduledTask)
                 .ToArray();
 

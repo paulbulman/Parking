@@ -82,6 +82,13 @@ namespace Parking.Service.IntegrationTests
 
             await DatabaseHelpers.CreateTrigger();
 
+            await DatabaseHelpers.CreateConfiguration(new Dictionary<string, string>
+            {
+                {"nearbyDistance", "3.5"},
+                {"shortLeadTimeSpaces", "0"},
+                {"totalSpaces", "0"}
+            });
+
             await DatabaseHelpers.CreateUser(
                 CreateUser.With(userId: "User1", emailAddress: "john.doe@example.com"));
 
@@ -93,7 +100,7 @@ namespace Parking.Service.IntegrationTests
 
             await TaskRunner.RunTasksAsync(CustomProviderFactory.CreateServiceProvider());
 
-            await CheckSingleEmail("john.doe@example.com", "Parking status for Tue 02 Mar: Allocated");
+            await CheckSingleEmail("john.doe@example.com", "Parking status for Tue 02 Mar: INTERRUPTED");
         }
 
         [Fact]
@@ -117,7 +124,7 @@ namespace Parking.Service.IntegrationTests
             await DatabaseHelpers.CreateRequests(
                 "User1",
                 "2021-03",
-                new Dictionary<string, string> { { "02", "I" } });
+                new Dictionary<string, string> { { "02", "P" } });
 
             await TaskRunner.RunTasksAsync(CustomProviderFactory.CreateServiceProvider());
 

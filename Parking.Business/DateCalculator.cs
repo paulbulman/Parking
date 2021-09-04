@@ -22,7 +22,7 @@
 
         LocalDate GetNextWorkingDate();
 
-        bool ScheduleIsDue(Schedule schedule);
+        bool ScheduleIsDue(Schedule schedule, Duration? within = null);
     }
 
     public class DateCalculator : IDateCalculator
@@ -95,7 +95,12 @@
 
         public LocalDate GetNextWorkingDate() => GetNextWorkingDayStrictlyAfter(this.GetInitialDate());
 
-        public bool ScheduleIsDue(Schedule schedule) => schedule.NextRunTime <= this.InitialInstant;
+        public bool ScheduleIsDue(Schedule schedule, Duration? within = null)
+        {
+            var timeToCompare = this.InitialInstant.Plus(within ?? Duration.Zero);
+
+            return schedule.NextRunTime <= timeToCompare;
+        }
 
         private LocalDate GetNextWorkingDayIncluding(LocalDate localDate)
         {

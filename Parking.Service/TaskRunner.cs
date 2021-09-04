@@ -17,14 +17,11 @@
             {
                 if (await triggerManager.ShouldRun())
                 {
-                    var requestPreProcessor = provider.GetRequiredService<RequestPreProcessor>();
-                    await requestPreProcessor.Update();
-
                     var requestUpdater = provider.GetRequiredService<RequestUpdater>();
-                    var allocatedRequests = await requestUpdater.Update();
+                    var updatedRequests = await requestUpdater.Update();
 
                     var allocationNotifier = provider.GetRequiredService<AllocationNotifier>();
-                    await allocationNotifier.Notify(allocatedRequests);
+                    await allocationNotifier.Notify(updatedRequests);
 
                     var scheduledTaskRunner = provider.GetRequiredService<ScheduledTaskRunner>();
                     await scheduledTaskRunner.RunScheduledTasks();

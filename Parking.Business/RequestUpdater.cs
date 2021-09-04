@@ -40,55 +40,66 @@
         {
             var shortLeadTimeAllocationDates = this.dateCalculator.GetShortLeadTimeAllocationDates();
             var longLeadTimeAllocationDates = this.dateCalculator.GetLongLeadTimeAllocationDates();
+            var allAllocationDates = shortLeadTimeAllocationDates.Concat(longLeadTimeAllocationDates).ToArray();
 
-            var firstDate = shortLeadTimeAllocationDates.First().PlusDays(-60);
-            var lastDate = longLeadTimeAllocationDates.Last();
+            var firstCacheDate = shortLeadTimeAllocationDates.First().PlusDays(-60);
+            var lastCacheDate = longLeadTimeAllocationDates.Last();
 
-            var requests = await this.requestRepository.GetRequests(firstDate, lastDate);
-            var reservations = await this.reservationRepository.GetReservations(firstDate, lastDate);
+            var requests = await this.requestRepository.GetRequests(firstCacheDate, lastCacheDate);
+            var reservations = await this.reservationRepository.GetReservations(firstCacheDate, lastCacheDate);
 
             var users = await this.userRepository.GetUsers();
             var configuration = await this.configurationRepository.GetConfiguration();
 
-            var updatedRequests = new List<Request>();
-            var cumulativeRequests = requests.ToList();
+            var newRequests = new List<Request>();
+            var requestsCache = requests.ToList();
+
+            var previouslyPendingRequests = requestsCache
+                .Where(r => r.Status == RequestStatus.Pending && allAllocationDates.Contains(r.Date))
+                .Select(r => new Request(r.UserId, r.Date, RequestStatus.Interrupted))
+                .ToArray();
+
+            UpdateRequests(newRequests, previouslyPendingRequests);
+            UpdateRequests(requestsCache, previouslyPendingRequests);
 
             foreach (var allocationDate in shortLeadTimeAllocationDates)
             {
                 var allocatedRequests = this.allocationCreator.Create(
-                    allocationDate, cumulativeRequests, reservations, users, configuration, LeadTimeType.Short);
+                    allocationDate, requestsCache, reservations, users, configuration, LeadTimeType.Short);
 
-                updatedRequests.AddRange(allocatedRequests);
-
-                ReplaceStaleRequests(cumulativeRequests, allocatedRequests);
+                UpdateRequests(newRequests, allocatedRequests);
+                UpdateRequests(requestsCache, allocatedRequests);
             }
 
             foreach (var allocationDate in longLeadTimeAllocationDates)
             {
                 var allocatedRequests = this.allocationCreator.Create(
-                    allocationDate, cumulativeRequests, reservations, users, configuration, LeadTimeType.Long);
+                    allocationDate, requestsCache, reservations, users, configuration, LeadTimeType.Long);
 
-                updatedRequests.AddRange(allocatedRequests);
-
-                ReplaceStaleRequests(cumulativeRequests, allocatedRequests);
+                UpdateRequests(newRequests, allocatedRequests);
+                UpdateRequests(requestsCache, allocatedRequests);
             }
 
-            await this.requestRepository.SaveRequests(updatedRequests);
+            await this.requestRepository.SaveRequests(newRequests);
 
-            return updatedRequests;
+            return newRequests;
         }
 
-        private static void ReplaceStaleRequests(
-            ICollection<Request> cumulativeRequests,
-            IEnumerable<Request> allocatedRequests)
+        private static void UpdateRequests(
+            ICollection<Request> existingRequests,
+            IEnumerable<Request> updatedRequests)
         {
-            foreach (var allocatedRequest in allocatedRequests)
+            foreach (var updatedRequest in updatedRequests)
             {
-                var previousExistingRequest = cumulativeRequests.Single(r =>
-                    r.UserId == allocatedRequest.UserId && r.Date == allocatedRequest.Date);
+                var previousExistingRequest = existingRequests.SingleOrDefault(r =>
+                    r.UserId == updatedRequest.UserId && r.Date == updatedRequest.Date);
 
-                cumulativeRequests.Remove(previousExistingRequest);
-                cumulativeRequests.Add(allocatedRequest);
+                if (previousExistingRequest != null)
+                {
+                    existingRequests.Remove(previousExistingRequest);
+                }
+
+                existingRequests.Add(updatedRequest);
             }
         }
     }
