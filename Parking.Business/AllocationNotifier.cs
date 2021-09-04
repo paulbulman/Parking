@@ -10,6 +10,8 @@
 
     public class AllocationNotifier
     {
+        private readonly ILogger logger;
+        
         private readonly IDateCalculator dateCalculator;
 
         private readonly IEmailRepository emailRepository;
@@ -19,11 +21,13 @@
         private readonly IUserRepository userRepository;
 
         public AllocationNotifier(
+            ILogger logger,
             IDateCalculator dateCalculator,
             IEmailRepository emailRepository,
             IScheduleRepository scheduleRepository,
             IUserRepository userRepository)
         {
+            this.logger = logger;
             this.dateCalculator = dateCalculator;
             this.emailRepository = emailRepository;
             this.scheduleRepository = scheduleRepository;
@@ -32,6 +36,13 @@
 
         public async Task Notify(IReadOnlyCollection<Request> updatedRequests)
         {
+            if (!updatedRequests.Any())
+            {
+                return;
+            }
+
+            this.logger.Log("Sending notifications for new requests.");
+
             var users = await this.userRepository.GetUsers();
 
             var schedules = await this.scheduleRepository.GetSchedules();
@@ -45,11 +56,15 @@
 
             if (dateCalculator.ScheduleIsDue(dailyNotificationSchedule, within: Duration.FromMinutes(2)))
             {
+                this.logger.Log("Daily notification email is due soon. Excluding this date.");
+
                 datesToExclude.Add(this.dateCalculator.GetNextWorkingDate());
             }
 
             if (dateCalculator.ScheduleIsDue(weeklyNotificationSchedule, within: Duration.FromMinutes(2)))
             {
+                this.logger.Log("Weekly notification email is due soon. Excluding these dates.");
+                
                 datesToExclude.AddRange(this.dateCalculator.GetWeeklyNotificationDates());
             }
 

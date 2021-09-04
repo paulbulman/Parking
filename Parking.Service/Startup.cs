@@ -34,6 +34,7 @@
             services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
             services.AddScoped<IDateCalculator, DateCalculator>();
             services.AddScoped<IEmailRepository, EmailRepository>();
+            services.AddScoped<ILogger, Logger>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<Random>();
             services.AddScoped<RequestPreProcessor>();

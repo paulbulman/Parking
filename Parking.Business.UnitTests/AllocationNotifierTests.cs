@@ -35,6 +35,7 @@
             var mockEmailRepository = new Mock<IEmailRepository>();
 
             var allocationNotifier = new AllocationNotifier(
+                Mock.Of<ILogger>(),
                 CreateDummyDateCalculator(),
                 mockEmailRepository.Object,
                 CreateDummyScheduleRepository(),
@@ -75,6 +76,7 @@
             var mockEmailRepository = new Mock<IEmailRepository>();
 
             var allocationNotifier = new AllocationNotifier(
+                Mock.Of<ILogger>(),
                 CreateDummyDateCalculator(),
                 mockEmailRepository.Object,
                 CreateDummyScheduleRepository(),
@@ -116,6 +118,7 @@
             var mockEmailRepository = new Mock<IEmailRepository>();
 
             var allocationNotifier = new AllocationNotifier(
+                Mock.Of<ILogger>(),
                 CreateDummyDateCalculator(),
                 mockEmailRepository.Object,
                 CreateDummyScheduleRepository(),
@@ -156,6 +159,7 @@
             var mockEmailRepository = new Mock<IEmailRepository>();
 
             var allocationNotifier = new AllocationNotifier(
+                Mock.Of<ILogger>(),
                 mockDateCalculator.Object,
                 mockEmailRepository.Object,
                 CreateDummyScheduleRepository(),
@@ -200,6 +204,7 @@
             var mockEmailRepository = new Mock<IEmailRepository>();
 
             var allocationNotifier = new AllocationNotifier(
+                Mock.Of<ILogger>(),
                 mockDateCalculator.Object,
                 mockEmailRepository.Object,
                 CreateDummyScheduleRepository(),

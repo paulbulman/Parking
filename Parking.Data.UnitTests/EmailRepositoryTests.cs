@@ -2,6 +2,7 @@
 {
     using System.Threading.Tasks;
     using Aws;
+    using Business;
     using Business.EmailTemplates;
     using Moq;
     using Xunit;
@@ -13,7 +14,10 @@
         {
             var mockStorageProvider = new Mock<IStorageProvider>();
 
-            var emailRepository = new EmailRepository(Mock.Of<IEmailProvider>(), mockStorageProvider.Object);
+            var emailRepository = new EmailRepository(
+                Mock.Of<ILogger>(),
+                Mock.Of<IEmailProvider>(),
+                mockStorageProvider.Object);
 
             await emailRepository.Send(
                 Mock.Of<IEmailTemplate>(e =>
@@ -39,7 +43,10 @@
         {
             var mockEmailProvider = new Mock<IEmailProvider>();
 
-            var emailRepository = new EmailRepository(mockEmailProvider.Object, Mock.Of<IStorageProvider>());
+            var emailRepository = new EmailRepository(
+                Mock.Of<ILogger>(),
+                mockEmailProvider.Object,
+                Mock.Of<IStorageProvider>());
 
             var emailTemplate = Mock.Of<IEmailTemplate>();
 
