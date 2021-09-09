@@ -37,7 +37,6 @@
             services.AddScoped<ILogger, Logger>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<Random>();
-            services.AddScoped<RequestPreProcessor>();
             services.AddScoped<IRequestRepository, RequestRepository>();
             services.AddScoped<IRequestSorter, RequestSorter>();
             services.AddScoped<RequestUpdater>();
