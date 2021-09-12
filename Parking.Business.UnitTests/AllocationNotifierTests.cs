@@ -3,6 +3,7 @@
     using System.Threading.Tasks;
     using Business.EmailTemplates;
     using Data;
+    using Microsoft.Extensions.Logging;
     using Model;
     using Moq;
     using NodaTime;
@@ -35,7 +36,7 @@
             var mockEmailRepository = new Mock<IEmailRepository>();
 
             var allocationNotifier = new AllocationNotifier(
-                Mock.Of<ILogger>(),
+                Mock.Of<ILogger<AllocationNotifier>>(),
                 CreateDummyDateCalculator(),
                 mockEmailRepository.Object,
                 CreateDummyScheduleRepository(),
@@ -76,7 +77,7 @@
             var mockEmailRepository = new Mock<IEmailRepository>();
 
             var allocationNotifier = new AllocationNotifier(
-                Mock.Of<ILogger>(),
+                Mock.Of<ILogger<AllocationNotifier>>(),
                 CreateDummyDateCalculator(),
                 mockEmailRepository.Object,
                 CreateDummyScheduleRepository(),
@@ -118,7 +119,7 @@
             var mockEmailRepository = new Mock<IEmailRepository>();
 
             var allocationNotifier = new AllocationNotifier(
-                Mock.Of<ILogger>(),
+                Mock.Of<ILogger<AllocationNotifier>>(),
                 CreateDummyDateCalculator(),
                 mockEmailRepository.Object,
                 CreateDummyScheduleRepository(),
@@ -159,7 +160,7 @@
             var mockEmailRepository = new Mock<IEmailRepository>();
 
             var allocationNotifier = new AllocationNotifier(
-                Mock.Of<ILogger>(),
+                Mock.Of<ILogger<AllocationNotifier>>(),
                 mockDateCalculator.Object,
                 mockEmailRepository.Object,
                 CreateDummyScheduleRepository(),
@@ -204,7 +205,7 @@
             var mockEmailRepository = new Mock<IEmailRepository>();
 
             var allocationNotifier = new AllocationNotifier(
-                Mock.Of<ILogger>(),
+                Mock.Of<ILogger<AllocationNotifier>>(),
                 mockDateCalculator.Object,
                 mockEmailRepository.Object,
                 CreateDummyScheduleRepository(),
