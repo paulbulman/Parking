@@ -5,12 +5,13 @@
     using System.Threading.Tasks;
     using Data;
     using EmailTemplates;
+    using Microsoft.Extensions.Logging;
     using Model;
     using NodaTime;
 
     public class AllocationNotifier
     {
-        private readonly ILogger logger;
+        private readonly ILogger<AllocationNotifier> logger;
         
         private readonly IDateCalculator dateCalculator;
 
@@ -21,7 +22,7 @@
         private readonly IUserRepository userRepository;
 
         public AllocationNotifier(
-            ILogger logger,
+            ILogger<AllocationNotifier> logger,
             IDateCalculator dateCalculator,
             IEmailRepository emailRepository,
             IScheduleRepository scheduleRepository,
@@ -41,7 +42,7 @@
                 return;
             }
 
-            this.logger.Log("Sending notifications for new requests.");
+            this.logger.LogInformation("Sending notifications for new requests.");
 
             var users = await this.userRepository.GetUsers();
 
@@ -56,14 +57,14 @@
 
             if (dateCalculator.ScheduleIsDue(dailyNotificationSchedule, within: Duration.FromMinutes(2)))
             {
-                this.logger.Log("Daily notification email is due soon. Excluding this date.");
+                this.logger.LogDebug("Daily notification email is due soon. Excluding this date.");
 
                 datesToExclude.Add(this.dateCalculator.GetNextWorkingDate());
             }
 
             if (dateCalculator.ScheduleIsDue(weeklyNotificationSchedule, within: Duration.FromMinutes(2)))
             {
-                this.logger.Log("Weekly notification email is due soon. Excluding these dates.");
+                this.logger.LogDebug("Weekly notification email is due soon. Excluding these dates.");
                 
                 datesToExclude.AddRange(this.dateCalculator.GetWeeklyNotificationDates());
             }

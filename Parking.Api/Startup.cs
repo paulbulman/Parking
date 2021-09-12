@@ -21,12 +21,23 @@ namespace Parking.Api
     using Microsoft.Extensions.Hosting;
     using Middleware;
     using NodaTime;
+    using Serilog;
+    using Serilog.Formatting.Compact;
     using SystemClock = NodaTime.SystemClock;
 
     public class Startup
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLogging(builder =>
+                builder.AddSerilog(
+                    new LoggerConfiguration()
+                        .MinimumLevel.Debug()
+                        .Enrich.FromLogContext()
+                        .WriteTo.Console(new CompactJsonFormatter())
+                        .CreateLogger(),
+                    dispose: true));
+
             var corsOrigins = Helpers.GetRequiredEnvironmentVariable("CORS_ORIGIN").Split(",");
 
             services.AddCors(options =>
@@ -57,10 +68,10 @@ namespace Parking.Api
 
                 options.AddPolicy(
                     "IsTeamLeader",
-                    policy => policy.RequireClaim("cognito:groups", Constants.TeamLeaderGroupName));
+                    builder => builder.RequireClaim("cognito:groups", Constants.TeamLeaderGroupName));
                 options.AddPolicy(
                     "IsUserAdmin",
-                    policy => policy.RequireClaim("cognito:groups", Constants.UserAdminGroupName));
+                    builder => builder.RequireClaim("cognito:groups", Constants.UserAdminGroupName));
             });
 
             services.AddSingleton<IClock>(SystemClock.Instance);
@@ -93,6 +104,8 @@ namespace Parking.Api
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseSerilogRequestLogging();
 
             app.UseMiddleware<HttpErrorMiddleware>();
             app.UseMiddleware<ExceptionMiddleware>();

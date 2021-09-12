@@ -13,6 +13,8 @@
     using Data.Aws;
     using Microsoft.Extensions.DependencyInjection;
     using NodaTime;
+    using Serilog;
+    using Serilog.Formatting.Compact;
 
     public class Startup
     {
@@ -21,6 +23,15 @@
             var services = new ServiceCollection();
 
             this.ConfigureExternalServices(services);
+
+            services.AddLogging(builder =>
+                builder.AddSerilog(
+                    new LoggerConfiguration()
+                        .MinimumLevel.Debug()
+                        .Enrich.FromLogContext()
+                        .WriteTo.Console(new CompactJsonFormatter())
+                        .CreateLogger(),
+                    dispose: true));
 
             services.AddScoped<IEmailProvider, EmailProvider>();
             services.AddScoped<IDatabaseProvider, DatabaseProvider>();
@@ -34,7 +45,6 @@
             services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
             services.AddScoped<IDateCalculator, DateCalculator>();
             services.AddScoped<IEmailRepository, EmailRepository>();
-            services.AddScoped<ILogger, Logger>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<Random>();
             services.AddScoped<IRequestRepository, RequestRepository>();

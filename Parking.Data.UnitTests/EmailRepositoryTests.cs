@@ -2,8 +2,8 @@
 {
     using System.Threading.Tasks;
     using Aws;
-    using Business;
     using Business.EmailTemplates;
+    using Microsoft.Extensions.Logging;
     using Moq;
     using Xunit;
 
@@ -15,7 +15,7 @@
             var mockStorageProvider = new Mock<IStorageProvider>();
 
             var emailRepository = new EmailRepository(
-                Mock.Of<ILogger>(),
+                Mock.Of<ILogger<EmailRepository>>(),
                 Mock.Of<IEmailProvider>(),
                 mockStorageProvider.Object);
 
@@ -44,7 +44,7 @@
             var mockEmailProvider = new Mock<IEmailProvider>();
 
             var emailRepository = new EmailRepository(
-                Mock.Of<ILogger>(),
+                Mock.Of<ILogger<EmailRepository>>(),
                 mockEmailProvider.Object,
                 Mock.Of<IStorageProvider>());
 
