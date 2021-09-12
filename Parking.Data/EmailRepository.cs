@@ -3,17 +3,20 @@
     using System.Text.Json;
     using System.Threading.Tasks;
     using Aws;
-    using Business;
     using Business.Data;
     using Business.EmailTemplates;
+    using Microsoft.Extensions.Logging;
 
     public class EmailRepository : IEmailRepository
     {
+        private readonly ILogger<EmailRepository> logger;
         private readonly IEmailProvider emailProvider;
-        private readonly ILogger logger;
         private readonly IStorageProvider storageProvider;
 
-        public EmailRepository(ILogger logger, IEmailProvider emailProvider, IStorageProvider storageProvider)
+        public EmailRepository(
+            ILogger<EmailRepository> logger,
+            IEmailProvider emailProvider,
+            IStorageProvider storageProvider)
         {
             this.logger = logger;
             this.storageProvider = storageProvider;
@@ -24,7 +27,7 @@
         {
             var rawData = JsonSerializer.Serialize(emailTemplate);
             
-            this.logger.Log("Sending email:\r\n" + rawData);
+            this.logger.LogInformation("Sending email: {@EmailTemplate}", emailTemplate);
 
             await this.storageProvider.SaveEmail(rawData);
 
