@@ -3,6 +3,8 @@ namespace Parking.Api
     using Amazon.Lambda.AspNetCoreServer;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Hosting;
+    using NodaTime;
+    using NodaTime.Text;
     using Serilog;
     using Serilog.Events;
     using Serilog.Formatting.Compact;
@@ -11,6 +13,8 @@ namespace Parking.Api
     {
         public LambdaEntryPoint() =>
             Log.Logger = new LoggerConfiguration()
+                .Destructure.ByTransforming<LocalDate>(d =>
+                    LocalDatePattern.CreateWithCurrentCulture("yyyy-MM-dd").Format(d))
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
                 .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
                 .Enrich.FromLogContext()

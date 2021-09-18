@@ -42,7 +42,7 @@
                 return;
             }
 
-            this.logger.LogInformation("Sending notifications for new requests.");
+            this.logger.LogDebug("Sending notifications for new requests.");
 
             var users = await this.userRepository.GetUsers();
 

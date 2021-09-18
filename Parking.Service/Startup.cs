@@ -13,6 +13,7 @@
     using Data.Aws;
     using Microsoft.Extensions.DependencyInjection;
     using NodaTime;
+    using NodaTime.Text;
     using Serilog;
     using Serilog.Formatting.Compact;
 
@@ -27,6 +28,8 @@
             services.AddLogging(builder =>
                 builder.AddSerilog(
                     new LoggerConfiguration()
+                        .Destructure.ByTransforming<LocalDate>(d =>
+                            LocalDatePattern.CreateWithCurrentCulture("yyyy-MM-dd").Format(d))
                         .MinimumLevel.Debug()
                         .Enrich.FromLogContext()
                         .WriteTo.Console(new CompactJsonFormatter())

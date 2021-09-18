@@ -2,6 +2,7 @@ namespace Parking.Business.UnitTests
 {
     using System.Collections.Generic;
     using System.Linq;
+    using Microsoft.Extensions.Logging;
     using Model;
     using Moq;
     using NodaTime;
@@ -107,7 +108,7 @@ namespace Parking.Business.UnitTests
                 .Setup(r => r.Sort(AllocationDate, existingRequests, Reservations, Users, Configuration.NearbyDistance))
                 .Returns(RequestSorterResult);
 
-            return new AllocationCreator(mockRequestSorter.Object);
+            return new AllocationCreator(Mock.Of<ILogger<AllocationCreator>>(), mockRequestSorter.Object);
         }
 
         // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local

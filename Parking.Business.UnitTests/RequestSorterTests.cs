@@ -3,7 +3,9 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Microsoft.Extensions.Logging;
     using Model;
+    using Moq;
     using NodaTime;
     using NodaTime.Testing.Extensions;
     using TestHelpers;
@@ -21,9 +23,9 @@
 
         private static readonly IReadOnlyCollection<User> DefaultUsers = new List<User>
         {
-            CreateUser.With(userId: "user1", commuteDistance: NearbyDistance),
-            CreateUser.With(userId: "user2", commuteDistance: NearbyDistance),
-            CreateUser.With(userId: "user3", commuteDistance: NearbyDistance)
+            CreateUser.With(userId: "user1", firstName: "User", lastName: "1", commuteDistance: NearbyDistance),
+            CreateUser.With(userId: "user2", firstName: "User", lastName: "2", commuteDistance: NearbyDistance),
+            CreateUser.With(userId: "user3", firstName: "User", lastName: "3", commuteDistance: NearbyDistance)
         };
 
         [Fact]
@@ -38,7 +40,14 @@
 
             var result = SortRequests(requests, NoReservations, DefaultUsers);
 
-            Assert.All(requests, r => Assert.Contains(r, result));
+            Assert.All(
+                requests,
+                expected => Assert.Single(
+                    result,
+                    actual => 
+                        actual.UserId == expected.UserId && 
+                        actual.Date == expected.Date &&
+                        actual.Status == expected.Status));
         }
 
         [Fact]
@@ -208,8 +217,8 @@
         {
             var users = new[]
             {
-                CreateUser.With(userId: "user1", commuteDistance: NearbyDistance),
-                CreateUser.With(userId: "user2", commuteDistance: NearbyDistance + 0.01m)
+                CreateUser.With(userId: "user1", firstName: "Nearby", commuteDistance: NearbyDistance),
+                CreateUser.With(userId: "user2", firstName: "Far away", commuteDistance: NearbyDistance + 0.01m)
             };
 
             var requests = new[]
@@ -230,8 +239,8 @@
         {
             var users = new[]
             {
-                CreateUser.With(userId: "user1", commuteDistance: NearbyDistance),
-                CreateUser.With(userId: "user2", commuteDistance: null)
+                CreateUser.With(userId: "user1", firstName: "Nearby", commuteDistance: NearbyDistance),
+                CreateUser.With(userId: "user2", firstName: "Missing distance", commuteDistance: null)
             };
 
             var requests = new[]
@@ -252,8 +261,8 @@
         {
             var users = new[]
             {
-                CreateUser.With(userId: "user1", commuteDistance: NearbyDistance + 1),
-                CreateUser.With(userId: "user2", commuteDistance: NearbyDistance)
+                CreateUser.With(userId: "user1", firstName: "Far away", commuteDistance: NearbyDistance + 1),
+                CreateUser.With(userId: "user2", firstName: "Reservation", commuteDistance: NearbyDistance)
             };
 
             var requests = new[]
@@ -278,7 +287,12 @@
             IReadOnlyCollection<Request> requests,
             IReadOnlyCollection<Reservation> reservations,
             IReadOnlyCollection<User> users) =>
-            new RequestSorter(new Random(RandomSeed)).Sort(SortDate, requests, reservations, users, NearbyDistance);
+            new RequestSorter(Mock.Of<ILogger<RequestSorter>>(), new Random(RandomSeed)).Sort(
+                SortDate,
+                requests,
+                reservations,
+                users,
+                NearbyDistance);
 
         private static void CheckOrder(IEnumerable<string> expected, IEnumerable<Request> actual) =>
             Assert.Equal(expected, actual.Select(r => r.UserId));
