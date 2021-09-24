@@ -125,5 +125,19 @@
 
             Assert.Equal(expectedResult, actual);
         }
+
+        [Theory]
+        [InlineData(RequestStatus.Allocated, false)]
+        [InlineData(RequestStatus.Cancelled, false)]
+        [InlineData(RequestStatus.HardInterrupted, true)]
+        [InlineData(RequestStatus.Interrupted, true)]
+        [InlineData(RequestStatus.Pending, false)]
+        [InlineData(RequestStatus.SoftInterrupted, true)]
+        public static void IsInterrupted_returns_true_for_interrupted_statuses(RequestStatus requestStatus, bool expectedResult)
+        {
+            var actual = requestStatus.IsInterrupted();
+
+            Assert.Equal(expectedResult, actual);
+        }
     }
 }

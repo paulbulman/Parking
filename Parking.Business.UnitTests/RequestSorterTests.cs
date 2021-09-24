@@ -44,8 +44,8 @@
                 requests,
                 expected => Assert.Single(
                     result,
-                    actual => 
-                        actual.UserId == expected.UserId && 
+                    actual =>
+                        actual.UserId == expected.UserId &&
                         actual.Date == expected.Date &&
                         actual.Status == expected.Status));
         }
@@ -120,6 +120,23 @@
         }
 
         [Fact]
+        public static void Ignores_dates_where_no_users_were_interrupted_when_calculating_priority()
+        {
+            var requests = new[]
+            {
+                new Request("user1", SortDate.PlusDays(-2), RequestStatus.Interrupted),
+                new Request("user2", SortDate.PlusDays(-2), RequestStatus.Interrupted),
+                new Request("user1", SortDate.PlusDays(-1), RequestStatus.Allocated),
+                new Request("user1", SortDate, RequestStatus.Interrupted),
+                new Request("user2", SortDate, RequestStatus.Interrupted),
+            };
+
+            var result = SortRequests(requests, NoReservations, DefaultUsers);
+
+            CheckOrder(new[] { "user1", "user2" }, result);
+        }
+
+        [Fact]
         public static void Ignores_cancelled_requests_when_calculating_priority()
         {
             var requests = new[]
@@ -174,8 +191,8 @@
         {
             var requests = new[]
             {
-                new Request("user1", SortDate.PlusDays(-1), RequestStatus.Allocated),
-                new Request("user2", SortDate.PlusDays(-1), RequestStatus.Allocated),
+                new Request("user1", SortDate.PlusDays(-1), RequestStatus.Interrupted),
+                new Request("user2", SortDate.PlusDays(-1), RequestStatus.Interrupted),
                 new Request("user1", SortDate, RequestStatus.Interrupted),
                 new Request("user2", SortDate, RequestStatus.Interrupted),
                 new Request("user3", SortDate, RequestStatus.Interrupted)

@@ -104,17 +104,10 @@
                 .Where(r => r.Date == localDate)
                 .ToArray();
 
-            var interruptedStatuses = new[]
-            {
-                RequestStatus.Interrupted,
-                RequestStatus.HardInterrupted,
-                RequestStatus.SoftInterrupted
-            };
-
             var allocatedRequests = filteredRequests
                 .Where(r => r.Status == RequestStatus.Allocated);
             var interruptedRequests = filteredRequests
-                .Where(r => interruptedStatuses.Contains(r.Status));
+                .Where(r => r.Status.IsInterrupted());
             var pendingRequests = filteredRequests
                 .Where(r => r.Status == RequestStatus.Pending);
 

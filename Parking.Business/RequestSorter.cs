@@ -121,11 +121,17 @@
             IReadOnlyCollection<Request> allRequests,
             IReadOnlyCollection<Reservation> reservations)
         {
+            var allUsersInterruptionDates = allRequests
+                .Where(r => r.Status.IsInterrupted())
+                .Select(r => r.Date)
+                .Distinct()
+                .ToArray();
+
             var userPreviousRequests = allRequests
                 .Where(r =>
                     r.UserId == request.UserId &&
                     r.Date < request.Date &&
-                    r.Date >= new LocalDate(2021, 9, 6) &&
+                    allUsersInterruptionDates.Contains(r.Date) &&
                     !UserHasReservation(r, reservations))
                 .ToArray();
 

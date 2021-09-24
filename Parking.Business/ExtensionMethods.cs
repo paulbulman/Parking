@@ -28,8 +28,9 @@
 
         public static bool IsRequested(this RequestStatus requestStatus) => RequestedStatuses.Contains(requestStatus);
 
-        public static bool IsAllocatable(this RequestStatus requestStatus) =>
-            AllocatableStatuses.Contains(requestStatus);
+        public static bool IsAllocatable(this RequestStatus requestStatus) => AllocatableStatuses.Contains(requestStatus);
+
+        public static bool IsInterrupted(this RequestStatus requestStatus) => InterruptedStatuses.Contains(requestStatus);
 
         private static IEnumerable<RequestStatus> RequestedStatuses =>
             new[]
@@ -44,6 +45,14 @@
         private static IEnumerable<RequestStatus> AllocatableStatuses =>
             new[]
             {
+                RequestStatus.Interrupted,
+                RequestStatus.SoftInterrupted,
+            };
+
+        private static IEnumerable<RequestStatus> InterruptedStatuses =>
+            new[]
+            {
+                RequestStatus.HardInterrupted,
                 RequestStatus.Interrupted,
                 RequestStatus.SoftInterrupted,
             };
