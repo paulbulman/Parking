@@ -41,7 +41,7 @@ namespace Parking.Api.IntegrationTests
 
             AddAuthorizationHeader(client, UserType.Normal);
 
-            var response = await client.GetAsync("/registrationNumbers");
+            var response = await client.GetAsync("/registrationNumbers/CD34CDE");
 
             response.EnsureSuccessStatusCode();
 
@@ -49,16 +49,10 @@ namespace Parking.Api.IntegrationTests
 
             var actualRegistrationNumbers = registrationNumbersResponse.RegistrationNumbers.ToArray();
 
-            Assert.Equal(3, actualRegistrationNumbers.Length);
+            Assert.Single(actualRegistrationNumbers);
 
-            Assert.Equal("Kent Attewell", actualRegistrationNumbers[0].Name);
-            Assert.Equal("AB12ABC", actualRegistrationNumbers[0].RegistrationNumber);
-
-            Assert.Equal("Dwayne Wanjek", actualRegistrationNumbers[1].Name);
-            Assert.Equal("CD34CDE", actualRegistrationNumbers[1].RegistrationNumber);
-
-            Assert.Equal("Kent Attewell", actualRegistrationNumbers[2].Name);
-            Assert.Equal("X123XYZ", actualRegistrationNumbers[2].RegistrationNumber);
+            Assert.Equal("Dwayne Wanjek", actualRegistrationNumbers[0].Name);
+            Assert.Equal("CD34CDE", actualRegistrationNumbers[0].RegistrationNumber);
         }
     }
 }
