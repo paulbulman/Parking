@@ -22,6 +22,8 @@
 
         LocalDate GetNextWorkingDate();
 
+        bool IsWorkingDay(LocalDate date);
+
         bool ScheduleIsDue(Schedule schedule, Duration? within = null);
     }
 
@@ -95,6 +97,11 @@
 
         public LocalDate GetNextWorkingDate() => GetNextWorkingDayStrictlyAfter(this.GetInitialDate());
 
+        public bool IsWorkingDay(LocalDate date) =>
+            date.DayOfWeek != IsoDayOfWeek.Saturday &&
+            date.DayOfWeek != IsoDayOfWeek.Sunday &&
+            this.bankHolidayRepository.GetBankHolidays().All(b => b.Date != date);
+
         public bool ScheduleIsDue(Schedule schedule, Duration? within = null)
         {
             var timeToCompare = this.InitialInstant.Plus(within ?? Duration.Zero);
@@ -124,10 +131,5 @@
                 .Select(firstDate.PlusDays)
                 .Where(this.IsWorkingDay)
                 .ToArray();
-
-        private bool IsWorkingDay(LocalDate date) =>
-            date.DayOfWeek != IsoDayOfWeek.Saturday &&
-            date.DayOfWeek != IsoDayOfWeek.Sunday &&
-            this.bankHolidayRepository.GetBankHolidays().All(b => b.Date != date);
     }
 }
