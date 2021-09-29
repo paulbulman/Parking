@@ -92,16 +92,24 @@
                 .Select(r => fullNames[r.Key.UserId])
                 .ToArray();
 
-            if (fullNamesWithoutAllocationRatios.Any())
-            {
-                this.logger.LogDebug(
-                    "{@fullNames} had no existing allocation ratios and will have a value created at random for {@date}.",
-                    fullNamesWithoutAllocationRatios,
-                    requestsToSort.Select(r => r.Date).Distinct().Single());
-            }
-
             var minExistingRatio = existingAllocationRatios.Select(r => r.Value).Min() ?? 0;
             var maxExistingRatio = existingAllocationRatios.Select(r => r.Value).Max() ?? 1;
+
+            if (fullNamesWithoutAllocationRatios.Any())
+            {
+                const string Message =
+                    "{@fullNames} had no existing allocation ratios and will have a value created at random between the existing minimum of " +
+                    "{minExistingRatio} and maximum of " +
+                    "{maxExistingRatio} for " +
+                    "{@date}.";
+
+                this.logger.LogDebug(
+                    Message,
+                    fullNamesWithoutAllocationRatios,
+                    minExistingRatio,
+                    maxExistingRatio,
+                    requestsToSort.Select(r => r.Date).Distinct().Single());
+            }
 
             var minExistingPercentage = (int)(minExistingRatio * 100);
             var maxExistingPercentage = (int)(maxExistingRatio * 100);
