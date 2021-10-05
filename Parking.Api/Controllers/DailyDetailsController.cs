@@ -69,6 +69,8 @@
                 patchRequest.LocalDate,
                 patchRequest.LocalDate);
 
+            var users = await this.userRepository.GetUsers();
+
             var request = requests.SingleOrDefault();
 
             if (request == null)
@@ -87,7 +89,7 @@
 
             var updatedRequest = new Request(request.UserId, request.Date, updatedRequestStatus);
 
-            await this.requestRepository.SaveRequests(new[] { updatedRequest });
+            await this.requestRepository.SaveRequests(new[] { updatedRequest }, users);
 
             await this.triggerRepository.AddTrigger();
 

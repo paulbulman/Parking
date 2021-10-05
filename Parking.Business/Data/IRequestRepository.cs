@@ -11,6 +11,6 @@
 
         Task<IReadOnlyCollection<Request>> GetRequests(string userId, LocalDate firstDate, LocalDate lastDate);
 
-        Task SaveRequests(IReadOnlyCollection<Request> requests);
+        Task SaveRequests(IReadOnlyCollection<Request> requests, IReadOnlyCollection<User> users);
     }
 }

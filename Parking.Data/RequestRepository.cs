@@ -8,14 +8,20 @@
     using Aws;
     using Business;
     using Business.Data;
+    using Microsoft.Extensions.Logging;
     using Model;
     using NodaTime;
 
     public class RequestRepository : IRequestRepository
     {
+        private readonly ILogger<RequestRepository> logger;
         private readonly IDatabaseProvider databaseProvider;
 
-        public RequestRepository(IDatabaseProvider databaseProvider) => this.databaseProvider = databaseProvider;
+        public RequestRepository(ILogger<RequestRepository> logger, IDatabaseProvider databaseProvider)
+        {
+            this.logger = logger;
+            this.databaseProvider = databaseProvider;
+        }
 
         public async Task<IReadOnlyCollection<Request>> GetRequests(LocalDate firstDate, LocalDate lastDate)
         {
@@ -45,12 +51,18 @@
             return requests;
         }
 
-        public async Task SaveRequests(IReadOnlyCollection<Request> requests)
+        public async Task SaveRequests(IReadOnlyCollection<Request> requests, IReadOnlyCollection<User> users)
         {
             if (!requests.Any())
             {
                 return;
             }
+
+            var fullNames = users.ToDictionary(u => u.UserId, u => $"{u.FirstName} {u.LastName}");
+
+            this.logger.LogDebug(
+                "Saving requests: {@requests}",
+                requests.Select(r => new { r.UserId, FullName = fullNames[r.UserId], r.Date, r.Status }));
 
             var orderedRequests = requests.OrderBy(r => r.Date).ToList();
 

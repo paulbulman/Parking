@@ -39,5 +39,20 @@
 
             return mockUserRepository.Object;
         }
+
+        public static IUserRepository WithUserExistsAndUsers(string userId, bool userExists, IReadOnlyCollection<User> users)
+        {
+            var mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
+
+            mockUserRepository
+                .Setup(r => r.UserExists(userId))
+                .ReturnsAsync(userExists);
+
+            mockUserRepository
+                .Setup(r => r.GetUsers())
+                .ReturnsAsync(users);
+
+            return mockUserRepository.Object;
+        }
     }
 }

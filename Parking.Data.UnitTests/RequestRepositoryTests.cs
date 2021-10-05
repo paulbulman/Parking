@@ -5,14 +5,22 @@ namespace Parking.Data.UnitTests
     using System.Linq;
     using System.Threading.Tasks;
     using Aws;
+    using Microsoft.Extensions.Logging;
     using Model;
     using Moq;
     using NodaTime;
     using NodaTime.Testing.Extensions;
+    using TestHelpers;
     using Xunit;
 
     public static class RequestRepositoryTests
     {
+        private static readonly IReadOnlyCollection<User> DefaultUsers = new List<User>
+        {
+            CreateUser.With(userId: "user1", firstName: "User", lastName: "1"),
+            CreateUser.With(userId: "user2", firstName: "User", lastName: "2"),
+        };
+
         [Fact]
         public static async Task GetRequests_returns_empty_collection_when_no_matching_raw_item_exists()
         {
@@ -21,7 +29,7 @@ namespace Parking.Data.UnitTests
             SetupMockRepository(mockDatabaseProvider, new YearMonth(2020, 8));
             SetupMockRepository(mockDatabaseProvider, new YearMonth(2020, 9));
 
-            var requestRepository = new RequestRepository(mockDatabaseProvider.Object);
+            var requestRepository = new RequestRepository(Mock.Of<ILogger<RequestRepository>>(), mockDatabaseProvider.Object);
 
             var result = await requestRepository.GetRequests(1.August(2020), 30.September(2020));
 
@@ -47,7 +55,7 @@ namespace Parking.Data.UnitTests
                 new YearMonth(2020, 9),
                 CreateRawItem("User1", "2020-09", KeyValuePair.Create("30", rawValue)));
 
-            var requestRepository = new RequestRepository(mockDatabaseProvider.Object);
+            var requestRepository = new RequestRepository(Mock.Of<ILogger<RequestRepository>>(), mockDatabaseProvider.Object);
 
             var result = await requestRepository.GetRequests(30.September(2020), 30.September(2020));
 
@@ -79,7 +87,7 @@ namespace Parking.Data.UnitTests
                     "2020-09",
                     KeyValuePair.Create("30", "A")));
 
-            var requestRepository = new RequestRepository(mockDatabaseProvider.Object);
+            var requestRepository = new RequestRepository(Mock.Of<ILogger<RequestRepository>>(), mockDatabaseProvider.Object);
 
             var result = await requestRepository.GetRequests(1.August(2020), 30.September(2020));
 
@@ -116,7 +124,7 @@ namespace Parking.Data.UnitTests
                     "2020-09",
                     KeyValuePair.Create("30", "C")));
 
-            var requestRepository = new RequestRepository(mockDatabaseProvider.Object);
+            var requestRepository = new RequestRepository(Mock.Of<ILogger<RequestRepository>>(), mockDatabaseProvider.Object);
 
             var result = await requestRepository.GetRequests("User1", 1.August(2020), 30.September(2020));
 
@@ -140,7 +148,7 @@ namespace Parking.Data.UnitTests
                 CreateRawItem("User1", "2020-08", KeyValuePair.Create("02", "I")),
                 CreateRawItem("User2", "2020-08", KeyValuePair.Create("02", "C")));
 
-            var requestRepository = new RequestRepository(mockDatabaseProvider.Object);
+            var requestRepository = new RequestRepository(Mock.Of<ILogger<RequestRepository>>(), mockDatabaseProvider.Object);
 
             var result = await requestRepository.GetRequests(3.August(2020), 31.August(2020));
 
@@ -153,9 +161,9 @@ namespace Parking.Data.UnitTests
         {
             var mockDatabaseProvider = new Mock<IDatabaseProvider>();
 
-            var requestRepository = new RequestRepository(mockDatabaseProvider.Object);
+            var requestRepository = new RequestRepository(Mock.Of<ILogger<RequestRepository>>(), mockDatabaseProvider.Object);
 
-            await requestRepository.SaveRequests(new List<Request>());
+            await requestRepository.SaveRequests(new List<Request>(), DefaultUsers);
 
             mockDatabaseProvider.VerifyNoOtherCalls();
         }
@@ -179,11 +187,11 @@ namespace Parking.Data.UnitTests
                 .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
                 .Returns(Task.CompletedTask);
 
-            var requestRepository = new RequestRepository(mockDatabaseProvider.Object);
+            var requestRepository = new RequestRepository(Mock.Of<ILogger<RequestRepository>>(), mockDatabaseProvider.Object);
             
             var requests = new[] { new Request("User1", 1.September(2020), requestStatus) };
             
-            await requestRepository.SaveRequests(requests);
+            await requestRepository.SaveRequests(requests, DefaultUsers);
 
             var expectedRawItems = new[]
             {
@@ -206,15 +214,17 @@ namespace Parking.Data.UnitTests
                 .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
                 .Returns(Task.CompletedTask);
 
-            var requestRepository = new RequestRepository(mockDatabaseProvider.Object);
-            await requestRepository.SaveRequests(
-                new[]
-                {
-                    new Request("User1", 1.September(2020), RequestStatus.Allocated),
-                    new Request("User1", 2.September(2020), RequestStatus.Cancelled),
-                    new Request("User1", 3.October(2020), RequestStatus.Interrupted),
-                    new Request("User2", 4.October(2020), RequestStatus.Interrupted)
-                });
+            var requestRepository = new RequestRepository(Mock.Of<ILogger<RequestRepository>>(), mockDatabaseProvider.Object);
+            
+            var requests = new[]
+            {
+                new Request("User1", 1.September(2020), RequestStatus.Allocated),
+                new Request("User1", 2.September(2020), RequestStatus.Cancelled),
+                new Request("User1", 3.October(2020), RequestStatus.Interrupted),
+                new Request("User2", 4.October(2020), RequestStatus.Interrupted)
+            };
+
+            await requestRepository.SaveRequests(requests, DefaultUsers);
 
             var expectedRawItems = new[]
             {
@@ -269,15 +279,17 @@ namespace Parking.Data.UnitTests
                 .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
                 .Returns(Task.CompletedTask);
 
-            var requestRepository = new RequestRepository(mockDatabaseProvider.Object);
-            await requestRepository.SaveRequests(
-                new[]
-                {
-                    new Request("User1", 2.September(2020), RequestStatus.Allocated),
-                    new Request("User1", 3.September(2020), RequestStatus.Interrupted),
-                    new Request("User2", 3.October(2020), RequestStatus.Cancelled),
-                    new Request("User2", 4.October(2020), RequestStatus.Interrupted)
-                });
+            var requestRepository = new RequestRepository(Mock.Of<ILogger<RequestRepository>>(), mockDatabaseProvider.Object);
+            
+            var requests = new[]
+            {
+                new Request("User1", 2.September(2020), RequestStatus.Allocated),
+                new Request("User1", 3.September(2020), RequestStatus.Interrupted),
+                new Request("User2", 3.October(2020), RequestStatus.Cancelled),
+                new Request("User2", 4.October(2020), RequestStatus.Interrupted)
+            };
+
+            await requestRepository.SaveRequests(requests, DefaultUsers);
 
             var expectedRawItems = new[]
             {
@@ -335,15 +347,15 @@ namespace Parking.Data.UnitTests
                 .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
                 .Returns(Task.CompletedTask);
 
-            var requestRepository = new RequestRepository(mockDatabaseProvider.Object);
-            await requestRepository.SaveRequests(
-                new[]
-                {
-                    new Request("User1", 2.September(2020), RequestStatus.Allocated),
-                    new Request("User1", 3.September(2020), RequestStatus.Interrupted),
-                    new Request("User1", 3.October(2020), RequestStatus.Cancelled),
-                    new Request("User1", 4.October(2020), RequestStatus.Interrupted)
-                });
+            var requestRepository = new RequestRepository(Mock.Of<ILogger<RequestRepository>>(), mockDatabaseProvider.Object);
+            var requests = new[]
+            {
+                new Request("User1", 2.September(2020), RequestStatus.Allocated),
+                new Request("User1", 3.September(2020), RequestStatus.Interrupted),
+                new Request("User1", 3.October(2020), RequestStatus.Cancelled),
+                new Request("User1", 4.October(2020), RequestStatus.Interrupted)
+            };
+            await requestRepository.SaveRequests(requests, DefaultUsers);
 
             var expectedRawItems = new[]
             {

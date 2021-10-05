@@ -13,6 +13,12 @@
 
     public static class RequestUpdaterTests
     {
+        private static readonly IReadOnlyCollection<User> DefaultUsers = new List<User>
+        {
+            CreateUser.With(userId: "user1", firstName: "User", lastName: "1"),
+            CreateUser.With(userId: "user2", firstName: "User", lastName: "2"),
+        };
+
         private static readonly IReadOnlyCollection<LocalDate> ShortLeadTimeDates = new[]
         {
             3.December(2020),
@@ -84,7 +90,7 @@
                 CreateMockDateCalculator().Object,
                 mockRequestRepository.Object,
                 Mock.Of<IReservationRepository>(),
-                Mock.Of<IUserRepository>());
+                CreateUserRepository.WithUsers(DefaultUsers));
 
             await requestUpdater.Update();
 
@@ -121,7 +127,7 @@
                 CreateMockDateCalculator().Object,
                 CreateMockRequestRepository().Object,
                 Mock.Of<IReservationRepository>(),
-                Mock.Of<IUserRepository>());
+                CreateUserRepository.WithUsers(DefaultUsers));
 
             await requestUpdater.Update();
 
@@ -152,7 +158,7 @@
                 CreateMockDateCalculator().Object,
                 CreateMockRequestRepository().Object,
                 Mock.Of<IReservationRepository>(),
-                Mock.Of<IUserRepository>());
+                CreateUserRepository.WithUsers(DefaultUsers));
 
             var result = await requestUpdater.Update();
 
@@ -237,9 +243,10 @@
                 .Setup(r => r.GetRequests(EarliestConsideredDate, LastConsideredDate))
                 .ReturnsAsync(InitialRequests);
             mockRequestRepository
-                .Setup(r => r.SaveRequests(It.Is<IReadOnlyCollection<Request>>(actual =>
-                    actual.Count == NewlyAllocatedRequests.Count &&
-                    NewlyAllocatedRequests.All(actual.Contains))))
+                .Setup(r => r.SaveRequests(
+                    It.Is<IReadOnlyCollection<Request>>(actual =>
+                        actual.Count == NewlyAllocatedRequests.Count && NewlyAllocatedRequests.All(actual.Contains)),
+                    It.IsAny<IReadOnlyCollection<User>>()))
                 .Returns(Task.CompletedTask);
 
             return mockRequestRepository;

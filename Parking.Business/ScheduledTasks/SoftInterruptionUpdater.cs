@@ -10,11 +10,16 @@
     {
         private readonly IDateCalculator dateCalculator;
         private readonly IRequestRepository requestRepository;
+        private readonly IUserRepository userRepository;
 
-        public SoftInterruptionUpdater(IDateCalculator dateCalculator, IRequestRepository requestRepository)
+        public SoftInterruptionUpdater(
+            IDateCalculator dateCalculator,
+            IRequestRepository requestRepository,
+            IUserRepository userRepository)
         {
             this.dateCalculator = dateCalculator;
             this.requestRepository = requestRepository;
+            this.userRepository = userRepository;
         }
 
         public ScheduledTaskType ScheduledTaskType => ScheduledTaskType.SoftInterruptionUpdater;
@@ -30,7 +35,9 @@
                 .Select(r => new Request(r.UserId, r.Date, RequestStatus.SoftInterrupted))
                 .ToArray();
 
-            await this.requestRepository.SaveRequests(updatedRequests);
+            var users = await this.userRepository.GetUsers();
+
+            await this.requestRepository.SaveRequests(updatedRequests, users);
         }
 
         public Instant GetNextRunTime() =>

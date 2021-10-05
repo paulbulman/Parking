@@ -80,7 +80,7 @@
                 UpdateRequests(requestsCache, allocatedRequests);
             }
 
-            await this.requestRepository.SaveRequests(newRequests);
+            await this.requestRepository.SaveRequests(newRequests, users);
 
             return newRequests;
         }

@@ -14,6 +14,12 @@
 
     public static class SoftInterruptionUpdaterTests
     {
+        private static readonly IReadOnlyCollection<User> DefaultUsers = new List<User>
+        {
+            CreateUser.With(userId: "user1", firstName: "User", lastName: "1"),
+            CreateUser.With(userId: "user2", firstName: "User", lastName: "2"),
+        };
+
         [Fact]
         public static async Task Updates_unallocated_requests_to_soft_interrupted()
         {
@@ -33,12 +39,13 @@
                 .Setup(r => r.GetRequests(nextWorkingDate, nextWorkingDate))
                 .ReturnsAsync(requests);
             mockRequestRepository
-                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
+                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>(), It.IsAny<IReadOnlyCollection<User>>()))
                 .Returns(Task.CompletedTask);
 
             var softInterruptionUpdater = new SoftInterruptionUpdater(
                 mockDateCalculator.Object,
-                mockRequestRepository.Object);
+                mockRequestRepository.Object,
+                CreateUserRepository.WithUsers(DefaultUsers));
 
             await softInterruptionUpdater.Run();
 
@@ -50,7 +57,8 @@
 
             mockRequestRepository.Verify(r => r.GetRequests(nextWorkingDate, nextWorkingDate), Times.Once);
             mockRequestRepository.Verify(r => r.SaveRequests(
-                    It.Is<IReadOnlyCollection<Request>>(actual => CheckRequests(expectedRequests, actual.ToList()))),
+                    It.Is<IReadOnlyCollection<Request>>(actual => CheckRequests(expectedRequests, actual.ToList())),
+                    DefaultUsers),
                 Times.Once);
         }
 
@@ -77,27 +85,29 @@
                 .Setup(r => r.GetRequests(nextWorkingDate, nextWorkingDate))
                 .ReturnsAsync(requests);
             mockRequestRepository
-                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
+                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>(), It.IsAny<IReadOnlyCollection<User>>()))
                 .Returns(Task.CompletedTask);
 
             var softInterruptionUpdater = new SoftInterruptionUpdater(
                 mockDateCalculator.Object,
-                mockRequestRepository.Object);
+                mockRequestRepository.Object,
+                CreateUserRepository.WithUsers(DefaultUsers));
 
             await softInterruptionUpdater.Run();
 
             mockRequestRepository.Verify(r => r.GetRequests(nextWorkingDate, nextWorkingDate), Times.Once);
             mockRequestRepository.Verify(
-                r => r.SaveRequests(It.Is<IReadOnlyCollection<Request>>(actual => actual.Count == 0)),
+                r => r.SaveRequests(It.Is<IReadOnlyCollection<Request>>(actual => actual.Count == 0), DefaultUsers),
                 Times.Once);
         }
 
         [Fact]
-        public static void ScheduledTaskType_returns_DailyNotification()
+        public static void ScheduledTaskType_returns_SoftInterruptionUpdater()
         {
             var softInterruptionUpdater = new SoftInterruptionUpdater(
                 Mock.Of<IDateCalculator>(),
-                Mock.Of<IRequestRepository>());
+                Mock.Of<IRequestRepository>(),
+                Mock.Of<IUserRepository>());
 
             Assert.Equal(ScheduledTaskType.SoftInterruptionUpdater, softInterruptionUpdater.ScheduledTaskType);
         }
@@ -113,7 +123,8 @@
 
             var actual = new SoftInterruptionUpdater(
                 dateCalculator,
-                Mock.Of<IRequestRepository>()).GetNextRunTime();
+                Mock.Of<IRequestRepository>(),
+                Mock.Of<IUserRepository>()).GetNextRunTime();
 
             var expected = expectedNextDay.December(2020).At(11, 2, 0).Utc();
 
@@ -127,7 +138,8 @@
 
             var actual = new SoftInterruptionUpdater(
                 dateCalculator,
-                Mock.Of<IRequestRepository>()).GetNextRunTime();
+                Mock.Of<IRequestRepository>(),
+                Mock.Of<IUserRepository>()).GetNextRunTime();
 
             var expected = 30.March(2020).At(10, 2, 0).Utc();
 
