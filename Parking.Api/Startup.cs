@@ -107,6 +107,7 @@ namespace Parking.Api
 
             app.UseSerilogRequestLogging();
 
+            app.UseMiddleware<HttpLoggingMiddleware>();
             app.UseMiddleware<HttpErrorMiddleware>();
             app.UseMiddleware<ExceptionMiddleware>();
 
