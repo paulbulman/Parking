@@ -17,18 +17,23 @@ namespace Parking.Api.UnitTests.Controllers
 
     public static class ReservationsControllerTests
     {
+        private static readonly IReadOnlyCollection<User> DefaultUsers = new[]
+        {
+            CreateUser.With(userId: "User1", firstName: "Silvester", lastName: "Probet"),
+            CreateUser.With(userId: "User2", firstName: "Kendricks", lastName: "Hawke"),
+            CreateUser.With(userId: "User3", firstName: "Rupert", lastName: "Trollope"),
+        };
+        
         [Fact]
         public static async Task Returns_reservations_data_for_each_active_date()
         {
             var activeDates = new[] { 15.February(2021), 16.February(2021), 18.February(2021) };
 
-            var users = new[] { CreateUser.With(userId: "User1") };
-
             var controller = new ReservationsController(
                 CreateConfigurationRepository.WithDefaultConfiguration(),
                 CreateDateCalculator.WithActiveDates(activeDates),
                 CreateReservationRepository.WithReservations(activeDates, new List<Reservation>()),
-                CreateUserRepository.WithUsers(users));
+                CreateUserRepository.WithUsers(DefaultUsers));
 
             var result = await controller.GetAsync();
 
@@ -55,13 +60,11 @@ namespace Parking.Api.UnitTests.Controllers
                 new Reservation("User3", 15.February(2021)),
             };
 
-            var users = new[] { CreateUser.With(userId: "User1") };
-
             var controller = new ReservationsController(
                 CreateConfigurationRepository.WithDefaultConfiguration(),
                 CreateDateCalculator.WithActiveDates(activeDates),
                 CreateReservationRepository.WithReservations(activeDates, reservations),
-                CreateUserRepository.WithUsers(users));
+                CreateUserRepository.WithUsers(DefaultUsers));
 
             var result = await controller.GetAsync();
 
@@ -97,18 +100,11 @@ namespace Parking.Api.UnitTests.Controllers
         {
             var activeDates = new[] { 15.February(2021) };
 
-            var users = new[]
-            {
-                CreateUser.With(userId: "User1", firstName: "Silvester", lastName: "Probet"),
-                CreateUser.With(userId: "User2", firstName: "Kendricks", lastName: "Hawke"),
-                CreateUser.With(userId: "User3", firstName: "Rupert", lastName: "Trollope"),
-            };
-
             var controller = new ReservationsController(
                 CreateConfigurationRepository.WithDefaultConfiguration(),
                 CreateDateCalculator.WithActiveDates(activeDates),
                 CreateReservationRepository.WithReservations(activeDates, new List<Reservation>()),
-                CreateUserRepository.WithUsers(users));
+                CreateUserRepository.WithUsers(DefaultUsers));
 
             var result = await controller.GetAsync();
 
@@ -161,7 +157,9 @@ namespace Parking.Api.UnitTests.Controllers
                 CreateReservationRepository.MockWithReservations(activeDates, new List<Reservation>());
 
             mockReservationRepository
-                .Setup(r => r.SaveReservations(It.IsAny<IReadOnlyCollection<Reservation>>()))
+                .Setup(r => r.SaveReservations(
+                    It.IsAny<IReadOnlyCollection<Reservation>>(),
+                    It.IsAny<IReadOnlyCollection<User>>()))
                 .Returns(Task.CompletedTask);
 
             var patchRequest = new ReservationsPatchRequest(new[]
@@ -174,7 +172,7 @@ namespace Parking.Api.UnitTests.Controllers
                 CreateConfigurationRepository.WithDefaultConfiguration(),
                 CreateDateCalculator.WithActiveDates(activeDates),
                 mockReservationRepository.Object,
-                CreateUserRepository.WithUsers(new List<User>()));
+                CreateUserRepository.WithUsers(DefaultUsers));
 
             await controller.PatchAsync(patchRequest);
 
@@ -198,7 +196,9 @@ namespace Parking.Api.UnitTests.Controllers
                 CreateReservationRepository.MockWithReservations(activeDates, new List<Reservation>());
 
             mockReservationRepository
-                .Setup(r => r.SaveReservations(It.IsAny<IReadOnlyCollection<Reservation>>()))
+                .Setup(r => r.SaveReservations(
+                    It.IsAny<IReadOnlyCollection<Reservation>>(),
+                    It.IsAny<IReadOnlyCollection<User>>()))
                 .Returns(Task.CompletedTask);
 
             var patchRequest = new ReservationsPatchRequest(new[]
@@ -211,7 +211,7 @@ namespace Parking.Api.UnitTests.Controllers
                 CreateConfigurationRepository.WithDefaultConfiguration(),
                 CreateDateCalculator.WithActiveDates(activeDates),
                 mockReservationRepository.Object,
-                CreateUserRepository.WithUsers(new List<User>()));
+                CreateUserRepository.WithUsers(DefaultUsers));
 
             await controller.PatchAsync(patchRequest);
 
@@ -235,7 +235,9 @@ namespace Parking.Api.UnitTests.Controllers
                 CreateReservationRepository.MockWithReservations(activeDates, returnedReservations);
 
             mockReservationRepository
-                .Setup(r => r.SaveReservations(It.IsAny<IReadOnlyCollection<Reservation>>()))
+                .Setup(r => r.SaveReservations(
+                    It.IsAny<IReadOnlyCollection<Reservation>>(),
+                    It.IsAny<IReadOnlyCollection<User>>()))
                 .Returns(Task.CompletedTask);
 
             var patchRequest = new ReservationsPatchRequest(new[]
@@ -247,7 +249,7 @@ namespace Parking.Api.UnitTests.Controllers
                 CreateConfigurationRepository.WithDefaultConfiguration(),
                 CreateDateCalculator.WithActiveDates(activeDates),
                 mockReservationRepository.Object,
-                CreateUserRepository.WithUsers(new List<User>()));
+                CreateUserRepository.WithUsers(DefaultUsers));
 
             var result = await controller.PatchAsync(patchRequest);
 
@@ -266,7 +268,8 @@ namespace Parking.Api.UnitTests.Controllers
         {
             mockReservationRepository.Verify(
                 r => r.SaveReservations(It.Is<IReadOnlyCollection<Reservation>>(
-                    actual => CheckReservations(expectedSavedReservations, actual.ToList()))),
+                    actual => CheckReservations(expectedSavedReservations, actual.ToList())), 
+                    DefaultUsers),
                 Times.Once);
         }
 

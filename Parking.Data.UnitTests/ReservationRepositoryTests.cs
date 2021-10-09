@@ -5,14 +5,24 @@ namespace Parking.Data.UnitTests
     using System.Linq;
     using System.Threading.Tasks;
     using Aws;
+    using Microsoft.Extensions.Logging;
     using Model;
     using Moq;
     using NodaTime;
     using NodaTime.Testing.Extensions;
+    using TestHelpers;
     using Xunit;
 
     public static class ReservationRepositoryTests
     {
+        private static readonly IReadOnlyCollection<User> DefaultUsers = new List<User>
+        {
+            CreateUser.With(userId: "user1", firstName: "User", lastName: "1"),
+            CreateUser.With(userId: "user2", firstName: "User", lastName: "2"),
+            CreateUser.With(userId: "user3", firstName: "User", lastName: "3"),
+            CreateUser.With(userId: "user4", firstName: "User", lastName: "4"),
+        };
+
         [Fact]
         public static async Task GetReservations_returns_empty_collection_when_no_matching_raw_item_exists()
         {
@@ -21,7 +31,8 @@ namespace Parking.Data.UnitTests
             SetupMockRepository(mockDatabaseProvider, new YearMonth(2020, 8));
             SetupMockRepository(mockDatabaseProvider, new YearMonth(2020, 9));
 
-            var reservationRepository = new ReservationRepository(mockDatabaseProvider.Object);
+            var reservationRepository = new ReservationRepository(
+                Mock.Of<ILogger<ReservationRepository>>(), mockDatabaseProvider.Object);
 
             var result = await reservationRepository.GetReservations(1.August(2020), 30.September(2020));
 
@@ -47,7 +58,8 @@ namespace Parking.Data.UnitTests
                 CreateRawItem(
                     "2020-09", KeyValuePair.Create("02", new List<string> { "User1" })));
 
-            var reservationRepository = new ReservationRepository(mockDatabaseProvider.Object);
+            var reservationRepository = new ReservationRepository(
+                Mock.Of<ILogger<ReservationRepository>>(), mockDatabaseProvider.Object);
 
             var result = await reservationRepository.GetReservations(1.August(2020), 30.September(2020));
 
@@ -71,7 +83,9 @@ namespace Parking.Data.UnitTests
                 new YearMonth(2020, 8),
                 CreateRawItem("2020-08", KeyValuePair.Create("02", new List<string> { "User1", "User2" })));
 
-            var reservationRepository = new ReservationRepository(mockDatabaseProvider.Object);
+            var reservationRepository = new ReservationRepository(
+                Mock.Of<ILogger<ReservationRepository>>(),
+                mockDatabaseProvider.Object);
 
             var result = await reservationRepository.GetReservations(3.August(2020), 31.August(2020));
 
@@ -84,9 +98,10 @@ namespace Parking.Data.UnitTests
         {
             var mockDatabaseProvider = new Mock<IDatabaseProvider>();
 
-            var reservationRepository = new ReservationRepository(mockDatabaseProvider.Object);
+            var reservationRepository = new ReservationRepository(
+                Mock.Of<ILogger<ReservationRepository>>(), mockDatabaseProvider.Object);
 
-            await reservationRepository.SaveReservations(new List<Reservation>());
+            await reservationRepository.SaveReservations(new List<Reservation>(), new List<User>());
 
             mockDatabaseProvider.VerifyNoOtherCalls();
         }
@@ -102,15 +117,18 @@ namespace Parking.Data.UnitTests
                 .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
                 .Returns(Task.CompletedTask);
 
-            var reservationRepository = new ReservationRepository(mockDatabaseProvider.Object);
-            await reservationRepository.SaveReservations(
-                new[]
-                {
-                    new Reservation("User1", 1.March(2021)),
-                    new Reservation("User1", 2.March(2021)),
-                    new Reservation("User1", 1.April(2021)),
-                    new Reservation("User2", 1.April(2021)),
-                });
+            var reservationRepository = new ReservationRepository(
+                Mock.Of<ILogger<ReservationRepository>>(), mockDatabaseProvider.Object);
+            
+            var reservations = new[]
+            {
+                new Reservation("User1", 1.March(2021)),
+                new Reservation("User1", 2.March(2021)),
+                new Reservation("User1", 1.April(2021)),
+                new Reservation("User2", 1.April(2021)),
+            };
+
+            await reservationRepository.SaveReservations(reservations, DefaultUsers);
 
             var expectedRawItems = new[]
             {
@@ -149,15 +167,18 @@ namespace Parking.Data.UnitTests
                 .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
                 .Returns(Task.CompletedTask);
 
-            var reservationRepository = new ReservationRepository(mockDatabaseProvider.Object);
-            await reservationRepository.SaveReservations(
-                new[]
-                {
-                    new Reservation("User2", 1.March(2021)),
-                    new Reservation("User4", 1.March(2021)),
-                    new Reservation("User1", 3.March(2021)),
-                    new Reservation("User3", 3.April(2021)),
-                });
+            var reservationRepository =
+                new ReservationRepository(Mock.Of<ILogger<ReservationRepository>>(), mockDatabaseProvider.Object);
+
+            var reservations = new[]
+            {
+                new Reservation("User2", 1.March(2021)),
+                new Reservation("User4", 1.March(2021)),
+                new Reservation("User1", 3.March(2021)),
+                new Reservation("User3", 3.April(2021)),
+            };
+
+            await reservationRepository.SaveReservations(reservations, DefaultUsers);
 
             var expectedRawItems = new[]
             {
@@ -187,15 +208,18 @@ namespace Parking.Data.UnitTests
                 .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
                 .Returns(Task.CompletedTask);
 
-            var reservationRepository = new ReservationRepository(mockDatabaseProvider.Object);
-            await reservationRepository.SaveReservations(
-                new[]
-                {
-                    new Reservation("User1", 1.March(2021)),
-                    new Reservation("", 1.March(2021)),
-                    new Reservation("", 2.March(2021)),
-                    new Reservation("User2", 2.March(2021)),
-                });
+            var reservationRepository = new ReservationRepository(
+                Mock.Of<ILogger<ReservationRepository>>(), mockDatabaseProvider.Object);
+
+            var reservations = new[]
+            {
+                new Reservation("User1", 1.March(2021)),
+                new Reservation("", 1.March(2021)),
+                new Reservation("", 2.March(2021)),
+                new Reservation("User2", 2.March(2021)),
+            };
+
+            await reservationRepository.SaveReservations(reservations, DefaultUsers);
 
             var expectedRawItems = new[]
             {

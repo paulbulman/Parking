@@ -9,6 +9,6 @@
     {
         Task<IReadOnlyCollection<Reservation>> GetReservations(LocalDate firstDate, LocalDate lastDate);
 
-        Task SaveReservations(IReadOnlyCollection<Reservation> reservations);
+        Task SaveReservations(IReadOnlyCollection<Reservation> reservations, IReadOnlyCollection<User> users);
     }
 }

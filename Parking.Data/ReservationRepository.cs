@@ -8,14 +8,20 @@
     using Aws;
     using Business;
     using Business.Data;
+    using Microsoft.Extensions.Logging;
     using Model;
     using NodaTime;
 
     public class ReservationRepository : IReservationRepository
     {
+        private readonly ILogger<ReservationRepository> logger;
         private readonly IDatabaseProvider databaseProvider;
 
-        public ReservationRepository(IDatabaseProvider databaseProvider) => this.databaseProvider = databaseProvider;
+        public ReservationRepository(ILogger<ReservationRepository> logger, IDatabaseProvider databaseProvider)
+        {
+            this.logger = logger;
+            this.databaseProvider = databaseProvider;
+        }
 
         public async Task<IReadOnlyCollection<Reservation>> GetReservations(LocalDate firstDate, LocalDate lastDate)
         {
@@ -35,12 +41,18 @@
             return matchingReservations;
         }
 
-        public async Task SaveReservations(IReadOnlyCollection<Reservation> reservations)
+        public async Task SaveReservations(IReadOnlyCollection<Reservation> reservations, IReadOnlyCollection<User> users)
         {
             if (!reservations.Any())
             {
                 return;
             }
+
+            var fullNames = users.ToDictionary(u => u.UserId, u => $"{u.FirstName} {u.LastName}");
+
+            this.logger.LogDebug(
+                "Saving reservations: {@reservations}",
+                reservations.Select(r => new { r.UserId, FullName = fullNames[r.UserId], r.Date }));
 
             var orderedReservations = reservations.OrderBy(r => r.Date).ToList();
 

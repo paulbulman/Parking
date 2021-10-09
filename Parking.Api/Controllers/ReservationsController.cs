@@ -58,7 +58,9 @@
                 .SelectMany(CreateReservations)
                 .ToList();
 
-            await this.reservationRepository.SaveReservations(reservations);
+            var users = await this.userRepository.GetUsers();
+
+            await this.reservationRepository.SaveReservations(reservations, users);
 
             var response = await this.GetReservations();
 
