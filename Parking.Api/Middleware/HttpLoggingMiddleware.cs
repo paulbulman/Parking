@@ -6,49 +6,99 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Primitives;
+    using Parking.Business.Data;
     using Serilog;
 
     public class HttpLoggingMiddleware
     {
+        private readonly ILogger<HttpLoggingMiddleware> logger;
         private readonly RequestDelegate next;
         private readonly IDiagnosticContext diagnosticContext;
 
-        public HttpLoggingMiddleware(RequestDelegate next, IDiagnosticContext diagnosticContext)
+        public HttpLoggingMiddleware(
+            ILogger<HttpLoggingMiddleware> logger,
+            RequestDelegate next,
+            IDiagnosticContext diagnosticContext)
         {
+            this.logger = logger;
             this.next = next;
             this.diagnosticContext = diagnosticContext;
         }
 
-        public async Task Invoke(HttpContext context)
+        public async Task Invoke(
+            HttpContext context,
+            INotificationRepository notificationRepository)
         {
-            await this.next(context);
-
-            var request = context.Request;
-
-            this.diagnosticContext.Set("RequestHeaders", request.Headers.Select(FormatHeaderValues));
-            this.diagnosticContext.Set("RemoteIpAddress", context.Connection.RemoteIpAddress);
-            this.diagnosticContext.Set("UserClaims", context.User?.Claims?.Select(c => KeyValuePair.Create(c.Type, c.Value)));
-            
-            if (request.QueryString.HasValue)
+            try
             {
-                this.diagnosticContext.Set("QueryString", request.QueryString.Value);
+                await this.next(context);
             }
-
-            if (request.Body.CanSeek)
+            catch (Exception initialException)
             {
-                request.Body.Seek(0, SeekOrigin.Begin);
+                await this.SendNotification(
+                    notificationRepository,
+                    subject: "Unhandled exception",
+                    body: initialException.ToString());
+
+                throw;
             }
-
-            var bodyReader = new StreamReader(request.Body);
-            var body = await bodyReader.ReadToEndAsync();
-
-            if (body.Length > 0)
+            finally
             {
-                this.diagnosticContext.Set("RequestBody", body);
-            }
+                this.diagnosticContext.Set("RemoteIpAddress", context.Connection.RemoteIpAddress);
+                this.diagnosticContext.Set("UserClaims", context.User?.Claims?.Select(c => KeyValuePair.Create(c.Type, c.Value)));
 
-            this.diagnosticContext.Set("StatusCode", context.Response.StatusCode);
+                var request = context.Request;
+
+                this.diagnosticContext.Set("RequestHeaders", request.Headers.Select(FormatHeaderValues).ToArray());
+
+                if (request.Body.CanSeek)
+                {
+                    request.Body.Seek(0, SeekOrigin.Begin);
+                }
+
+                var bodyReader = new StreamReader(request.Body);
+                var body = await bodyReader.ReadToEndAsync();
+
+                if (body.Length > 0)
+                {
+                    this.diagnosticContext.Set("RequestBody", body);
+                }
+
+                var statusCode = context.Response.StatusCode;
+
+                this.diagnosticContext.Set("StatusCode", statusCode);
+
+                if (statusCode >= 400)
+                {
+                    var notificationSubject = $"HTTP {statusCode} error";
+                    var notificationBody =
+                        $"An HTTP {statusCode} error occurred during a {context.Request.Method} request to {context.Request.Path}.";
+
+                    await this.SendNotification(
+                        notificationRepository,
+                        subject: notificationSubject,
+                        body: notificationBody);
+                }
+            }
+        }
+
+        private async Task SendNotification(
+            INotificationRepository notificationRepository,
+            string subject,
+            string body)
+        {
+            try
+            {
+                await notificationRepository.Send(subject, body);
+            }
+            catch (Exception exception)
+            {
+                this.logger.LogError(
+                    exception,
+                    "Exception occurred attempting to send exception notification.");
+            }
         }
 
         private static KeyValuePair<string, string> FormatHeaderValues(KeyValuePair<string, StringValues> header) =>

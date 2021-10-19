@@ -16,6 +16,7 @@ namespace Parking.Api
                 .Destructure.ByTransforming<LocalDate>(d =>
                     LocalDatePattern.CreateWithCurrentCulture("yyyy-MM-dd").Format(d))
                 .MinimumLevel.Debug()
+                .MinimumLevel.Override("Parking.Api.Authentication.DefaultAuthenticationHandler", LogEventLevel.Information)
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
                 .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
                 .Enrich.FromLogContext()
