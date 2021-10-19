@@ -52,7 +52,7 @@
 
             this.logger.LogDebug(
                 "Saving reservations: {@reservations}",
-                reservations.Select(r => new { r.UserId, FullName = fullNames[r.UserId], r.Date }));
+                reservations.Select(r => new { r.UserId, FullName = GetFullName(fullNames, r.UserId), r.Date }));
 
             var orderedReservations = reservations.OrderBy(r => r.Date).ToList();
 
@@ -71,6 +71,11 @@
 
             await this.databaseProvider.SaveItems(rawItems);
         }
+
+        private static string GetFullName(IDictionary<string, string> fullNames, string userId) =>
+            string.IsNullOrEmpty(userId) ? "[No user]" :
+            !fullNames.ContainsKey(userId) ? $"[Unknown user ID '{userId}']" :
+            fullNames[userId];
 
         private static IEnumerable<Reservation> CreateWholeMonthReservations(RawItem rawItem, YearMonth yearMonth)
         {
