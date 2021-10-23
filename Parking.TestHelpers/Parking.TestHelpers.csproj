@@ -21,7 +21,7 @@
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.2.53" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
     <PackageReference Include="Moq" Version="4.16.1" />
-    <PackageReference Include="NodaTime" Version="3.0.7" />
+    <PackageReference Include="NodaTime" Version="3.0.9" />
     <PackageReference Include="NodaTime.Testing" Version="3.0.7" />
   </ItemGroup>
 
