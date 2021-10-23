@@ -116,7 +116,9 @@ namespace Parking.Api.UnitTests.Controllers
                 u.EmailAddress == "john.doe@example.com" &&
                 u.FirstName == "John" &&
                 u.LastName == "Doe" &&
-                u.RegistrationNumber == "AB12CDE")));
+                u.RegistrationNumber == "AB12CDE" &&
+                u.RequestReminderEnabled == true &&
+                u.ReservationReminderEnabled == true)));
 
             mockUserRepository.VerifyNoOtherCalls();
         }
@@ -164,7 +166,9 @@ namespace Parking.Api.UnitTests.Controllers
                 emailAddress: "john.doe@example.com",
                 firstName: "John",
                 lastName: "Doe",
-                registrationNumber: "AB12CDE");
+                registrationNumber: "AB12CDE",
+                requestReminderEnabled: true,
+                reservationReminderEnabled: false);
 
             var mockUserRepository = new Mock<IUserRepository>();
 
@@ -190,7 +194,9 @@ namespace Parking.Api.UnitTests.Controllers
                         u.EmailAddress == "john.doe@example.com" &&
                         u.FirstName == "__NEW_FIRST_NAME__" &&
                         u.LastName == "__NEW_LAST_NAME__" &&
-                        u.RegistrationNumber == "__NEW_REG__")),
+                        u.RegistrationNumber == "__NEW_REG__" &&
+                        u.RequestReminderEnabled == true &&
+                        u.ReservationReminderEnabled == false)),
                 Times.Once);
 
             mockUserRepository.VerifyNoOtherCalls();

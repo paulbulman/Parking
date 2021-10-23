@@ -67,14 +67,18 @@
             string emailAddress,
             string firstName,
             string lastName,
-            string? registrationNumber) => new RawItem(primaryKey, sortKey)
+            string? registrationNumber,
+            bool? requestReminderEnabled,
+            bool? reservationReminderEnabled) => new RawItem(primaryKey, sortKey)
             {
                 AlternativeRegistrationNumber = alternativeRegistrationNumber,
                 CommuteDistance = commuteDistance,
                 EmailAddress = emailAddress,
                 FirstName = firstName,
                 LastName = lastName,
-                RegistrationNumber = registrationNumber
+                RegistrationNumber = registrationNumber,
+                RequestReminderEnabled = requestReminderEnabled,
+                ReservationReminderEnabled = reservationReminderEnabled
             };
 
         [DynamoDBHashKey]
@@ -111,8 +115,14 @@
         [DynamoDBProperty("requests")]
         public Dictionary<string, string>? Requests { get; set; }
 
+        [DynamoDBProperty("requestReminderEnabled")]
+        public bool? RequestReminderEnabled { get; set; }
+
         [DynamoDBProperty("reservations", typeof(ReservationsConverter))]
         public Dictionary<string, List<string>>? Reservations { get; set; }
+
+        [DynamoDBProperty("reservationReminderEnabled")]
+        public bool? ReservationReminderEnabled { get; set; }
 
         [DynamoDBProperty("schedules")]
         public Dictionary<string, string>? Schedules { get; set; }

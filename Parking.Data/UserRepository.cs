@@ -26,13 +26,15 @@
             var userId = await this.identityProvider.CreateUser(user.EmailAddress, user.FirstName, user.LastName);
 
             var newUser = new User(
-                userId,
-                user.AlternativeRegistrationNumber,
-                user.CommuteDistance,
-                user.EmailAddress,
-                user.FirstName,
-                user.LastName,
-                user.RegistrationNumber);
+                userId: userId,
+                alternativeRegistrationNumber: user.AlternativeRegistrationNumber,
+                commuteDistance: user.CommuteDistance,
+                emailAddress: user.EmailAddress,
+                firstName: user.FirstName,
+                lastName: user.LastName,
+                registrationNumber: user.RegistrationNumber,
+                requestReminderEnabled: user.RequestReminderEnabled,
+                reservationReminderEnabled: user.ReservationReminderEnabled);
                 
             await this.databaseProvider.SaveItem(CreateRawItem(newUser));
 
@@ -98,13 +100,15 @@
             }
 
             return new User(
-                rawItem.PrimaryKey.Split('#')[1],
-                rawItem.AlternativeRegistrationNumber,
-                rawItem.CommuteDistance,
-                rawItem.EmailAddress,
-                rawItem.FirstName,
-                rawItem.LastName,
-                rawItem.RegistrationNumber);
+                userId: rawItem.PrimaryKey.Split('#')[1],
+                alternativeRegistrationNumber: rawItem.AlternativeRegistrationNumber,
+                commuteDistance: rawItem.CommuteDistance,
+                emailAddress: rawItem.EmailAddress,
+                firstName: rawItem.FirstName,
+                lastName: rawItem.LastName,
+                registrationNumber: rawItem.RegistrationNumber,
+                requestReminderEnabled: rawItem.RequestReminderEnabled ?? true,
+                reservationReminderEnabled: rawItem.ReservationReminderEnabled ?? true);
         }
 
         private static RawItem CreateRawItem(User user) =>
@@ -116,6 +120,8 @@
                 emailAddress: user.EmailAddress,
                 firstName: user.FirstName,
                 lastName: user.LastName,
-                registrationNumber: user.RegistrationNumber);
+                registrationNumber: user.RegistrationNumber,
+                requestReminderEnabled: user.RequestReminderEnabled,
+                reservationReminderEnabled: user.ReservationReminderEnabled);
     }
 }

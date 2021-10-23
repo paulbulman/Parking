@@ -43,9 +43,10 @@
 
             foreach (var user in users.Where(u =>
                 UserIsActive(u, requests) && 
-                !HasUpcomingRequests(u, requests, nextWeeklyNotificationDates)))
+                !HasUpcomingRequests(u, requests, nextWeeklyNotificationDates) &&
+                u.RequestReminderEnabled))
             {
-                await emailRepository.Send(
+                await this.emailRepository.Send(
                     new EmailTemplates.RequestReminder(user, nextWeeklyNotificationDates));
             }
         }

@@ -24,7 +24,11 @@
         {
             await DatabaseHelpers.CreateUser(
                 CreateUser.With(
-                    userId: "User1", alternativeRegistrationNumber: "X123XYZ", registrationNumber: "AB12ABC"));
+                    userId: "User1",
+                    alternativeRegistrationNumber: "X123XYZ",
+                    registrationNumber: "AB12ABC",
+                    requestReminderEnabled: true,
+                    reservationReminderEnabled: false));
 
             var client = this.factory.CreateClient();
 
@@ -40,6 +44,8 @@
 
             Assert.Equal("X123XYZ", actualProfile.AlternativeRegistrationNumber);
             Assert.Equal("AB12ABC", actualProfile.RegistrationNumber);
+            Assert.True(actualProfile.RequestReminderEnabled);
+            Assert.False(actualProfile.ReservationReminderEnabled);
         }
 
         [Fact]
@@ -50,13 +56,19 @@
                     userId: "User1",
                     alternativeRegistrationNumber: "X123XYZ",
                     commuteDistance: 12.3m,
-                    registrationNumber: "AB12ABC"));
+                    registrationNumber: "AB12ABC",
+                    requestReminderEnabled: true,
+                    reservationReminderEnabled: false));
 
             var client = this.factory.CreateClient();
 
             AddAuthorizationHeader(client, UserType.Normal);
 
-            var request = new ProfilePatchRequest("__ALTERNATIVE_REG__", "__REG__");
+            var request = new ProfilePatchRequest(
+                alternativeRegistrationNumber: "__ALTERNATIVE_REG__",
+                registrationNumber: "__REG__",
+                requestReminderEnabled: false,
+                reservationReminderEnabled: true);
 
             var response = await client.PatchAsJsonAsync("/profiles", request);
 
@@ -66,6 +78,8 @@
 
             Assert.Equal("__ALTERNATIVE_REG__", savedUser.AlternativeRegistrationNumber);
             Assert.Equal("__REG__", savedUser.RegistrationNumber);
+            Assert.False(savedUser.RequestReminderEnabled);
+            Assert.True(savedUser.ReservationReminderEnabled);
         }
     }
 }

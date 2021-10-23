@@ -62,6 +62,44 @@
         }
 
         [Fact]
+        public static async Task Does_not_send_emails_to_users_with_reminder_disabled()
+        {
+            var nextWorkingDate = 23.December(2020);
+
+            var mockDateCalculator = new Mock<IDateCalculator>(MockBehavior.Strict);
+            mockDateCalculator
+                .Setup(c => c.GetNextWorkingDate())
+                .Returns(nextWorkingDate);
+
+            var mockEmailRepository = new Mock<IEmailRepository>();
+
+            var mockReservationRepository = new Mock<IReservationRepository>(MockBehavior.Strict);
+            mockReservationRepository
+                .Setup(r => r.GetReservations(nextWorkingDate, nextWorkingDate))
+                .ReturnsAsync(new List<Reservation>());
+
+            var teamLeaderUsers = new[]
+            {
+                CreateUser.With(userId: "user1", emailAddress: "1@abc.com", reservationReminderEnabled: false),
+            };
+
+            var mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
+            mockUserRepository
+                .Setup(r => r.GetTeamLeaderUsers())
+                .ReturnsAsync(teamLeaderUsers);
+
+            var reservationReminder = new ReservationReminder(
+                mockDateCalculator.Object,
+                mockEmailRepository.Object,
+                mockReservationRepository.Object,
+                mockUserRepository.Object);
+
+            await reservationReminder.Run();
+
+            mockEmailRepository.VerifyNoOtherCalls();
+        }
+
+        [Fact]
         public static async Task Does_not_send_email_when_reservations_have_been_entered()
         {
             var nextWorkingDate = 23.December(2020);

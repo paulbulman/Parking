@@ -44,13 +44,15 @@
             }
 
             var updatedUser = new User(
-                existingUser.UserId,
-                request.AlternativeRegistrationNumber,
-                existingUser.CommuteDistance,
-                existingUser.EmailAddress,
-                existingUser.FirstName,
-                existingUser.LastName,
-                request.RegistrationNumber);
+                userId: existingUser.UserId,
+                alternativeRegistrationNumber: request.AlternativeRegistrationNumber,
+                commuteDistance: existingUser.CommuteDistance,
+                emailAddress: existingUser.EmailAddress,
+                firstName: existingUser.FirstName,
+                lastName: existingUser.LastName,
+                registrationNumber: request.RegistrationNumber,
+                requestReminderEnabled: request.RequestReminderEnabled ?? true,
+                reservationReminderEnabled: request.ReservationReminderEnabled ?? true);
 
             await this.userRepository.SaveUser(updatedUser);
 
@@ -61,7 +63,11 @@
 
         private static ProfileResponse CreateResponse(User user)
         {
-            var profile = new ProfileData(user.RegistrationNumber, user.AlternativeRegistrationNumber);
+            var profile = new ProfileData(
+                registrationNumber: user.RegistrationNumber,
+                alternativeRegistrationNumber: user.AlternativeRegistrationNumber,
+                requestReminderEnabled: user.RequestReminderEnabled,
+                reservationReminderEnabled: user.ReservationReminderEnabled);
 
             return new ProfileResponse(profile);
         }

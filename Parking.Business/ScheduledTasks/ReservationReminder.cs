@@ -40,7 +40,7 @@
             {
                 var teamLeaderUsers = await userRepository.GetTeamLeaderUsers();
 
-                foreach (var teamLeaderUser in teamLeaderUsers)
+                foreach (var teamLeaderUser in teamLeaderUsers.Where(u => u.ReservationReminderEnabled))
                 {
                     await emailRepository.Send(
                         new EmailTemplates.ReservationReminder(teamLeaderUser, nextWorkingDate));

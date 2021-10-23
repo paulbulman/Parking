@@ -66,7 +66,9 @@
                 ["emailAddress"] = user.EmailAddress,
                 ["firstName"] = user.FirstName,
                 ["lastName"] = user.LastName,
-                ["registrationNumber"] = user.RegistrationNumber
+                ["registrationNumber"] = user.RegistrationNumber,
+                ["requestReminderEnabled"] = user.RequestReminderEnabled, 
+                ["reservationReminderEnabled"] = user.ReservationReminderEnabled
             };
 
             await table.PutItemAsync(document);
@@ -80,14 +82,21 @@
 
             var document = await table.GetItemAsync(new Primitive($"USER#{userId}"), new Primitive("PROFILE"));
 
+            var requestReminderEnabled =
+                document["requestReminderEnabled"] == null || document["requestReminderEnabled"] == "1";
+            var reservationReminderEnabled =
+                document["reservationReminderEnabled"] == null || document["reservationReminderEnabled"] == "1";
+
             return new User(
-                userId,
-                document["alternativeRegistrationNumber"],
-                decimal.Parse(document["commuteDistance"]),
-                document["emailAddress"],
-                document["firstName"],
-                document["lastName"],
-                document["registrationNumber"]);
+                userId: userId,
+                alternativeRegistrationNumber: document["alternativeRegistrationNumber"],
+                commuteDistance: decimal.Parse(document["commuteDistance"]),
+                emailAddress: document["emailAddress"],
+                firstName: document["firstName"],
+                lastName: document["lastName"],
+                registrationNumber: document["registrationNumber"],
+                requestReminderEnabled: requestReminderEnabled,
+                reservationReminderEnabled: reservationReminderEnabled);
         }
 
         public static async Task CreateRequests(string userId, string monthKey, Dictionary<string, string> requests)

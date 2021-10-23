@@ -55,13 +55,15 @@
         public async Task<IActionResult> PostAsync([FromBody] UserPostRequest request)
         {
             var newUser = new User(
-                string.Empty,
-                request.AlternativeRegistrationNumber,
-                request.CommuteDistance,
-                request.EmailAddress,
-                request.FirstName,
-                request.LastName,
-                request.RegistrationNumber);
+                userId: string.Empty,
+                alternativeRegistrationNumber: request.AlternativeRegistrationNumber,
+                commuteDistance: request.CommuteDistance,
+                emailAddress: request.EmailAddress,
+                firstName: request.FirstName,
+                lastName: request.LastName,
+                registrationNumber: request.RegistrationNumber,
+                requestReminderEnabled: true,
+                reservationReminderEnabled: true);
 
             var user = await this.userRepository.CreateUser(newUser);
 
@@ -85,13 +87,15 @@
             }
 
             var updatedUser = new User(
-                existingUser.UserId,
-                request.AlternativeRegistrationNumber,
-                request.CommuteDistance,
-                existingUser.EmailAddress,
-                request.FirstName,
-                request.LastName,
-                request.RegistrationNumber);
+                userId: existingUser.UserId,
+                alternativeRegistrationNumber: request.AlternativeRegistrationNumber,
+                commuteDistance: request.CommuteDistance,
+                emailAddress: existingUser.EmailAddress,
+                firstName: request.FirstName,
+                lastName: request.LastName,
+                registrationNumber: request.RegistrationNumber,
+                requestReminderEnabled: existingUser.RequestReminderEnabled,
+                reservationReminderEnabled: existingUser.ReservationReminderEnabled);
 
             await this.userRepository.SaveUser(updatedUser);
 

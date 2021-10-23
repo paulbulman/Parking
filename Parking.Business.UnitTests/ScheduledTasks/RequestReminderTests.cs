@@ -59,6 +59,47 @@
         }
 
         [Fact]
+        public static async Task Does_not_send_emails_to_users_with_reminder_disabled()
+        {
+            var nextWeeklyNotificationDates = new[] { 21.December(2020), 22.December(2020) };
+
+            var mockDateCalculator = new Mock<IDateCalculator>(MockBehavior.Strict);
+            mockDateCalculator
+                .Setup(d => d.GetNextWeeklyNotificationDates())
+                .Returns(nextWeeklyNotificationDates);
+
+            var mockEmailRepository = new Mock<IEmailRepository>();
+
+            var requests = new[]
+            {
+                new Request("user1", 18.December(2020), RequestStatus.Allocated),
+                new Request("user1", 21.December(2020), RequestStatus.Cancelled)
+            };
+
+            var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);
+            mockRequestRepository
+                .Setup(r => r.GetRequests(22.October(2020), 22.December(2020)))
+                .ReturnsAsync(requests);
+
+            var user = CreateUser.With(userId: "user1", emailAddress: "1@abc.com", requestReminderEnabled: false);
+
+            var mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
+            mockUserRepository
+                .Setup(r => r.GetUsers())
+                .ReturnsAsync(new[] { user });
+
+            var requestReminder = new RequestReminder(
+                mockDateCalculator.Object,
+                mockEmailRepository.Object,
+                mockRequestRepository.Object,
+                mockUserRepository.Object);
+
+            await requestReminder.Run();
+
+            mockEmailRepository.VerifyNoOtherCalls();
+        }
+
+        [Fact]
         public static async Task Does_not_send_emails_to_users_with_upcoming_requests()
         {
             var nextWeeklyNotificationDates = new[] { 21.December(2020), 22.December(2020) };

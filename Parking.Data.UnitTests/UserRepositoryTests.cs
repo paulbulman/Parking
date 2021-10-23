@@ -50,7 +50,9 @@ namespace Parking.Data.UnitTests
                 emailAddress: "john.doe@example.com",
                 firstName: "John",
                 lastName: "Doe",
-                registrationNumber: "AB12CDE"
+                registrationNumber: "AB12CDE",
+                requestReminderEnabled: true,
+                reservationReminderEnabled: false
             );
 
             await userRepository.CreateUser(user);
@@ -64,7 +66,9 @@ namespace Parking.Data.UnitTests
                     actual.EmailAddress == "john.doe@example.com" &&
                     actual.FirstName == "John" &&
                     actual.LastName == "Doe" &&
-                    actual.RegistrationNumber == "AB12CDE")),
+                    actual.RegistrationNumber == "AB12CDE" &&
+                    actual.RequestReminderEnabled == true &&
+                    actual.ReservationReminderEnabled == false)),
                 Times.Once);
         }
 
@@ -85,14 +89,26 @@ namespace Parking.Data.UnitTests
                 emailAddress: "john.doe@example.com",
                 firstName: "John",
                 lastName: "Doe",
-                registrationNumber: "AB12CDE"
+                registrationNumber: "AB12CDE",
+                requestReminderEnabled: true,
+                reservationReminderEnabled: false
             );
 
             var result = await userRepository.CreateUser(user);
 
             Assert.NotNull(result);
 
-            CheckUser(new[] { result }, "User1", "A999XYZ", 1.23m, "john.doe@example.com", "John", "Doe", "AB12CDE");
+            CheckUser(
+                result: new[] { result }, 
+                expectedUserId: "User1", 
+                expectedAlternativeRegistrationNumber: "A999XYZ", 
+                expectedCommuteDistance: 1.23m, 
+                expectedEmailAddress: "john.doe@example.com", 
+                expectedFirstName: "John", 
+                expectedLastName: "Doe", 
+                expectedRegistrationNumber: "AB12CDE", 
+                expectedRequestReminderEnabled: true, 
+                expectedReservationReminderEnabled: false);
         }
 
         [Fact]
@@ -110,7 +126,9 @@ namespace Parking.Data.UnitTests
                 emailAddress: "1@abc.com",
                 firstName: "Sean",
                 lastName: "Cantera",
-                registrationNumber: "AB12CDE");
+                registrationNumber: "AB12CDE",
+                requestReminderEnabled: true,
+                reservationReminderEnabled: false);
 
             mockDatabaseProvider
                 .Setup(p => p.GetUser(UserId))
@@ -168,7 +186,9 @@ namespace Parking.Data.UnitTests
                 emailAddress: "1@abc.com",
                 firstName: "Sean",
                 lastName: "Cantera",
-                registrationNumber: "AB12CDE");
+                registrationNumber: "AB12CDE",
+                requestReminderEnabled: true,
+                reservationReminderEnabled: false);
 
             mockDatabaseProvider.Setup(p => p.GetUser(UserId)).ReturnsAsync(rawItem);
 
@@ -178,7 +198,17 @@ namespace Parking.Data.UnitTests
 
             Assert.NotNull(result);
 
-            CheckUser(new[] { result! }, UserId, "W789XYZ", 1.23m, "1@abc.com", "Sean", "Cantera", "AB12CDE");
+            CheckUser(
+                result: new[] { result! }, 
+                expectedUserId: UserId, 
+                expectedAlternativeRegistrationNumber: "W789XYZ", 
+                expectedCommuteDistance: 1.23m, 
+                expectedEmailAddress: "1@abc.com", 
+                expectedFirstName: "Sean", 
+                expectedLastName: "Cantera", 
+                expectedRegistrationNumber: "AB12CDE", 
+                expectedRequestReminderEnabled: true,
+                expectedReservationReminderEnabled: false);
         }
 
         [Fact]
@@ -188,9 +218,9 @@ namespace Parking.Data.UnitTests
 
             var rawItems = new[]
             {
-                RawItem.CreateUser(primaryKey: "USER#Id1", sortKey: "PROFILE", alternativeRegistrationNumber: "W789XYZ", commuteDistance: 1.23m, emailAddress: "1@abc.com", firstName: "Sean", lastName: "Cantera", registrationNumber: "AB12CDE"),
-                RawItem.CreateUser(primaryKey: "USER#Id2", sortKey: "PROFILE", alternativeRegistrationNumber: null, commuteDistance: 2.34m, emailAddress: "2@abc.com", firstName: "Clyde", lastName: "Memory", registrationNumber: "FG34HIJ"),
-                RawItem.CreateUser(primaryKey: "USER#Id3", sortKey: "PROFILE", alternativeRegistrationNumber: null, commuteDistance: null, emailAddress: "3@xyz.co.uk", firstName: "Kalle", lastName: "Rochewell", registrationNumber: null)
+                RawItem.CreateUser(primaryKey: "USER#Id1", sortKey: "PROFILE", alternativeRegistrationNumber: "W789XYZ", commuteDistance: 1.23m, emailAddress: "1@abc.com", firstName: "Sean", lastName: "Cantera", registrationNumber: "AB12CDE", requestReminderEnabled: true, reservationReminderEnabled: false),
+                RawItem.CreateUser(primaryKey: "USER#Id2", sortKey: "PROFILE", alternativeRegistrationNumber: null, commuteDistance: 2.34m, emailAddress: "2@abc.com", firstName: "Clyde", lastName: "Memory", registrationNumber: "FG34HIJ", requestReminderEnabled: false, reservationReminderEnabled: null),
+                RawItem.CreateUser(primaryKey: "USER#Id3", sortKey: "PROFILE", alternativeRegistrationNumber: null, commuteDistance: null, emailAddress: "3@xyz.co.uk", firstName: "Kalle", lastName: "Rochewell", registrationNumber: null, requestReminderEnabled: null, reservationReminderEnabled: true)
             };
             mockDatabaseProvider.Setup(p => p.GetUsers()).ReturnsAsync(rawItems);
 
@@ -202,9 +232,9 @@ namespace Parking.Data.UnitTests
 
             Assert.Equal(rawItems.Length, result.Count);
 
-            CheckUser(result, "Id1", "W789XYZ", 1.23m, "1@abc.com", "Sean", "Cantera", "AB12CDE");
-            CheckUser(result, "Id2", null, 2.34m, "2@abc.com", "Clyde", "Memory", "FG34HIJ");
-            CheckUser(result, "Id3", null, null, "3@xyz.co.uk", "Kalle", "Rochewell", null);
+            CheckUser(result, "Id1", "W789XYZ", 1.23m, "1@abc.com", "Sean", "Cantera", "AB12CDE", true, false);
+            CheckUser(result, "Id2", null, 2.34m, "2@abc.com", "Clyde", "Memory", "FG34HIJ", false, true);
+            CheckUser(result, "Id3", null, null, "3@xyz.co.uk", "Kalle", "Rochewell", null, true, true);
         }
 
         [Fact]
@@ -214,9 +244,9 @@ namespace Parking.Data.UnitTests
 
             var rawUsers = new[]
             {
-                RawItem.CreateUser(primaryKey: "USER#Id1", sortKey: "PROFILE", alternativeRegistrationNumber: null, commuteDistance: null, emailAddress: "1@abc.com", firstName: "Shalom", lastName: "Georgiades", registrationNumber: null),
-                RawItem.CreateUser(primaryKey: "USER#Id2", sortKey: "PROFILE", alternativeRegistrationNumber: null, commuteDistance: null, emailAddress: "2@abc.com", firstName: "Randolf", lastName: "Blogg", registrationNumber: null),
-                RawItem.CreateUser(primaryKey: "USER#Id3", sortKey: "PROFILE", alternativeRegistrationNumber: null, commuteDistance: null, emailAddress: "3@xyz.co.uk", firstName: "Kris", lastName: "Whibley", registrationNumber: null)
+                RawItem.CreateUser(primaryKey: "USER#Id1", sortKey: "PROFILE", alternativeRegistrationNumber: null, commuteDistance: null, emailAddress: "1@abc.com", firstName: "Shalom", lastName: "Georgiades", registrationNumber: null, requestReminderEnabled: true, false),
+                RawItem.CreateUser(primaryKey: "USER#Id2", sortKey: "PROFILE", alternativeRegistrationNumber: null, commuteDistance: null, emailAddress: "2@abc.com", firstName: "Randolf", lastName: "Blogg", registrationNumber: null, requestReminderEnabled: false, null),
+                RawItem.CreateUser(primaryKey: "USER#Id3", sortKey: "PROFILE", alternativeRegistrationNumber: null, commuteDistance: null, emailAddress: "3@xyz.co.uk", firstName: "Kris", lastName: "Whibley", registrationNumber: null, requestReminderEnabled: null, true)
             };
             mockDatabaseProvider.Setup(p => p.GetUsers()).ReturnsAsync(rawUsers);
 
@@ -233,8 +263,8 @@ namespace Parking.Data.UnitTests
 
             Assert.Equal(rawTeamLeaderUserIds.Length, result.Count);
 
-            CheckUser(result, "Id1", null, null, "1@abc.com", "Shalom", "Georgiades", null);
-            CheckUser(result, "Id3", null, null, "3@xyz.co.uk", "Kris", "Whibley", null);
+            CheckUser(result, "Id1", null, null, "1@abc.com", "Shalom", "Georgiades", null, true, false);
+            CheckUser(result, "Id3", null, null, "3@xyz.co.uk", "Kris", "Whibley", null, true, true);
         }
 
         [Fact]
@@ -261,7 +291,9 @@ namespace Parking.Data.UnitTests
                 emailAddress: "john.doe@example.com",
                 firstName: "John",
                 lastName: "Doe",
-                registrationNumber: "AB12CDE");
+                registrationNumber: "AB12CDE",
+                requestReminderEnabled: true,
+                reservationReminderEnabled: false);
 
             var mockDatabaseProvider = new Mock<IDatabaseProvider>();
 
@@ -278,7 +310,9 @@ namespace Parking.Data.UnitTests
                     actual.EmailAddress == "john.doe@example.com" &&
                     actual.FirstName == "John" &&
                     actual.LastName == "Doe" &&
-                    actual.RegistrationNumber == "AB12CDE")),
+                    actual.RegistrationNumber == "AB12CDE" &&
+                    actual.RequestReminderEnabled == true &&
+                    actual.ReservationReminderEnabled == false)),
                 Times.Once);
         }
 
@@ -290,7 +324,9 @@ namespace Parking.Data.UnitTests
             string expectedEmailAddress,
             string expectedFirstName,
             string expectedLastName,
-            string? expectedRegistrationNumber)
+            string? expectedRegistrationNumber,
+            bool expectedRequestReminderEnabled,
+            bool expectedReservationReminderEnabled)
         {
             var actual = result.Where(u =>
                 u.UserId == expectedUserId &&
@@ -299,7 +335,9 @@ namespace Parking.Data.UnitTests
                 u.EmailAddress == expectedEmailAddress &&
                 u.FirstName == expectedFirstName &&
                 u.LastName == expectedLastName &&
-                u.RegistrationNumber == expectedRegistrationNumber);
+                u.RegistrationNumber == expectedRegistrationNumber &&
+                u.RequestReminderEnabled == expectedRequestReminderEnabled &&
+                u.ReservationReminderEnabled == expectedReservationReminderEnabled);
 
             Assert.Single(actual);
         }
