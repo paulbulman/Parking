@@ -52,11 +52,13 @@
             const string ExpectedPlainTextBody =
                 "No requests have yet been entered for Mon 21 Dec - Thu 24 Dec.\r\n\r\n" +
                 "If you do not need parking during this period you can ignore this message.\r\n\r\n" +
-                "Otherwise, you should enter requests by the end of today to have them taken into account.";
+                "Otherwise, you should enter requests by the end of today to have them taken into account.\r\n\r\n" +
+                "If you do not want to receive these emails, you can turn them off from your profile page in the app.";
             const string ExpectedHtmlTextBody =
                 "<p>No requests have yet been entered for Mon 21 Dec - Thu 24 Dec.</p>\r\n" +
                 "<p>If you do not need parking during this period you can ignore this message.</p>\r\n" +
-                "<p>Otherwise, you should enter requests by the end of today to have them taken into account.</p>";
+                "<p>Otherwise, you should enter requests by the end of today to have them taken into account.</p>\r\n" +
+                "<p>If you do not want to receive these emails, you can turn them off from your profile page in the app.</p>";
 
             Assert.Equal(ExpectedPlainTextBody, template.PlainTextBody);
             Assert.Equal(ExpectedHtmlTextBody, template.HtmlBody);

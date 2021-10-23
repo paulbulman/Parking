@@ -29,7 +29,8 @@
         {
             $"No reservations have yet been entered for {this.localDate.ToEmailDisplayString()}.",
             "If no spaces need reserving for this date then you can ignore this message.",
-            "Otherwise, you should enter reservations by 11am to ensure spaces are allocated accordingly."
+            "Otherwise, you should enter reservations by 11am to ensure spaces are allocated accordingly.",
+            "If you do not want to receive these emails, you can turn them off from your profile page in the app.",
         };
     }
 }

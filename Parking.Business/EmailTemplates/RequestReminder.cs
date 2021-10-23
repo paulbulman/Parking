@@ -29,7 +29,8 @@
         {
             $"No requests have yet been entered for {this.reminderDates.ToEmailDisplayString()}.",
             "If you do not need parking during this period you can ignore this message.",
-            "Otherwise, you should enter requests by the end of today to have them taken into account."
+            "Otherwise, you should enter requests by the end of today to have them taken into account.",
+            "If you do not want to receive these emails, you can turn them off from your profile page in the app.",
         };
     }
 }
