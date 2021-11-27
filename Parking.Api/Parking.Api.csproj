@@ -14,7 +14,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Amazon.Lambda.AspNetCoreServer" Version="6.0.3" />
+    <PackageReference Include="Amazon.Lambda.AspNetCoreServer" Version="7.0.0" />
     <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.1.75" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.0.85" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.5" />
