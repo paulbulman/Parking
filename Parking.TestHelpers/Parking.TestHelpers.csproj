@@ -14,11 +14,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.1.75" />
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.1" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.5" />
-    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.0.103" />
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.3" />
+    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.1.82" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.2.5" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.7.6" />
+    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.0.110" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.10" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
     <PackageReference Include="Moq" Version="4.16.1" />
     <PackageReference Include="NodaTime" Version="3.0.9" />
