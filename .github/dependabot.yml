@@ -4,6 +4,6 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "saturday"
+      day: "friday"
       time: "07:00"
       timezone: "Europe/London"
