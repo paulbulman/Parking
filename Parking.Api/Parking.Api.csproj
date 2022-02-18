@@ -21,7 +21,7 @@
     <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.0.123" />
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.23" />
     <PackageReference Include="NodaTime" Version="3.0.9" />
-    <PackageReference Include="Serilog.AspNetCore" Version="4.1.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.15.1" />
   </ItemGroup>
   <ItemGroup>
