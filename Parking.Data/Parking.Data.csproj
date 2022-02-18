@@ -16,7 +16,7 @@
   <ItemGroup>
     <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.1.95" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.2.19" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.7.21" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.7.22" />
     <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.0.123" />
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.23" />
     <PackageReference Include="NodaTime" Version="3.0.9" />
