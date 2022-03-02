@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <AWSProjectType>Lambda</AWSProjectType>
     <Nullable>enable</Nullable>
@@ -14,13 +14,13 @@
   <ItemGroup>
     <PackageReference Include="Amazon.Lambda.Core" Version="2.1.0" />
     <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.2.0" />
-    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.1.97" />
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.3" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.7.23" />
-    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.0.125" />
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.25" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.22" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.22" />
+    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.1.103" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.3.6" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.8.3" />
+    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.0.131" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.31" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
     <PackageReference Include="NodaTime" Version="3.0.9" />
     <PackageReference Include="Serilog" Version="2.10.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />

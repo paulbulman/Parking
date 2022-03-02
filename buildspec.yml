@@ -2,9 +2,8 @@ version: 0.2
 
 phases:
   install:
-    runtime-versions:
-      dotnet: 3.1
     commands:
+      - /usr/local/bin/dotnet-install.sh --channel LTS
       - dotnet tool install -g Amazon.Lambda.Tools
   build:
     commands:

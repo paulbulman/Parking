@@ -47,7 +47,7 @@
 
             Assert.NotNull(result.Principal);
 
-            Assert.Equal(3, result.Principal.Claims.Count());
+            Assert.Equal(3, result.Principal!.Claims.Count());
 
             Assert.Contains(result.Principal.Claims, c => c.Type == "sub" && c.Value == "1234567890");
             Assert.Contains(result.Principal.Claims, c => c.Type == "name" && c.Value == "John Doe");

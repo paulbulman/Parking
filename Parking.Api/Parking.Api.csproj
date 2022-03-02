@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <AWSProjectType>Lambda</AWSProjectType>
     <!-- This property makes the build directory similar to a publish directory and helps the AWS .NET Lambda Mock Test Tool find project dependencies. -->
@@ -15,11 +15,11 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Amazon.Lambda.AspNetCoreServer" Version="7.0.1" />
-    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.1.97" />
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.3" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.7.23" />
-    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.0.125" />
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.25" />
+    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.1.103" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.3.6" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.8.3" />
+    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.0.131" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.31" />
     <PackageReference Include="NodaTime" Version="3.0.9" />
     <PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.16.0" />
