@@ -16,7 +16,7 @@
   <ItemGroup>
     <PackageReference Include="Amazon.Lambda.AspNetCoreServer" Version="7.0.1" />
     <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.1.103" />
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.3.6" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.3.7" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.8.3" />
     <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.0.131" />
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.31" />
