@@ -16,13 +16,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.1.103" />
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.3.6" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.8.3" />
-    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.0.131" />
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.31" />
+    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.1.104" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.3.7" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.8.4" />
+    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.0.132" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.32" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
-    <PackageReference Include="Moq" Version="4.17.1" />
+    <PackageReference Include="Moq" Version="4.17.2" />
     <PackageReference Include="NodaTime.Testing" Version="3.0.9" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
