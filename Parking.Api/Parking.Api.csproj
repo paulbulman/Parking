@@ -14,15 +14,15 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Amazon.Lambda.AspNetCoreServer" Version="7.0.1" />
-    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.1.104" />
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.3.7" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.8.4" />
-    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.0.132" />
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.32" />
-    <PackageReference Include="NodaTime" Version="3.0.9" />
+    <PackageReference Include="Amazon.Lambda.AspNetCoreServer" Version="7.1.0" />
+    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.2.14" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.3.26" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.8.23" />
+    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.0.150" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.50" />
+    <PackageReference Include="NodaTime" Version="3.1.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.16.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.17.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Parking.Business\Parking.Business.csproj" />
