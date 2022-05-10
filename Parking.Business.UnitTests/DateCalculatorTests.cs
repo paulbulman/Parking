@@ -74,6 +74,22 @@ namespace Parking.Business.UnitTests
         }
 
         [Fact]
+        public static void GetCalculationWindow_returns_60_days_before_current_working_day_first()
+        {
+            var currentDate = 9.May(2022);
+            var result = CreateDateCalculator(currentDate).GetCalculationWindow().Start;
+            Assert.Equal(10.March(2022), result);
+        }
+
+        [Fact]
+        public static void GetCalculationWindow_returns_date_at_end_of_next_week_last()
+        {
+            var currentDate = 9.May(2022);
+            var result = CreateDateCalculator(currentDate).GetCalculationWindow().End;
+            Assert.Equal(20.May(2022), result);
+        }
+
+        [Fact]
         public static void GetShortLeadTimeAllocationDates_returns_current_working_day_if_called_before_11_am()
         {
             var instant = 4.September(2020).At(10, 59, 59).InZoneStrictly(LondonTimeZone).ToInstant();

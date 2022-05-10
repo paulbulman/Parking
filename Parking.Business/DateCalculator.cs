@@ -12,6 +12,8 @@
 
         IReadOnlyCollection<LocalDate> GetActiveDates();
 
+        DateInterval GetCalculationWindow();
+
         IReadOnlyCollection<LocalDate> GetShortLeadTimeAllocationDates();
 
         IReadOnlyCollection<LocalDate> GetLongLeadTimeAllocationDates();
@@ -51,6 +53,14 @@
                 .With(DateAdjusters.EndOfMonth);
 
             return this.WorkingDatesBetween(currentDate, lastDayOfNextMonth);
+        }
+
+        public DateInterval GetCalculationWindow()
+        {
+            var start = this.GetShortLeadTimeAllocationDates().First().PlusDays(-60);
+            var end = this.GetLongLeadTimeAllocationDates().Last();
+
+            return new DateInterval(start, end);
         }
 
         public IReadOnlyCollection<LocalDate> GetShortLeadTimeAllocationDates()

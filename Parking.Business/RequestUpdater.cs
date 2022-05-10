@@ -42,8 +42,7 @@
             var longLeadTimeAllocationDates = this.dateCalculator.GetLongLeadTimeAllocationDates();
             var allAllocationDates = shortLeadTimeAllocationDates.Concat(longLeadTimeAllocationDates).ToArray();
 
-            var firstCacheDate = shortLeadTimeAllocationDates.First().PlusDays(-60);
-            var lastCacheDate = longLeadTimeAllocationDates.Last();
+            var (firstCacheDate, lastCacheDate) = this.dateCalculator.GetCalculationWindow();
 
             var requests = await this.requestRepository.GetRequests(firstCacheDate, lastCacheDate);
             var reservations = await this.reservationRepository.GetReservations(firstCacheDate, lastCacheDate);
