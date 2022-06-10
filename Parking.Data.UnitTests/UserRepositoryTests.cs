@@ -316,6 +316,34 @@ namespace Parking.Data.UnitTests
                 Times.Once);
         }
 
+        [Fact]
+        public static async Task Delete_user_deletes_user_from_database()
+        {
+            const string UserId = "User1";
+
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>();
+
+            var userRepository = new UserRepository(mockDatabaseProvider.Object, Mock.Of<IIdentityProvider>());
+
+            await userRepository.DeleteUser(UserId);
+
+            mockDatabaseProvider.Verify(p => p.DeleteUser(UserId), Times.Once);
+        }
+
+        [Fact]
+        public static async Task Delete_user_deletes_user_from_identity_provider()
+        {
+            const string UserId = "User1";
+
+            var mockIdentityProvider = new Mock<IIdentityProvider>();
+
+            var userRepository = new UserRepository(Mock.Of<IDatabaseProvider>(), mockIdentityProvider.Object);
+
+            await userRepository.DeleteUser(UserId);
+
+            mockIdentityProvider.Verify(p => p.DeleteUser(UserId), Times.Once);
+        }
+
         private static void CheckUser(
             IEnumerable<User> result,
             string expectedUserId,
