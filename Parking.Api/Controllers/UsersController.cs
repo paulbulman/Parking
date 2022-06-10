@@ -2,21 +2,35 @@
 {
     using System.Linq;
     using System.Threading.Tasks;
+    using Business;
     using Business.Data;
     using Json.Users;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Model;
+    using NodaTime;
 
     [Authorize(Policy = "IsUserAdmin")]
     [Route("[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
     {
+        private readonly IDateCalculator dateCalculator;
+
+        private readonly IReservationRepository reservationRepository;
+
         private readonly IUserRepository userRepository;
 
-        public UsersController(IUserRepository userRepository) => this.userRepository = userRepository;
+        public UsersController(
+            IDateCalculator dateCalculator,
+            IReservationRepository reservationRepository,
+            IUserRepository userRepository)
+        {
+            this.dateCalculator = dateCalculator;
+            this.reservationRepository = reservationRepository;
+            this.userRepository = userRepository;
+        }
 
         [HttpGet]
         [ProducesResponseType(typeof(MultipleUsersResponse), StatusCodes.Status200OK)]
@@ -104,6 +118,27 @@
             var response = new SingleUserResponse(usersData);
 
             return this.Ok(response);
+        }
+
+        public async Task<IActionResult> DeleteAsync(string userId)
+        {
+            var existingUser = await this.userRepository.GetUser(userId);
+
+            if (existingUser == null)
+            {
+                return this.NotFound();
+            }
+
+            var calculationWindow = this.dateCalculator.GetCalculationWindow();
+            var activeDates = this.dateCalculator.GetActiveDates();
+
+            var deleteReservationsDateInterval = new DateInterval(calculationWindow.Start, activeDates.Last());
+
+            await this.reservationRepository.DeleteReservations(existingUser, deleteReservationsDateInterval);
+
+            await this.userRepository.DeleteUser(userId);
+
+            return this.Ok();
         }
 
         private static UsersData CreateUsersData(User user) =>
