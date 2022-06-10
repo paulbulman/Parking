@@ -17,10 +17,10 @@ namespace Parking.Data.UnitTests
     {
         private static readonly IReadOnlyCollection<User> DefaultUsers = new List<User>
         {
-            CreateUser.With(userId: "user1", firstName: "User", lastName: "1"),
-            CreateUser.With(userId: "user2", firstName: "User", lastName: "2"),
-            CreateUser.With(userId: "user3", firstName: "User", lastName: "3"),
-            CreateUser.With(userId: "user4", firstName: "User", lastName: "4"),
+            CreateUser.With(userId: "User1", firstName: "User", lastName: "1"),
+            CreateUser.With(userId: "User2", firstName: "User", lastName: "2"),
+            CreateUser.With(userId: "User3", firstName: "User", lastName: "3"),
+            CreateUser.With(userId: "User4", firstName: "User", lastName: "4"),
         };
 
         [Fact]
@@ -227,6 +227,138 @@ namespace Parking.Data.UnitTests
                     "2021-03",
                     KeyValuePair.Create("01", new List<string> {"User1"}),
                     KeyValuePair.Create("02", new List<string> {"User2"})),
+            };
+
+            mockDatabaseProvider.Verify(
+                p => p.SaveItems(It.Is<IEnumerable<RawItem>>(actual => CheckRawItems(expectedRawItems, actual.ToList()))),
+                Times.Once);
+        }
+
+        [Fact]
+        public static async Task DeleteReservations_deletes_reservations_for_given_user()
+        {
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
+            mockDatabaseProvider
+                .Setup(p => p.GetReservations(new YearMonth(2021, 3)))
+                .ReturnsAsync(new[]
+                {
+                    CreateRawItem("2021-03", KeyValuePair.Create("02", new List<string>{"User1"}))
+                });
+            mockDatabaseProvider
+                .Setup(p => p.GetReservations(new YearMonth(2021, 4)))
+                .ReturnsAsync(new[]
+                {
+                    CreateRawItem("2021-04", KeyValuePair.Create("03", new List<string>{"User1"}))
+                });
+            mockDatabaseProvider
+                .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
+                .Returns(Task.CompletedTask);
+
+            var reservationRepository =
+                new ReservationRepository(Mock.Of<ILogger<ReservationRepository>>(), mockDatabaseProvider.Object);
+
+            var user = DefaultUsers.Single(u => u.UserId == "User1");
+
+            await reservationRepository.DeleteReservations(user, new DateInterval(1.March(2021), 30.April(2021)));
+
+            var expectedRawItems = new[]
+            {
+                CreateRawItem(
+                    "2021-03",
+                    KeyValuePair.Create("02", new List<string>())),
+                CreateRawItem(
+                    "2021-04",
+                    KeyValuePair.Create("03", new List<string>()))
+            };
+
+            mockDatabaseProvider.Verify(
+                p => p.SaveItems(It.Is<IEnumerable<RawItem>>(actual => CheckRawItems(expectedRawItems, actual.ToList()))),
+                Times.Once);
+        }
+
+        [Fact]
+        public static async Task DeleteReservations_preserves_reservations_for_other_users()
+        {
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
+            mockDatabaseProvider
+                .Setup(p => p.GetReservations(new YearMonth(2021, 3)))
+                .ReturnsAsync(new[]
+                {
+                    CreateRawItem("2021-03", KeyValuePair.Create("02", new List<string>{"User1", "User2"}))
+                });
+            mockDatabaseProvider
+                .Setup(p => p.GetReservations(new YearMonth(2021, 4)))
+                .ReturnsAsync(new[]
+                {
+                    CreateRawItem("2021-04", KeyValuePair.Create("03", new List<string>{"User1"})),
+                    CreateRawItem("2021-04", KeyValuePair.Create("04", new List<string>{"User2"}))
+                });
+            mockDatabaseProvider
+                .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
+                .Returns(Task.CompletedTask);
+
+            var reservationRepository =
+                new ReservationRepository(Mock.Of<ILogger<ReservationRepository>>(), mockDatabaseProvider.Object);
+
+            var user = DefaultUsers.Single(u => u.UserId == "User1");
+
+            await reservationRepository.DeleteReservations(user, new DateInterval(1.March(2021), 30.April(2021)));
+
+            var expectedRawItems = new[]
+            {
+                CreateRawItem(
+                    "2021-03",
+                    KeyValuePair.Create("02", new List<string> {"User2"})),
+                CreateRawItem(
+                    "2021-04",
+                    KeyValuePair.Create("03", new List<string> ()),
+                    KeyValuePair.Create("04", new List<string> {"User2"}))
+            };
+
+            mockDatabaseProvider.Verify(
+                p => p.SaveItems(It.Is<IEnumerable<RawItem>>(actual => CheckRawItems(expectedRawItems, actual.ToList()))),
+                Times.Once);
+        }
+
+        [Fact]
+        public static async Task DeleteReservations_preserves_reservations_for_other_dates()
+        {
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
+            mockDatabaseProvider
+                .Setup(p => p.GetReservations(new YearMonth(2021, 3)))
+                .ReturnsAsync(new[]
+                {
+                    CreateRawItem("2021-03", KeyValuePair.Create("01", new List<string>{"User1"})),
+                    CreateRawItem("2021-03", KeyValuePair.Create("02", new List<string>{"User1"})),
+                });
+            mockDatabaseProvider
+                .Setup(p => p.GetReservations(new YearMonth(2021, 4)))
+                .ReturnsAsync(new[]
+                {
+                    CreateRawItem("2021-04", KeyValuePair.Create("03", new List<string>{"User1"})),
+                    CreateRawItem("2021-04", KeyValuePair.Create("04", new List<string>{"User1"}))
+                });
+            mockDatabaseProvider
+                .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
+                .Returns(Task.CompletedTask);
+
+            var reservationRepository =
+                new ReservationRepository(Mock.Of<ILogger<ReservationRepository>>(), mockDatabaseProvider.Object);
+
+            var user = DefaultUsers.Single(u => u.UserId == "User1");
+
+            await reservationRepository.DeleteReservations(user, new DateInterval(2.March(2021), 3.April(2021)));
+
+            var expectedRawItems = new[]
+            {
+                CreateRawItem(
+                    "2021-03",
+                    KeyValuePair.Create("01", new List<string> {"User1"}),
+                    KeyValuePair.Create("02", new List<string> ())),
+                CreateRawItem(
+                    "2021-04",
+                    KeyValuePair.Create("03", new List<string> ()),
+                    KeyValuePair.Create("04", new List<string> {"User1"}))
             };
 
             mockDatabaseProvider.Verify(

@@ -72,6 +72,31 @@
             await this.databaseProvider.SaveItems(rawItems);
         }
 
+        public async Task DeleteReservations(User user, DateInterval dateInterval)
+        {
+            Reservation CreateNewReservation(Reservation reservation)
+            {
+                var shouldDelete = reservation.UserId == user.UserId && dateInterval.Contains(reservation.Date);
+
+                var newUserId = shouldDelete ? string.Empty : reservation.UserId;
+
+                return new Reservation(newUserId, reservation.Date);
+            }
+
+            var firstDate = dateInterval.Start.With(DateAdjusters.StartOfMonth);
+            var lastDate = dateInterval.End.With(DateAdjusters.EndOfMonth);
+
+            var existingReservations = await this.GetReservations(firstDate, lastDate);
+
+            var newReservations = existingReservations.Select(CreateNewReservation);
+
+            var rawItems = newReservations
+                .GroupBy(r => r.Date.ToYearMonth())
+                .Select(CreateRawItem);
+
+            await this.databaseProvider.SaveItems(rawItems);
+        }
+
         private static string GetFullName(IDictionary<string, string> fullNames, string userId) =>
             string.IsNullOrEmpty(userId) ? "[No user]" :
             !fullNames.ContainsKey(userId) ? $"[Unknown user ID '{userId}']" :
