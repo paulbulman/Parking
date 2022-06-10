@@ -32,6 +32,8 @@
         Task SaveItems(IEnumerable<RawItem> rawItems);
 
         Task DeleteItems(IEnumerable<RawItem> rawItems);
+
+        Task DeleteUser(string userId);
     }
 
     public class DatabaseProvider : IDatabaseProvider
@@ -178,6 +180,17 @@
             var query = context.QueryAsync<RawItem>(hashKeyValue, config);
 
             return await query.GetRemainingAsync();
+        }
+
+        public async Task DeleteUser(string userId)
+        {
+            using var context = new DynamoDBContext(this.dynamoDbClient);
+            
+            var config = new DynamoDBOperationConfig { OverrideTableName = TableName };
+            
+            var hashKeyValue = $"USER#{userId}";
+
+            await context.DeleteAsync(hashKeyValue, config);
         }
     }
 }
