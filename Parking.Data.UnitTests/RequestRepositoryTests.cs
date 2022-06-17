@@ -17,8 +17,8 @@ namespace Parking.Data.UnitTests
     {
         private static readonly IReadOnlyCollection<User> DefaultUsers = new List<User>
         {
-            CreateUser.With(userId: "user1", firstName: "User", lastName: "1"),
-            CreateUser.With(userId: "user2", firstName: "User", lastName: "2"),
+            CreateUser.With(userId: "User1", firstName: "User", lastName: "1"),
+            CreateUser.With(userId: "User2", firstName: "User", lastName: "2"),
         };
 
         [Fact]
@@ -374,6 +374,112 @@ namespace Parking.Data.UnitTests
 
             mockDatabaseProvider.Verify(
                 p => p.SaveItems(It.Is<IEnumerable<RawItem>>(actual => CheckRawItems(expectedRawItems, actual.ToList()))),
+                Times.Once);
+        }
+
+        [Fact]
+        public static async Task DeleteRequests_deletes_requests_for_given_user_and_date_interval()
+        {
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
+            mockDatabaseProvider
+                .Setup(p => p.GetRequests("User1", new YearMonth(2020, 9)))
+                .ReturnsAsync(new[]
+                {
+                    CreateRawItem(
+                        "User1",
+                        "2020-09",
+                        KeyValuePair.Create("01", "A"),
+                        KeyValuePair.Create("02", "I")),
+                });
+            mockDatabaseProvider
+                .Setup(p => p.GetRequests("User1", new YearMonth(2020, 10)))
+                .ReturnsAsync(new List<RawItem>());
+            mockDatabaseProvider
+                .Setup(p => p.GetRequests("User1", new YearMonth(2020, 11)))
+                .ReturnsAsync(new[]
+                {
+                    CreateRawItem(
+                        "User1",
+                        "2020-11",
+                        KeyValuePair.Create("03", "I"))
+                });
+            mockDatabaseProvider
+                .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
+                .Returns(Task.CompletedTask);
+            mockDatabaseProvider
+                .Setup(p => p.DeleteItems(It.IsAny<IEnumerable<RawItem>>()))
+                .Returns(Task.CompletedTask);
+
+            var requestRepository = new RequestRepository(Mock.Of<ILogger<RequestRepository>>(), mockDatabaseProvider.Object);
+
+            var user = DefaultUsers.Single(u => u.UserId == "User1");
+
+            var dateInterval = new DateInterval(2.September(2020), 3.November(2020));
+
+            await requestRepository.DeleteRequests(user, dateInterval);
+
+            var expectedSavedRawItems = new[]
+            {
+                CreateRawItem("User1", "2020-09", KeyValuePair.Create("01", "A")),
+            };
+
+            var expectedDeletedRawItems = new[]
+            {
+                CreateRawItem("User1", "2020-11"),
+            };
+
+            mockDatabaseProvider.Verify(
+                p => p.SaveItems(It.Is<IEnumerable<RawItem>>(actual => CheckRawItems(expectedSavedRawItems, actual.ToList()))),
+                Times.Once);
+
+            mockDatabaseProvider.Verify(
+                p => p.DeleteItems(It.Is<IEnumerable<RawItem>>(actual => CheckRawItems(expectedDeletedRawItems, actual.ToList()))),
+                Times.Once);
+        }
+
+        [Fact]
+        public static async Task DeleteRequests_handles_nothing_to_delete()
+        {
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
+            mockDatabaseProvider
+                .Setup(p => p.GetRequests("User1", new YearMonth(2020, 9)))
+                .ReturnsAsync(new[]
+                {
+                    CreateRawItem(
+                        "User1",
+                        "2020-09",
+                        KeyValuePair.Create("01", "A"),
+                        KeyValuePair.Create("02", "I")),
+                });
+            mockDatabaseProvider
+                .Setup(p => p.GetRequests("User1", new YearMonth(2020, 10)))
+                .ReturnsAsync(new[]
+                {
+                    CreateRawItem(
+                        "User1",
+                        "2020-10",
+                        KeyValuePair.Create("03", "I"))
+                });
+            mockDatabaseProvider
+                .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
+                .Returns(Task.CompletedTask);
+            mockDatabaseProvider
+                .Setup(p => p.DeleteItems(It.IsAny<IEnumerable<RawItem>>()))
+                .Returns(Task.CompletedTask);
+
+            var requestRepository = new RequestRepository(Mock.Of<ILogger<RequestRepository>>(), mockDatabaseProvider.Object);
+
+            var user = DefaultUsers.Single(u => u.UserId == "User1");
+
+            var dateInterval = new DateInterval(3.September(2020), 2.October(2020));
+
+            await requestRepository.DeleteRequests(user, dateInterval);
+
+            mockDatabaseProvider.Verify(
+                p => p.SaveItems(It.Is<IEnumerable<RawItem>>(e => !e.Any())),
+                Times.Once);
+            mockDatabaseProvider.Verify(
+                p => p.DeleteItems(It.Is<IEnumerable<RawItem>>(e => !e.Any())),
                 Times.Once);
         }
 

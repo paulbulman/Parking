@@ -83,6 +83,44 @@
             await SaveCombinedRequests(combinedRequests);
         }
 
+        public async Task DeleteRequests(User user, DateInterval dateInterval)
+        {
+            var rawItemsToSave = new List<RawItem>();
+            var rawItemsToDelete = new List<RawItem>();
+
+            foreach (var yearMonth in dateInterval.YearMonths())
+            {
+                var queryResult = await this.databaseProvider.GetRequests(user.UserId, yearMonth);
+
+                var existingUserRequests = queryResult
+                    .SelectMany(r => CreateWholeMonthRequests(r, yearMonth))
+                    .ToArray();
+
+                if (existingUserRequests.Any(r => dateInterval.Contains(r.Date)))
+                {
+                    var requestsToPreserve = existingUserRequests
+                        .Where(r => !dateInterval.Contains(r.Date))
+                        .ToArray();
+
+                    if (requestsToPreserve.Any())
+                    {
+                        rawItemsToSave.AddRange(
+                            requestsToPreserve
+                                .GroupBy(request => request.Date.ToYearMonth())
+                                .Select(yearMonthRequests => CreateRawItem(user.UserId, yearMonthRequests))
+                                .ToArray());
+                    }
+                    else
+                    {
+                        rawItemsToDelete.Add(CreateEmptyRawItem(user.UserId, yearMonth));
+                    }
+                }
+            }
+
+            await this.databaseProvider.SaveItems(rawItemsToSave);
+            await this.databaseProvider.DeleteItems(rawItemsToDelete);
+        }
+
         private static bool IsOverwritten(Request existingRequest, IEnumerable<Request> newRequests) =>
             newRequests.Any(r => r.UserId == existingRequest.UserId && r.Date == existingRequest.Date);
 
@@ -156,9 +194,20 @@
 
         private static RawItem CreateRawItem(string userId, IGrouping<YearMonth, Request> yearMonthRequests) =>
             RawItem.CreateRequests(
-                primaryKey: $"USER#{userId}",
-                sortKey: $"REQUESTS#{yearMonthRequests.Key.ToString("yyyy-MM", CultureInfo.InvariantCulture)}",
+                primaryKey: CreatePrimaryKey(userId),
+                sortKey: CreateSortKey(yearMonthRequests.Key),
                 requests: yearMonthRequests.ToDictionary(CreateRawRequestDayKey, CreateRawRequestStatus));
+
+        private static RawItem CreateEmptyRawItem(string userId, YearMonth yearMonth) =>
+            RawItem.CreateRequests(
+                primaryKey: CreatePrimaryKey(userId),
+                sortKey: CreateSortKey(yearMonth),
+                requests: new Dictionary<string, string>());
+
+        private static string CreatePrimaryKey(string userId) => $"USER#{userId}";
+
+        private static string CreateSortKey(YearMonth yearMonth) =>
+            $"REQUESTS#{yearMonth.ToString("yyyy-MM", CultureInfo.InvariantCulture)}";
 
         private static string CreateRawRequestDayKey(Request request) =>
             request.Date.Day.ToString("D2", CultureInfo.InvariantCulture);
