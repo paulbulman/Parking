@@ -1,4 +1,6 @@
-﻿namespace Parking.Data.Aws
+﻿using Parking.Model;
+
+namespace Parking.Data.Aws
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -13,6 +15,8 @@
         Task<IReadOnlyCollection<string>> GetUserIdsInGroup(string groupName);
         
         Task UpdateUser(string userId, string firstName, string lastName);
+
+        Task DeleteUser(User user);
     }
 
     public class IdentityProvider : IIdentityProvider
@@ -68,6 +72,13 @@
                     new AttributeType {Name = "given_name", Value = firstName},
                     new AttributeType {Name = "family_name", Value = lastName},
                 }
+            });
+
+        public async Task DeleteUser(User user) =>
+            await this.cognitoIdentityProvider.AdminDeleteUserAsync(new AdminDeleteUserRequest
+            {
+                Username = user.UserId,
+                UserPoolId = UserPoolId
             });
     }
 }

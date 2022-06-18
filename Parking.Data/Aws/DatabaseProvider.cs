@@ -31,6 +31,8 @@
 
         Task SaveItems(IEnumerable<RawItem> rawItems);
 
+        Task DeleteItem(RawItem rawItem);
+
         Task DeleteItems(IEnumerable<RawItem> rawItems);
     }
 
@@ -127,6 +129,15 @@
             {
                 await context.SaveAsync(rawItem, config);
             }
+        }
+
+        public async Task DeleteItem(RawItem rawItem)
+        {
+            using var context = new DynamoDBContext(this.dynamoDbClient);
+
+            var config = new DynamoDBOperationConfig { OverrideTableName = TableName };
+
+            await context.DeleteAsync(rawItem, config);
         }
 
         public async Task DeleteItems(IEnumerable<RawItem> rawItems)

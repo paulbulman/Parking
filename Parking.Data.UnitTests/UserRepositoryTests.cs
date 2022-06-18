@@ -316,6 +316,38 @@ namespace Parking.Data.UnitTests
                 Times.Once);
         }
 
+        [Fact]
+        public static async Task Delete_user_deletes_user_from_database()
+        {
+            var user = CreateUser.With(userId: "User1");
+
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>();
+
+            var userRepository = new UserRepository(mockDatabaseProvider.Object, Mock.Of<IIdentityProvider>());
+
+            await userRepository.DeleteUser(user);
+
+            mockDatabaseProvider.Verify(
+                p => p.DeleteItem(It.Is<RawItem>(actual =>
+                    actual.PrimaryKey == "USER#User1" &&
+                    actual.SortKey == "PROFILE")),
+                Times.Once);
+        }
+
+        [Fact]
+        public static async Task Delete_user_deletes_user_from_identity_provider()
+        {
+            var user = CreateUser.With(userId: "User1");
+
+            var mockIdentityProvider = new Mock<IIdentityProvider>();
+
+            var userRepository = new UserRepository(Mock.Of<IDatabaseProvider>(), mockIdentityProvider.Object);
+
+            await userRepository.DeleteUser(user);
+
+            mockIdentityProvider.Verify(p => p.DeleteUser(user), Times.Once);
+        }
+
         private static void CheckUser(
             IEnumerable<User> result,
             string expectedUserId,

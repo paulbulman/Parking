@@ -82,6 +82,13 @@
                 .ToArray();
         }
 
+        public async Task DeleteUser(User user)
+        {
+            await this.databaseProvider.DeleteItem(CreateRawItem(user));
+
+            await this.identityProvider.DeleteUser(user);
+        }
+
         private static User CreateUser(RawItem rawItem)
         {
             if (rawItem.EmailAddress == null)
