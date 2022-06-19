@@ -168,6 +168,30 @@ namespace Parking.Api.IntegrationTests
             Assert.Equal("__REG__", savedUser.RegistrationNumber);
         }
 
+        [Fact]
+        public async Task Deletes_existing_user()
+        {
+            await DatabaseHelpers.CreateUser(
+                CreateUser.With(userId: "User1"));
+
+            await DatabaseHelpers.CreateUser(
+                CreateUser.With(userId: "User2"));
+
+            var client = this.factory.CreateClient();
+
+            AddAuthorizationHeader(client, UserType.UserAdmin);
+
+            var response = await client.DeleteAsync("/users/User1");
+
+            response.EnsureSuccessStatusCode();
+
+            var deletedUserExists = await DatabaseHelpers.UserExists("User1");
+            var remainingUserExists = await DatabaseHelpers.UserExists("User2");
+
+            Assert.False(deletedUserExists);
+            Assert.True(remainingUserExists);
+        }
+
         private static void CheckUser(
             UsersData actual,
             string expectedUserId,

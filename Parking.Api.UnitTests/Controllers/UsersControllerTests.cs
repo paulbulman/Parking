@@ -6,10 +6,13 @@ namespace Parking.Api.UnitTests.Controllers
     using System.Threading.Tasks;
     using Api.Controllers;
     using Api.Json.Users;
+    using Business;
     using Business.Data;
     using Microsoft.AspNetCore.Mvc;
     using Model;
     using Moq;
+    using NodaTime;
+    using NodaTime.Testing.Extensions;
     using TestHelpers;
     using Xunit;
     using static ControllerHelpers;
@@ -39,7 +42,7 @@ namespace Parking.Api.UnitTests.Controllers
 
             var userRepository = CreateUserRepository.WithUsers(users);
 
-            var controller = new UsersController(userRepository);
+            var controller = CreateController(userRepository);
 
             var result = await controller.GetAsync();
 
@@ -63,7 +66,7 @@ namespace Parking.Api.UnitTests.Controllers
 
             var userRepository = CreateUserRepository.WithUser(UserId, null);
 
-            var controller = new UsersController(userRepository);
+            var controller = CreateController(userRepository);
 
             var result = await controller.GetByIdAsync(UserId);
 
@@ -85,7 +88,7 @@ namespace Parking.Api.UnitTests.Controllers
 
             var userRepository = CreateUserRepository.WithUser(UserId, user);
 
-            var controller = new UsersController(userRepository);
+            var controller = CreateController(userRepository);
 
             var result = await controller.GetByIdAsync(UserId);
 
@@ -104,7 +107,7 @@ namespace Parking.Api.UnitTests.Controllers
                 .Setup(r => r.CreateUser(It.IsAny<User>()))
                 .ReturnsAsync(CreateUser.With(userId: "User1"));
 
-            var controller = new UsersController(mockUserRepository.Object);
+            var controller = CreateController(mockUserRepository.Object);
 
             var request = new UserPostRequest("Z999ABC", 12.3M, "john.doe@example.com", "John", "Doe", "AB12CDE");
 
@@ -140,7 +143,7 @@ namespace Parking.Api.UnitTests.Controllers
                 .Setup(r => r.CreateUser(It.IsAny<User>()))
                 .ReturnsAsync(returnedUser);
 
-            var controller = new UsersController(mockUserRepository.Object);
+            var controller = CreateController(mockUserRepository.Object);
 
             var request = new UserPostRequest("Z999ABC", 12.3M, "john.doe@example.com", "John", "Doe", "AB12CDE");
 
@@ -179,7 +182,7 @@ namespace Parking.Api.UnitTests.Controllers
             var request = new UserPatchRequest(
                 "__NEW_ALTERNATIVE_REG__", 99.9m, "__NEW_FIRST_NAME__", "__NEW_LAST_NAME__", "__NEW_REG__");
 
-            var controller = new UsersController(mockUserRepository.Object);
+            var controller = CreateController(mockUserRepository.Object);
 
             await controller.PatchAsync(UserId, request);
 
@@ -218,7 +221,7 @@ namespace Parking.Api.UnitTests.Controllers
             var request = new UserPatchRequest(
                 "__NEW_ALTERNATIVE_REG__", 99.9m, "__NEW_FIRST_NAME__", "__NEW_LAST_NAME__", "__NEW_REG__");
 
-            var controller = new UsersController(mockUserRepository.Object);
+            var controller = CreateController(mockUserRepository.Object);
 
             var result = await controller.PatchAsync(UserId, request);
 
@@ -246,12 +249,78 @@ namespace Parking.Api.UnitTests.Controllers
             var request = new UserPatchRequest(
                 "__NEW_ALTERNATIVE_REG__", 99.9m, "__NEW_FIRST_NAME__", "__NEW_LAST_NAME__", "__NEW_REG__");
 
-            var controller = new UsersController(userRepository);
+            var controller = CreateController(userRepository);
 
             var result = await controller.PatchAsync(UserId, request);
 
             Assert.IsType<NotFoundResult>(result);
         }
+
+        [Fact]
+        public static async Task Deletes_user_and_related_entities()
+        {
+            const string UserId = "User1";
+
+            var activeDates = new[] { 28.June(2021), 29.June(2021), 1.July(2021) };
+
+            var mockDateCalculator = new Mock<IDateCalculator>(MockBehavior.Strict);
+            mockDateCalculator
+                .Setup(d => d.GetActiveDates())
+                .Returns(activeDates);
+            mockDateCalculator
+                .Setup(d => d.GetCalculationWindow())
+                .Returns(new DateInterval(1.June(2021), 29.June(2021)));
+
+            var existingUser = CreateUser.With(userId: UserId);
+
+            var mockUserRepository = new Mock<IUserRepository>();
+            mockUserRepository
+                .Setup(r => r.GetUser(UserId))
+                .ReturnsAsync(existingUser);
+
+            var mockRequestRepository = new Mock<IRequestRepository>();
+
+            var mockReservationRepository = new Mock<IReservationRepository>();
+
+            var controller = new UsersController(
+                mockDateCalculator.Object,
+                mockRequestRepository.Object,
+                mockReservationRepository.Object,
+                mockUserRepository.Object);
+
+            await controller.DeleteAsync(UserId);
+
+            mockRequestRepository.Verify(
+                r => r.DeleteRequests(existingUser, new DateInterval(1.June(2021), 1.July(2021))),
+                Times.Once);
+
+            mockReservationRepository.Verify(
+                r => r.DeleteReservations(existingUser, new DateInterval(1.June(2021), 1.July(2021))),
+                Times.Once);
+
+            mockUserRepository.Verify(r => r.DeleteUser(It.IsAny<User>()), Times.Once);
+        }
+
+        [Fact]
+        public static async Task Returns_404_response_when_given_user_to_delete_does_not_exist()
+        {
+            const string UserId = "User1";
+
+            var userRepository = CreateUserRepository.WithUser(UserId, null);
+
+            var controller = CreateController(userRepository);
+
+            var result = await controller.DeleteAsync(UserId);
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        private static UsersController CreateController(IUserRepository userRepository) => 
+            new UsersController(
+                Mock.Of<IDateCalculator>(),
+                Mock.Of<IRequestRepository>(),
+                Mock.Of<IReservationRepository>(),
+                userRepository);
 
         private static void CheckResult(
             UsersData actual,

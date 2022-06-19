@@ -74,6 +74,17 @@
             await table.PutItemAsync(document);
         }
 
+        public static async Task<bool> UserExists(string userId)
+        {
+            using var client = CreateClient();
+
+            var table = Table.LoadTable(client, TableName);
+
+            var document = await table.GetItemAsync(new Primitive($"USER#{userId}"), new Primitive("PROFILE"));
+
+            return document != null;
+        }
+
         public static async Task<User> ReadUser(string userId)
         {
             using var client = CreateClient();

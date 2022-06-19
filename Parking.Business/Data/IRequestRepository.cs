@@ -12,5 +12,7 @@
         Task<IReadOnlyCollection<Request>> GetRequests(string userId, LocalDate firstDate, LocalDate lastDate);
 
         Task SaveRequests(IReadOnlyCollection<Request> requests, IReadOnlyCollection<User> users);
+
+        Task DeleteRequests(User user, DateInterval dateInterval);
     }
 }

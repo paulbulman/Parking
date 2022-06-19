@@ -17,5 +17,7 @@
         Task SaveUser(User user);
 
         Task<IReadOnlyCollection<User>> GetTeamLeaderUsers();
+
+        Task DeleteUser(User user);
     }
 }
