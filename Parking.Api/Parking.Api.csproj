@@ -22,7 +22,7 @@
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.74" />
     <PackageReference Include="NodaTime" Version="3.1.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.19.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.21.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Parking.Business\Parking.Business.csproj" />
