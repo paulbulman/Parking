@@ -14,15 +14,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.2.14" />
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.3.26" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.8.23" />
-    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.0.150" />
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.50" />
+    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.5.3" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.3.67" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.9.38" />
+    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.0.191" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.91" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
-    <PackageReference Include="Moq" Version="4.17.2" />
-    <PackageReference Include="NodaTime" Version="3.1.0" />
-    <PackageReference Include="NodaTime.Testing" Version="3.1.0" />
+    <PackageReference Include="Moq" Version="4.18.2" />
+    <PackageReference Include="NodaTime" Version="3.1.1" />
+    <PackageReference Include="NodaTime.Testing" Version="3.1.1" />
   </ItemGroup>
 
   <ItemGroup>
