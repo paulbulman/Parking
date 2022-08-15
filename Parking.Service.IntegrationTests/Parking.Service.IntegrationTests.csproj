@@ -20,7 +20,7 @@
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.3.67" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.9.38" />
     <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.0.191" />
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.91" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.92" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.0" />
     <PackageReference Include="Moq" Version="4.18.2" />
     <PackageReference Include="NodaTime.Testing" Version="3.1.1" />
