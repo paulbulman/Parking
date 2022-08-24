@@ -13,6 +13,8 @@
         Task<IReadOnlyCollection<string>> GetUserIdsInGroup(string groupName);
         
         Task UpdateUser(string userId, string firstName, string lastName);
+
+        Task DeleteUser(string userId);
     }
 
     public class IdentityProvider : IIdentityProvider
@@ -68,6 +70,13 @@
                     new AttributeType {Name = "given_name", Value = firstName},
                     new AttributeType {Name = "family_name", Value = lastName},
                 }
+            });
+
+        public async Task DeleteUser(string userId) =>
+            await this.cognitoIdentityProvider.AdminDeleteUserAsync(new AdminDeleteUserRequest
+            {
+                Username = userId,
+                UserPoolId = UserPoolId
             });
     }
 }

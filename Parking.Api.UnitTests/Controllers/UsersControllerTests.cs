@@ -253,6 +253,40 @@ namespace Parking.Api.UnitTests.Controllers
             Assert.IsType<NotFoundResult>(result);
         }
 
+        [Fact]
+        public static async Task Deletes_user()
+        {
+            const string UserId = "User1";
+
+            var existingUser = CreateUser.With(userId: UserId);
+
+            var mockUserRepository = new Mock<IUserRepository>();
+
+            mockUserRepository
+                .Setup(r => r.GetUser(UserId))
+                .ReturnsAsync(existingUser);
+
+            var controller = new UsersController(mockUserRepository.Object);
+
+            await controller.DeleteAsync(UserId);
+
+            mockUserRepository.Verify(r => r.DeleteUser(existingUser), Times.Once);
+        }
+
+        [Fact]
+        public static async Task Returns_404_response_when_given_user_to_delete_does_not_exist()
+        {
+            const string UserId = "User1";
+
+            var userRepository = CreateUserRepository.WithUser(UserId, null);
+
+            var controller = new UsersController(userRepository);
+
+            var result = await controller.DeleteAsync(UserId);
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+
         private static void CheckResult(
             UsersData actual,
             string expectedUserId,

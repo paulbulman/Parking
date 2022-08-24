@@ -63,6 +63,7 @@ namespace Parking.Api.IntegrationTests
         {
             await DatabaseHelpers.CreateUser(CreateUser.With(userId: "User1", firstName: "Thornie", lastName: "Newis"));
             await DatabaseHelpers.CreateUser(CreateUser.With(userId: "User2", firstName: "Sully", lastName: "Paolino"));
+            await DatabaseHelpers.CreateDeletedUser(CreateUser.With(userId: "User3"));
 
             await DatabaseHelpers.CreateReservations("2021-03",
                 new Dictionary<string, List<string>>
@@ -92,7 +93,7 @@ namespace Parking.Api.IntegrationTests
             var day2Data = CalendarHelpers.GetDailyData(reservationsResponse.Reservations, 2.March(2021));
 
             Assert.Equal(new[] { "User1", "User2" }, day1Data.UserIds);
-            Assert.Equal(new[] { "User2", "User3" }, day2Data.UserIds);
+            Assert.Equal(new[] { "User2" }, day2Data.UserIds);
 
             Assert.Equal(2, reservationsResponse.ShortLeadTimeSpaces);
 

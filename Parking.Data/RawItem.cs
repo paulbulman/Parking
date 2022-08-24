@@ -5,6 +5,8 @@
     using System.Linq;
     using Amazon.DynamoDBv2.DataModel;
     using Amazon.DynamoDBv2.DocumentModel;
+    using NodaTime;
+    using NodaTime.Text;
 
     [DynamoDBTable("override-this-per-environment")]
     public class RawItem
@@ -62,6 +64,7 @@
         public static RawItem CreateUser(
             string primaryKey,
             string sortKey,
+            Instant? deletedTimestamp,
             string? alternativeRegistrationNumber,
             decimal? commuteDistance,
             string emailAddress,
@@ -71,6 +74,7 @@
             bool? requestReminderEnabled,
             bool? reservationReminderEnabled) => new RawItem(primaryKey, sortKey)
             {
+                DeletedTimestamp = deletedTimestamp,
                 AlternativeRegistrationNumber = alternativeRegistrationNumber,
                 CommuteDistance = commuteDistance,
                 EmailAddress = emailAddress,
@@ -90,6 +94,9 @@
         [DynamoDBGlobalSecondaryIndexHashKey("SK-PK-index")]
         [DynamoDBProperty("SK")]
         public string SortKey { get; set; }
+
+        [DynamoDBProperty("deletedTimestamp", typeof(TimestampConverter))]
+        public Instant? DeletedTimestamp { get; set; }
 
         [DynamoDBProperty("alternativeRegistrationNumber")]
         public string? AlternativeRegistrationNumber { get; set; }
@@ -154,6 +161,21 @@
                 dailyData.ToDictionary(
                     day => day.Key,
                     day => (DynamoDBEntry)new DynamoDBList(day.Value.Select(userId => new Primitive(userId)))));
+        }
+    }
+
+    public class TimestampConverter : IPropertyConverter
+    {
+        public object FromEntry(DynamoDBEntry entry) => InstantPattern.ExtendedIso.Parse(entry.AsString()).Value;
+
+        public DynamoDBEntry ToEntry(object value)
+        {
+            if (!(value is Instant instant))
+            {
+                throw new ArgumentException("Could not convert raw value to instant", nameof(value));
+            }
+
+            return InstantPattern.ExtendedIso.Format(instant);
         }
     }
 }

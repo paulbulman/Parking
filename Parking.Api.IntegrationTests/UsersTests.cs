@@ -57,6 +57,7 @@ namespace Parking.Api.IntegrationTests
                     firstName: "Ethelyn",
                     lastName: "Salamana",
                     registrationNumber: "XY89XYZ"));
+            await DatabaseHelpers.CreateDeletedUser(CreateUser.With(userId: "User3"));
 
             var client = this.factory.CreateClient();
 

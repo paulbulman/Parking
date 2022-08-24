@@ -67,8 +67,32 @@
                 ["firstName"] = user.FirstName,
                 ["lastName"] = user.LastName,
                 ["registrationNumber"] = user.RegistrationNumber,
-                ["requestReminderEnabled"] = user.RequestReminderEnabled, 
+                ["requestReminderEnabled"] = user.RequestReminderEnabled,
                 ["reservationReminderEnabled"] = user.ReservationReminderEnabled
+            };
+
+            await table.PutItemAsync(document);
+        }
+
+        public static async Task CreateDeletedUser(User user)
+        {
+            using var client = CreateClient();
+
+            var table = Table.LoadTable(client, TableName);
+
+            var document = new Document
+            {
+                ["PK"] = $"USER#{user.UserId}",
+                ["SK"] = "PROFILE",
+                ["deletedTimestamp"] = "2022-08-15T09:41:25.9787465Z",
+                ["alternativeRegistrationNumber"] = "DELETED",
+                ["commuteDistance"] = null,
+                ["emailAddress"] = "DELETED",
+                ["firstName"] = "DELETED",
+                ["lastName"] = "DELETED",
+                ["registrationNumber"] = "DELETED",
+                ["requestReminderEnabled"] = false,
+                ["reservationReminderEnabled"] = false
             };
 
             await table.PutItemAsync(document);

@@ -106,6 +106,23 @@
             return this.Ok(response);
         }
 
+        [HttpDelete("{userId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DeleteAsync(string userId)
+        {
+            var existingUser = await this.userRepository.GetUser(userId);
+
+            if (existingUser == null)
+            {
+                return this.NotFound();
+            }
+
+            await this.userRepository.DeleteUser(existingUser);
+
+            return this.NoContent();
+        }
+
         private static UsersData CreateUsersData(User user) =>
             new UsersData(
                 userId: user.UserId,

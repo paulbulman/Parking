@@ -5,6 +5,7 @@ namespace Parking.Data.UnitTests
     using System.Linq;
     using System.Threading.Tasks;
     using Aws;
+    using Business.Data;
     using Microsoft.Extensions.Logging;
     using Model;
     using Moq;
@@ -17,8 +18,8 @@ namespace Parking.Data.UnitTests
     {
         private static readonly IReadOnlyCollection<User> DefaultUsers = new List<User>
         {
-            CreateUser.With(userId: "user1", firstName: "User", lastName: "1"),
-            CreateUser.With(userId: "user2", firstName: "User", lastName: "2"),
+            CreateUser.With(userId: "User1", firstName: "User", lastName: "1"),
+            CreateUser.With(userId: "User2", firstName: "User", lastName: "2"),
         };
 
         [Fact]
@@ -26,10 +27,13 @@ namespace Parking.Data.UnitTests
         {
             var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
-            SetupMockRepository(mockDatabaseProvider, new YearMonth(2020, 8));
-            SetupMockRepository(mockDatabaseProvider, new YearMonth(2020, 9));
+            SetupMockDatabaseProvider(mockDatabaseProvider, new YearMonth(2020, 8));
+            SetupMockDatabaseProvider(mockDatabaseProvider, new YearMonth(2020, 9));
 
-            var requestRepository = new RequestRepository(Mock.Of<ILogger<RequestRepository>>(), mockDatabaseProvider.Object);
+            var requestRepository = new RequestRepository(
+                Mock.Of<ILogger<RequestRepository>>(),
+                mockDatabaseProvider.Object,
+                CreateDefaultUserRepository());
 
             var result = await requestRepository.GetRequests(1.August(2020), 30.September(2020));
 
@@ -50,12 +54,15 @@ namespace Parking.Data.UnitTests
         {
             var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
-            SetupMockRepository(
+            SetupMockDatabaseProvider(
                 mockDatabaseProvider,
                 new YearMonth(2020, 9),
                 CreateRawItem("User1", "2020-09", KeyValuePair.Create("30", rawValue)));
 
-            var requestRepository = new RequestRepository(Mock.Of<ILogger<RequestRepository>>(), mockDatabaseProvider.Object);
+            var requestRepository = new RequestRepository(
+                Mock.Of<ILogger<RequestRepository>>(),
+                mockDatabaseProvider.Object,
+                CreateDefaultUserRepository());
 
             var result = await requestRepository.GetRequests(30.September(2020), 30.September(2020));
 
@@ -67,7 +74,7 @@ namespace Parking.Data.UnitTests
         {
             var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
-            SetupMockRepository(
+            SetupMockDatabaseProvider(
                 mockDatabaseProvider,
                 new YearMonth(2020, 8),
                 CreateRawItem(
@@ -79,7 +86,7 @@ namespace Parking.Data.UnitTests
                     "User2",
                     "2020-08",
                     KeyValuePair.Create("02", "C")));
-            SetupMockRepository(
+            SetupMockDatabaseProvider(
                 mockDatabaseProvider,
                 new YearMonth(2020, 9),
                 CreateRawItem(
@@ -87,7 +94,10 @@ namespace Parking.Data.UnitTests
                     "2020-09",
                     KeyValuePair.Create("30", "A")));
 
-            var requestRepository = new RequestRepository(Mock.Of<ILogger<RequestRepository>>(), mockDatabaseProvider.Object);
+            var requestRepository = new RequestRepository(
+                Mock.Of<ILogger<RequestRepository>>(),
+                mockDatabaseProvider.Object,
+                CreateDefaultUserRepository());
 
             var result = await requestRepository.GetRequests(1.August(2020), 30.September(2020));
 
@@ -106,7 +116,7 @@ namespace Parking.Data.UnitTests
         {
             var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
-            SetupMockRepository(
+            SetupMockDatabaseProvider(
                 mockDatabaseProvider,
                 "User1",
                 new YearMonth(2020, 8),
@@ -115,7 +125,7 @@ namespace Parking.Data.UnitTests
                     "2020-08",
                     KeyValuePair.Create("02", "I"),
                     KeyValuePair.Create("13", "A")));
-            SetupMockRepository(
+            SetupMockDatabaseProvider(
                 mockDatabaseProvider,
                 "User1",
                 new YearMonth(2020, 9),
@@ -124,7 +134,10 @@ namespace Parking.Data.UnitTests
                     "2020-09",
                     KeyValuePair.Create("30", "C")));
 
-            var requestRepository = new RequestRepository(Mock.Of<ILogger<RequestRepository>>(), mockDatabaseProvider.Object);
+            var requestRepository = new RequestRepository(
+                Mock.Of<ILogger<RequestRepository>>(),
+                mockDatabaseProvider.Object,
+                CreateDefaultUserRepository());
 
             var result = await requestRepository.GetRequests("User1", 1.August(2020), 30.September(2020));
 
@@ -142,13 +155,16 @@ namespace Parking.Data.UnitTests
         {
             var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
 
-            SetupMockRepository(
+            SetupMockDatabaseProvider(
                 mockDatabaseProvider,
                 new YearMonth(2020, 8),
                 CreateRawItem("User1", "2020-08", KeyValuePair.Create("02", "I")),
                 CreateRawItem("User2", "2020-08", KeyValuePair.Create("02", "C")));
 
-            var requestRepository = new RequestRepository(Mock.Of<ILogger<RequestRepository>>(), mockDatabaseProvider.Object);
+            var requestRepository = new RequestRepository(
+                Mock.Of<ILogger<RequestRepository>>(),
+                mockDatabaseProvider.Object,
+                CreateDefaultUserRepository());
 
             var result = await requestRepository.GetRequests(3.August(2020), 31.August(2020));
 
@@ -157,11 +173,44 @@ namespace Parking.Data.UnitTests
         }
 
         [Fact]
+        public static async Task GetRequests_filters_requests_for_deleted_users()
+        {
+            var mockDatabaseProvider = new Mock<IDatabaseProvider>(MockBehavior.Strict);
+
+            SetupMockDatabaseProvider(
+                mockDatabaseProvider,
+                new YearMonth(2020, 8),
+                CreateRawItem("User1", "2020-08", KeyValuePair.Create("02", "I")),
+                CreateRawItem("User2", "2020-08", KeyValuePair.Create("02", "C")));
+
+            var users = new[] { CreateUser.With(userId: "User1") };
+
+            var mockUserRepository = new Mock<IUserRepository>();
+            mockUserRepository
+                .Setup(r => r.GetUsers())
+                .ReturnsAsync(users);
+
+            var requestRepository = new RequestRepository(
+                Mock.Of<ILogger<RequestRepository>>(),
+                mockDatabaseProvider.Object,
+                mockUserRepository.Object);
+
+            var result = await requestRepository.GetRequests(1.August(2020), 31.August(2020));
+
+            Assert.Equal(1, result.Count);
+
+            CheckRequest(result, "User1", 2.August(2020), RequestStatus.Interrupted);
+        }
+
+        [Fact]
         public static async Task SaveRequests_handles_empty_list()
         {
             var mockDatabaseProvider = new Mock<IDatabaseProvider>();
 
-            var requestRepository = new RequestRepository(Mock.Of<ILogger<RequestRepository>>(), mockDatabaseProvider.Object);
+            var requestRepository = new RequestRepository(
+                Mock.Of<ILogger<RequestRepository>>(),
+                mockDatabaseProvider.Object,
+                CreateDefaultUserRepository());
 
             await requestRepository.SaveRequests(new List<Request>(), DefaultUsers);
 
@@ -187,7 +236,10 @@ namespace Parking.Data.UnitTests
                 .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
                 .Returns(Task.CompletedTask);
 
-            var requestRepository = new RequestRepository(Mock.Of<ILogger<RequestRepository>>(), mockDatabaseProvider.Object);
+            var requestRepository = new RequestRepository(
+                Mock.Of<ILogger<RequestRepository>>(),
+                mockDatabaseProvider.Object,
+                CreateDefaultUserRepository());
             
             var requests = new[] { new Request("User1", 1.September(2020), requestStatus) };
             
@@ -214,7 +266,10 @@ namespace Parking.Data.UnitTests
                 .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
                 .Returns(Task.CompletedTask);
 
-            var requestRepository = new RequestRepository(Mock.Of<ILogger<RequestRepository>>(), mockDatabaseProvider.Object);
+            var requestRepository = new RequestRepository(
+                Mock.Of<ILogger<RequestRepository>>(),
+                mockDatabaseProvider.Object,
+                CreateDefaultUserRepository());
             
             var requests = new[]
             {
@@ -279,7 +334,10 @@ namespace Parking.Data.UnitTests
                 .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
                 .Returns(Task.CompletedTask);
 
-            var requestRepository = new RequestRepository(Mock.Of<ILogger<RequestRepository>>(), mockDatabaseProvider.Object);
+            var requestRepository = new RequestRepository(
+                Mock.Of<ILogger<RequestRepository>>(),
+                mockDatabaseProvider.Object,
+                CreateDefaultUserRepository());
             
             var requests = new[]
             {
@@ -347,7 +405,11 @@ namespace Parking.Data.UnitTests
                 .Setup(p => p.SaveItems(It.IsAny<IEnumerable<RawItem>>()))
                 .Returns(Task.CompletedTask);
 
-            var requestRepository = new RequestRepository(Mock.Of<ILogger<RequestRepository>>(), mockDatabaseProvider.Object);
+            var requestRepository = new RequestRepository(
+                Mock.Of<ILogger<RequestRepository>>(),
+                mockDatabaseProvider.Object,
+                CreateDefaultUserRepository());
+
             var requests = new[]
             {
                 new Request("User1", 2.September(2020), RequestStatus.Allocated),
@@ -377,7 +439,7 @@ namespace Parking.Data.UnitTests
                 Times.Once);
         }
 
-        private static void SetupMockRepository(
+        private static void SetupMockDatabaseProvider(
             Mock<IDatabaseProvider> mockDatabaseProvider,
             YearMonth yearMonth,
             params RawItem[] mockResult) =>
@@ -385,7 +447,7 @@ namespace Parking.Data.UnitTests
                 .Setup(p => p.GetRequests(yearMonth))
                 .Returns(Task.FromResult((IReadOnlyCollection<RawItem>)mockResult));
 
-        private static void SetupMockRepository(
+        private static void SetupMockDatabaseProvider(
             Mock<IDatabaseProvider> mockDatabaseProvider,
             string userId,
             YearMonth yearMonth,
@@ -393,6 +455,17 @@ namespace Parking.Data.UnitTests
             mockDatabaseProvider
                 .Setup(p => p.GetRequests(userId, yearMonth))
                 .Returns(Task.FromResult((IReadOnlyCollection<RawItem>)mockResult));
+
+        private static IUserRepository CreateDefaultUserRepository()
+        {
+            var mockUserRepository = new Mock<IUserRepository>();
+
+            mockUserRepository
+                .Setup(r => r.GetUsers())
+                .ReturnsAsync(DefaultUsers);
+
+            return mockUserRepository.Object;
+        }
 
         private static RawItem CreateRawItem(
             string userId,

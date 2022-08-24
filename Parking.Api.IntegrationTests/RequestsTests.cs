@@ -60,6 +60,8 @@
         [Fact]
         public async Task Returns_existing_requests()
         {
+            await DatabaseHelpers.CreateUser(CreateUser.With(userId: "User1"));
+
             var requests = new Dictionary<string, string>
             {
                 {"01", "P"}, {"02", "A"}, {"03", "C"}, {"04", "S"}, {"05", "H"}, {"08", "I"}

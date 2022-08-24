@@ -16,15 +16,22 @@
     {
         private readonly ILogger<ReservationRepository> logger;
         private readonly IDatabaseProvider databaseProvider;
+        private readonly IUserRepository userRepository;
 
-        public ReservationRepository(ILogger<ReservationRepository> logger, IDatabaseProvider databaseProvider)
+        public ReservationRepository(
+            ILogger<ReservationRepository> logger,
+            IDatabaseProvider databaseProvider,
+            IUserRepository userRepository)
         {
             this.logger = logger;
             this.databaseProvider = databaseProvider;
+            this.userRepository = userRepository;
         }
 
         public async Task<IReadOnlyCollection<Reservation>> GetReservations(LocalDate firstDate, LocalDate lastDate)
         {
+            var users = await this.userRepository.GetUsers();
+
             var matchingReservations = new List<Reservation>();
 
             foreach (var yearMonth in new DateInterval(firstDate, lastDate).YearMonths())
@@ -35,7 +42,8 @@
                     queryResult.SelectMany(r => CreateWholeMonthReservations(r, yearMonth));
 
                 matchingReservations.AddRange(
-                    wholeMonthReservations.Where(r => r.Date >= firstDate && r.Date <= lastDate));
+                    wholeMonthReservations.Where(r =>
+                        r.Date >= firstDate && r.Date <= lastDate && users.Select(u => u.UserId).Contains(r.UserId)));
             }
 
             return matchingReservations;

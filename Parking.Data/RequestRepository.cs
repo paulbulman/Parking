@@ -16,22 +16,29 @@
     {
         private readonly ILogger<RequestRepository> logger;
         private readonly IDatabaseProvider databaseProvider;
+        private readonly IUserRepository userRepository;
 
-        public RequestRepository(ILogger<RequestRepository> logger, IDatabaseProvider databaseProvider)
+        public RequestRepository(
+            ILogger<RequestRepository> logger,
+            IDatabaseProvider databaseProvider,
+            IUserRepository userRepository)
         {
             this.logger = logger;
             this.databaseProvider = databaseProvider;
+            this.userRepository = userRepository;
         }
 
         public async Task<IReadOnlyCollection<Request>> GetRequests(LocalDate firstDate, LocalDate lastDate)
         {
+            var users = await this.userRepository.GetUsers();
+
             var requests = new List<Request>();
 
             foreach (var yearMonth in new DateInterval(firstDate, lastDate).YearMonths())
             {
                 var queryResult = await this.databaseProvider.GetRequests(yearMonth);
 
-                requests.AddRange(CreateFilteredRequests(queryResult, yearMonth, firstDate, lastDate));
+                requests.AddRange(CreateFilteredRequests(queryResult, users, yearMonth, firstDate, lastDate));
             }
 
             return requests;
@@ -39,13 +46,15 @@
 
         public async Task<IReadOnlyCollection<Request>> GetRequests(string userId, LocalDate firstDate, LocalDate lastDate)
         {
+            var users = await this.userRepository.GetUsers();
+
             var requests = new List<Request>();
 
             foreach (var yearMonth in new DateInterval(firstDate, lastDate).YearMonths())
             {
                 var queryResult = await this.databaseProvider.GetRequests(userId, yearMonth);
 
-                requests.AddRange(CreateFilteredRequests(queryResult, yearMonth, firstDate, lastDate));
+                requests.AddRange(CreateFilteredRequests(queryResult, users, yearMonth, firstDate, lastDate));
             }
 
             return requests;
@@ -106,11 +115,12 @@
 
         private static IReadOnlyCollection<Request> CreateFilteredRequests(
             IReadOnlyCollection<RawItem> rawItems,
+            IReadOnlyCollection<User> users,
             YearMonth yearMonth,
             LocalDate firstDate,
             LocalDate lastDate) =>
             rawItems.SelectMany(r => CreateWholeMonthRequests(r, yearMonth))
-                .Where(r => r.Date >= firstDate && r.Date <= lastDate)
+                .Where(r => r.Date >= firstDate && r.Date <= lastDate && users.Select(u => u.UserId).Contains(r.UserId))
                 .ToArray();
 
         private static IEnumerable<Request> CreateWholeMonthRequests(RawItem rawItem, YearMonth yearMonth)

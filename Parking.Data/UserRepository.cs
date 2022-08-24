@@ -8,15 +8,19 @@
     using Business;
     using Business.Data;
     using Model;
+    using NodaTime;
 
     public class UserRepository : IUserRepository
     {
+        private readonly IClock clock;
+
         private readonly IDatabaseProvider databaseProvider;
         
         private readonly IIdentityProvider identityProvider;
 
-        public UserRepository(IDatabaseProvider databaseProvider,  IIdentityProvider identityProvider)
+        public UserRepository(IClock clock, IDatabaseProvider databaseProvider,  IIdentityProvider identityProvider)
         {
+            this.clock = clock;
             this.databaseProvider = databaseProvider;
             this.identityProvider = identityProvider;
         }
@@ -45,14 +49,14 @@
         {
             var queryResult = await this.databaseProvider.GetUser(userId);
             
-            return queryResult != null;
+            return queryResult is { DeletedTimestamp: null };
         }
 
         public async Task<User?> GetUser(string userId)
         {
             var queryResult = await this.databaseProvider.GetUser(userId);
 
-            return queryResult != null ? CreateUser(queryResult) : null;
+            return queryResult is { DeletedTimestamp: null } ? CreateUser(queryResult) : null;
         }
 
         public async Task<IReadOnlyCollection<User>> GetUsers()
@@ -60,6 +64,7 @@
             var queryResult = await this.databaseProvider.GetUsers();
 
             return queryResult
+                .Where(r => r.DeletedTimestamp == null)
                 .Select(CreateUser)
                 .ToArray();
         }
@@ -80,6 +85,13 @@
             return allUsers
                 .Where(u => teamLeaderUserIds.Contains(u.UserId))
                 .ToArray();
+        }
+
+        public async Task DeleteUser(User user)
+        {
+            await this.identityProvider.DeleteUser(user.UserId);
+
+            await this.databaseProvider.SaveItem(CreateDeletedRawItem(user, deletedTimestamp: this.clock.GetCurrentInstant()));
         }
 
         private static User CreateUser(RawItem rawItem)
@@ -115,6 +127,7 @@
             RawItem.CreateUser(
                 primaryKey: $"USER#{user.UserId}",
                 sortKey: "PROFILE",
+                deletedTimestamp: null,
                 alternativeRegistrationNumber: user.AlternativeRegistrationNumber,
                 commuteDistance: user.CommuteDistance,
                 emailAddress: user.EmailAddress,
@@ -123,5 +136,19 @@
                 registrationNumber: user.RegistrationNumber,
                 requestReminderEnabled: user.RequestReminderEnabled,
                 reservationReminderEnabled: user.ReservationReminderEnabled);
+
+        private static RawItem CreateDeletedRawItem(User user, Instant deletedTimestamp) =>
+            RawItem.CreateUser(
+                primaryKey: $"USER#{user.UserId}",
+                sortKey: "PROFILE",
+                deletedTimestamp: deletedTimestamp,
+                alternativeRegistrationNumber: "DELETED",
+                commuteDistance: null,
+                emailAddress: "DELETED",
+                firstName: "DELETED",
+                lastName: "DELETED",
+                registrationNumber: "DELETED",
+                requestReminderEnabled: false,
+                reservationReminderEnabled: false);
     }
 }
