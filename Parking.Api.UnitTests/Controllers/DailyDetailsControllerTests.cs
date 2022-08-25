@@ -328,7 +328,7 @@ namespace Parking.Api.UnitTests.Controllers
             var mockRequestRepository = CreateRequestRepository.MockWithRequests("user1", activeDates, existingRequests);
 
             mockRequestRepository
-                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>(), It.IsAny<IReadOnlyCollection<User>>()))
+                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
                 .Returns(Task.CompletedTask);
             mockRequestRepository
                 .Setup(r => r.GetRequests(It.IsAny<LocalDate>(), It.IsAny<LocalDate>()))
@@ -354,8 +354,7 @@ namespace Parking.Api.UnitTests.Controllers
             var expectedRequests = new[] { new Request("user1", requestDate, expectedRequestStatus) };
 
             mockRequestRepository.Verify(r => r.SaveRequests(
-                    It.Is<IReadOnlyCollection<Request>>(actual => CheckRequests(expectedRequests, actual.ToList())),
-                    users),
+                    It.Is<IReadOnlyCollection<Request>>(actual => CheckRequests(expectedRequests, actual.ToList()))),
                 Times.Once);
         }
 
@@ -373,7 +372,7 @@ namespace Parking.Api.UnitTests.Controllers
             var mockRequestRepository = CreateRequestRepository.MockWithRequests("user1", activeDates, existingRequests);
 
             mockRequestRepository
-                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>(), It.IsAny<IReadOnlyCollection<User>>()))
+                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
                 .Returns(Task.CompletedTask);
             mockRequestRepository
                 .Setup(r => r.GetRequests(It.IsAny<LocalDate>(), It.IsAny<LocalDate>()))
@@ -427,7 +426,7 @@ namespace Parking.Api.UnitTests.Controllers
                 .Setup(r => r.GetRequests("user1", 28.June(2021), 28.June(2021)))
                 .ReturnsAsync(new[] { initialRequest });
             mockRequestRepository
-                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>(), It.IsAny<IReadOnlyCollection<User>>()))
+                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
                 .Returns(Task.CompletedTask);
             mockRequestRepository
                 .Setup(r => r.GetRequests(28.June(2021), 29.June(2021)))

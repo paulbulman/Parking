@@ -49,12 +49,14 @@
             return matchingReservations;
         }
 
-        public async Task SaveReservations(IReadOnlyCollection<Reservation> reservations, IReadOnlyCollection<User> users)
+        public async Task SaveReservations(IReadOnlyCollection<Reservation> reservations)
         {
             if (!reservations.Any())
             {
                 return;
             }
+
+            var users = await this.userRepository.GetUsers();
 
             var fullNames = users.ToDictionary(u => u.UserId, u => $"{u.FirstName} {u.LastName}");
 

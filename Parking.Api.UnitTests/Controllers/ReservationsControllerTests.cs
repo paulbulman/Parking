@@ -157,9 +157,7 @@ namespace Parking.Api.UnitTests.Controllers
                 CreateReservationRepository.MockWithReservations(activeDates, new List<Reservation>());
 
             mockReservationRepository
-                .Setup(r => r.SaveReservations(
-                    It.IsAny<IReadOnlyCollection<Reservation>>(),
-                    It.IsAny<IReadOnlyCollection<User>>()))
+                .Setup(r => r.SaveReservations(It.IsAny<IReadOnlyCollection<Reservation>>()))
                 .Returns(Task.CompletedTask);
 
             var patchRequest = new ReservationsPatchRequest(new[]
@@ -196,9 +194,7 @@ namespace Parking.Api.UnitTests.Controllers
                 CreateReservationRepository.MockWithReservations(activeDates, new List<Reservation>());
 
             mockReservationRepository
-                .Setup(r => r.SaveReservations(
-                    It.IsAny<IReadOnlyCollection<Reservation>>(),
-                    It.IsAny<IReadOnlyCollection<User>>()))
+                .Setup(r => r.SaveReservations(It.IsAny<IReadOnlyCollection<Reservation>>()))
                 .Returns(Task.CompletedTask);
 
             var patchRequest = new ReservationsPatchRequest(new[]
@@ -235,9 +231,7 @@ namespace Parking.Api.UnitTests.Controllers
                 CreateReservationRepository.MockWithReservations(activeDates, returnedReservations);
 
             mockReservationRepository
-                .Setup(r => r.SaveReservations(
-                    It.IsAny<IReadOnlyCollection<Reservation>>(),
-                    It.IsAny<IReadOnlyCollection<User>>()))
+                .Setup(r => r.SaveReservations(It.IsAny<IReadOnlyCollection<Reservation>>()))
                 .Returns(Task.CompletedTask);
 
             var patchRequest = new ReservationsPatchRequest(new[]
@@ -268,8 +262,7 @@ namespace Parking.Api.UnitTests.Controllers
         {
             mockReservationRepository.Verify(
                 r => r.SaveReservations(It.Is<IReadOnlyCollection<Reservation>>(
-                    actual => CheckReservations(expectedSavedReservations, actual.ToList())), 
-                    DefaultUsers),
+                    actual => CheckReservations(expectedSavedReservations, actual.ToList()))),
                 Times.Once);
         }
 

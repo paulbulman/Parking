@@ -138,7 +138,7 @@ namespace Parking.Data.UnitTests
                 mockDatabaseProvider.Object,
                 CreateDefaultUserRepository());
 
-            await reservationRepository.SaveReservations(new List<Reservation>(), new List<User>());
+            await reservationRepository.SaveReservations(new List<Reservation>());
 
             mockDatabaseProvider.VerifyNoOtherCalls();
         }
@@ -167,7 +167,7 @@ namespace Parking.Data.UnitTests
                 new Reservation("User2", 1.April(2021)),
             };
 
-            await reservationRepository.SaveReservations(reservations, DefaultUsers);
+            await reservationRepository.SaveReservations(reservations);
 
             var expectedRawItems = new[]
             {
@@ -219,7 +219,7 @@ namespace Parking.Data.UnitTests
                 new Reservation("User3", 3.April(2021)),
             };
 
-            await reservationRepository.SaveReservations(reservations, DefaultUsers);
+            await reservationRepository.SaveReservations(reservations);
 
             var expectedRawItems = new[]
             {
@@ -262,7 +262,7 @@ namespace Parking.Data.UnitTests
                 new Reservation("User2", 2.March(2021)),
             };
 
-            await reservationRepository.SaveReservations(reservations, DefaultUsers);
+            await reservationRepository.SaveReservations(reservations);
 
             var expectedRawItems = new[]
             {

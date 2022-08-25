@@ -19,11 +19,11 @@
     public class ReservationsController : ControllerBase
     {
         private readonly IConfigurationRepository configurationRepository;
-        
+
         private readonly IDateCalculator dateCalculator;
-        
+
         private readonly IReservationRepository reservationRepository;
-        
+
         private readonly IUserRepository userRepository;
 
         public ReservationsController(
@@ -58,9 +58,7 @@
                 .SelectMany(CreateReservations)
                 .ToList();
 
-            var users = await this.userRepository.GetUsers();
-
-            await this.reservationRepository.SaveReservations(reservations, users);
+            await this.reservationRepository.SaveReservations(reservations);
 
             var response = await this.GetReservations();
 

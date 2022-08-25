@@ -89,7 +89,7 @@
 
             var updatedRequest = new Request(request.UserId, request.Date, updatedRequestStatus);
 
-            await this.requestRepository.SaveRequests(new[] { updatedRequest }, users);
+            await this.requestRepository.SaveRequests(new[] { updatedRequest });
 
             await this.triggerRepository.AddTrigger();
 

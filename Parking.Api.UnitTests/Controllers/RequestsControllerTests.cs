@@ -173,7 +173,7 @@
                 CreateRequestRepository.MockWithRequests(UserId, activeDates, new List<Request>());
 
             mockRequestRepository
-                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>(), It.IsAny<IReadOnlyCollection<User>>()))
+                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
                 .Returns(Task.CompletedTask);
 
             var patchRequest = new RequestsPatchRequest(new[]
@@ -199,7 +199,7 @@
                 new Request(UserId, 3.February(2021), RequestStatus.Cancelled),
             };
 
-            CheckSavedRequests(mockRequestRepository, expectedSavedRequests, DefaultUsers);
+            CheckSavedRequests(mockRequestRepository, expectedSavedRequests);
         }
 
         [Fact]
@@ -211,7 +211,7 @@
                 CreateRequestRepository.MockWithRequests(UserId, activeDates, new List<Request>());
 
             mockRequestRepository
-                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>(), It.IsAny<IReadOnlyCollection<User>>()))
+                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
                 .Returns(Task.CompletedTask);
 
             var mockTriggerRepository = new Mock<ITriggerRepository>();
@@ -241,7 +241,7 @@
                 CreateRequestRepository.MockWithRequests(UserId, activeDates, new List<Request>());
 
             mockRequestRepository
-                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>(), It.IsAny<IReadOnlyCollection<User>>()))
+                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
                 .Returns(Task.CompletedTask);
 
             var patchRequest = new RequestsPatchRequest(new[]
@@ -271,7 +271,7 @@
                 new Request(UserId, 3.February(2021), RequestStatus.Cancelled),
             };
 
-            CheckSavedRequests(mockRequestRepository, expectedSavedRequests, DefaultUsers);
+            CheckSavedRequests(mockRequestRepository, expectedSavedRequests);
         }
 
         [Fact]
@@ -283,7 +283,7 @@
                 CreateRequestRepository.MockWithRequests(UserId, activeDates, new List<Request>());
 
             mockRequestRepository
-                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>(), It.IsAny<IReadOnlyCollection<User>>()))
+                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
                 .Returns(Task.CompletedTask);
 
             var patchRequest = new RequestsPatchRequest(new[]
@@ -305,7 +305,7 @@
 
             await controller.PatchAsync(patchRequest);
 
-            CheckSavedRequests(mockRequestRepository, new List<Request>(), DefaultUsers);
+            CheckSavedRequests(mockRequestRepository, new List<Request>());
         }
 
         [Fact]
@@ -317,7 +317,7 @@
                 CreateRequestRepository.MockWithRequests(UserId, activeDates, new List<Request>());
 
             mockRequestRepository
-                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>(), It.IsAny<IReadOnlyCollection<User>>()))
+                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
                 .Returns(Task.CompletedTask);
 
             var patchRequest = new RequestsPatchRequest(new[]
@@ -337,7 +337,7 @@
 
             await controller.PatchAsync(patchRequest);
 
-            CheckSavedRequests(mockRequestRepository, new List<Request>(), DefaultUsers);
+            CheckSavedRequests(mockRequestRepository, new List<Request>());
         }
 
         [Fact]
@@ -349,7 +349,7 @@
                 CreateRequestRepository.MockWithRequests(UserId, activeDates, new List<Request>());
 
             mockRequestRepository
-                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>(), It.IsAny<IReadOnlyCollection<User>>()))
+                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
                 .Returns(Task.CompletedTask);
 
             var patchRequest = new RequestsPatchRequest(new[]
@@ -368,7 +368,7 @@
 
             var expectedSavedRequests = new[] { new Request(UserId, 2.February(2021), RequestStatus.Pending) };
 
-            CheckSavedRequests(mockRequestRepository, expectedSavedRequests, DefaultUsers);
+            CheckSavedRequests(mockRequestRepository, expectedSavedRequests);
         }
 
         [Fact]
@@ -382,7 +382,7 @@
                 CreateRequestRepository.MockWithRequests(UserId, activeDates, returnedRequests);
 
             mockRequestRepository
-                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>(), It.IsAny<IReadOnlyCollection<User>>()))
+                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
                 .Returns(Task.CompletedTask);
 
             var patchRequest =
@@ -426,13 +426,11 @@
 
         private static void CheckSavedRequests(
             Mock<IRequestRepository> mockRequestRepository,
-            IReadOnlyCollection<Request> expectedSavedRequests,
-            IReadOnlyCollection<User> expectedUsers)
+            IReadOnlyCollection<Request> expectedSavedRequests)
         {
             mockRequestRepository.Verify(
                 r => r.SaveRequests(
-                    It.Is<IReadOnlyCollection<Request>>(actual => CheckRequests(expectedSavedRequests, actual.ToList())),
-                    expectedUsers),
+                    It.Is<IReadOnlyCollection<Request>>(actual => CheckRequests(expectedSavedRequests, actual.ToList()))),
                 Times.Once);
         }
 

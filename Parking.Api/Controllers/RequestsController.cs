@@ -123,8 +123,6 @@
         {
             var activeDates = this.dateCalculator.GetActiveDates();
 
-            var users = await this.userRepository.GetUsers();
-
             var requestsToSave = request.Requests
                 .Where(r => activeDates.Contains(r.LocalDate))
                 .GroupBy(r => r.LocalDate)
@@ -133,7 +131,7 @@
                 .Select(v => CreateRequest(userId, v))
                 .ToArray();
 
-            await this.requestRepository.SaveRequests(requestsToSave, users);
+            await this.requestRepository.SaveRequests(requestsToSave);
 
             await this.triggerRepository.AddTrigger();
         }

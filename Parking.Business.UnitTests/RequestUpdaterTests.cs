@@ -245,8 +245,7 @@
             mockRequestRepository
                 .Setup(r => r.SaveRequests(
                     It.Is<IReadOnlyCollection<Request>>(actual =>
-                        actual.Count == NewlyAllocatedRequests.Count && NewlyAllocatedRequests.All(actual.Contains)),
-                    It.IsAny<IReadOnlyCollection<User>>()))
+                        actual.Count == NewlyAllocatedRequests.Count && NewlyAllocatedRequests.All(actual.Contains))))
                 .Returns(Task.CompletedTask);
 
             return mockRequestRepository;

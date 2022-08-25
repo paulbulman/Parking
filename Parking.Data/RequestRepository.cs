@@ -60,12 +60,14 @@
             return requests;
         }
 
-        public async Task SaveRequests(IReadOnlyCollection<Request> requests, IReadOnlyCollection<User> users)
+        public async Task SaveRequests(IReadOnlyCollection<Request> requests)
         {
             if (!requests.Any())
             {
                 return;
             }
+
+            var users = await this.userRepository.GetUsers();
 
             var fullNames = users.ToDictionary(u => u.UserId, u => $"{u.FirstName} {u.LastName}");
 

@@ -35,9 +35,7 @@
                 .Select(r => new Request(r.UserId, r.Date, RequestStatus.SoftInterrupted))
                 .ToArray();
 
-            var users = await this.userRepository.GetUsers();
-
-            await this.requestRepository.SaveRequests(updatedRequests, users);
+            await this.requestRepository.SaveRequests(updatedRequests);
         }
 
         public Instant GetNextRunTime() =>

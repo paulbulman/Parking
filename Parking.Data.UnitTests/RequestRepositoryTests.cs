@@ -212,7 +212,7 @@ namespace Parking.Data.UnitTests
                 mockDatabaseProvider.Object,
                 CreateDefaultUserRepository());
 
-            await requestRepository.SaveRequests(new List<Request>(), DefaultUsers);
+            await requestRepository.SaveRequests(new List<Request>());
 
             mockDatabaseProvider.VerifyNoOtherCalls();
         }
@@ -243,7 +243,7 @@ namespace Parking.Data.UnitTests
             
             var requests = new[] { new Request("User1", 1.September(2020), requestStatus) };
             
-            await requestRepository.SaveRequests(requests, DefaultUsers);
+            await requestRepository.SaveRequests(requests);
 
             var expectedRawItems = new[]
             {
@@ -279,7 +279,7 @@ namespace Parking.Data.UnitTests
                 new Request("User2", 4.October(2020), RequestStatus.Interrupted)
             };
 
-            await requestRepository.SaveRequests(requests, DefaultUsers);
+            await requestRepository.SaveRequests(requests);
 
             var expectedRawItems = new[]
             {
@@ -347,7 +347,7 @@ namespace Parking.Data.UnitTests
                 new Request("User2", 4.October(2020), RequestStatus.Interrupted)
             };
 
-            await requestRepository.SaveRequests(requests, DefaultUsers);
+            await requestRepository.SaveRequests(requests);
 
             var expectedRawItems = new[]
             {
@@ -417,7 +417,7 @@ namespace Parking.Data.UnitTests
                 new Request("User1", 3.October(2020), RequestStatus.Cancelled),
                 new Request("User1", 4.October(2020), RequestStatus.Interrupted)
             };
-            await requestRepository.SaveRequests(requests, DefaultUsers);
+            await requestRepository.SaveRequests(requests);
 
             var expectedRawItems = new[]
             {
