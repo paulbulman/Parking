@@ -5,6 +5,7 @@ namespace Parking.Data.UnitTests
     using System.Linq;
     using System.Threading.Tasks;
     using Aws;
+    using Business;
     using Business.Data;
     using Microsoft.Extensions.Logging;
     using Model;
@@ -35,7 +36,7 @@ namespace Parking.Data.UnitTests
                 mockDatabaseProvider.Object,
                 CreateDefaultUserRepository());
 
-            var result = await requestRepository.GetRequests(1.August(2020), 30.September(2020));
+            var result = await requestRepository.GetRequests(new DateInterval(1.August(2020), 30.September(2020)));
 
             Assert.NotNull(result);
             Assert.Empty(result);
@@ -64,7 +65,7 @@ namespace Parking.Data.UnitTests
                 mockDatabaseProvider.Object,
                 CreateDefaultUserRepository());
 
-            var result = await requestRepository.GetRequests(30.September(2020), 30.September(2020));
+            var result = await requestRepository.GetRequests(30.September(2020).ToDateInterval());
 
             CheckRequest(result, "User1", 30.September(2020), expectedRequestStatus);
         }
@@ -99,7 +100,7 @@ namespace Parking.Data.UnitTests
                 mockDatabaseProvider.Object,
                 CreateDefaultUserRepository());
 
-            var result = await requestRepository.GetRequests(1.August(2020), 30.September(2020));
+            var result = await requestRepository.GetRequests(new DateInterval(1.August(2020), 30.September(2020)));
 
             Assert.NotNull(result);
 
@@ -139,7 +140,7 @@ namespace Parking.Data.UnitTests
                 mockDatabaseProvider.Object,
                 CreateDefaultUserRepository());
 
-            var result = await requestRepository.GetRequests("User1", 1.August(2020), 30.September(2020));
+            var result = await requestRepository.GetRequests("User1", new DateInterval(1.August(2020), 30.September(2020)));
 
             Assert.NotNull(result);
 
@@ -166,7 +167,7 @@ namespace Parking.Data.UnitTests
                 mockDatabaseProvider.Object,
                 CreateDefaultUserRepository());
 
-            var result = await requestRepository.GetRequests(3.August(2020), 31.August(2020));
+            var result = await requestRepository.GetRequests(new DateInterval(3.August(2020), 31.August(2020)));
 
             Assert.NotNull(result);
             Assert.Empty(result);
@@ -195,7 +196,7 @@ namespace Parking.Data.UnitTests
                 mockDatabaseProvider.Object,
                 mockUserRepository.Object);
 
-            var result = await requestRepository.GetRequests(1.August(2020), 31.August(2020));
+            var result = await requestRepository.GetRequests(new DateInterval(1.August(2020), 31.August(2020)));
 
             Assert.Equal(1, result.Count);
 

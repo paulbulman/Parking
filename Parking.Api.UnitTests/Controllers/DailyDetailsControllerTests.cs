@@ -331,7 +331,7 @@ namespace Parking.Api.UnitTests.Controllers
                 .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
                 .Returns(Task.CompletedTask);
             mockRequestRepository
-                .Setup(r => r.GetRequests(It.IsAny<LocalDate>(), It.IsAny<LocalDate>()))
+                .Setup(r => r.GetRequests(It.IsAny<DateInterval>()))
                 .ReturnsAsync(new List<Request>());
 
             var users = new[]
@@ -375,7 +375,7 @@ namespace Parking.Api.UnitTests.Controllers
                 .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
                 .Returns(Task.CompletedTask);
             mockRequestRepository
-                .Setup(r => r.GetRequests(It.IsAny<LocalDate>(), It.IsAny<LocalDate>()))
+                .Setup(r => r.GetRequests(It.IsAny<DateInterval>()))
                 .ReturnsAsync(new List<Request>());
 
             var users = new[]
@@ -423,13 +423,13 @@ namespace Parking.Api.UnitTests.Controllers
                 CreateRequestRepository.MockWithRequests("user1", activeDates, new[] {initialRequest});
 
             mockRequestRepository
-                .Setup(r => r.GetRequests("user1", 28.June(2021), 28.June(2021)))
+                .Setup(r => r.GetRequests("user1", 28.June(2021).ToDateInterval()))
                 .ReturnsAsync(new[] { initialRequest });
             mockRequestRepository
                 .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
                 .Returns(Task.CompletedTask);
             mockRequestRepository
-                .Setup(r => r.GetRequests(28.June(2021), 29.June(2021)))
+                .Setup(r => r.GetRequests(new DateInterval(28.June(2021), 29.June(2021))))
                 .ReturnsAsync(updatedRequests);
 
             var users = new[]

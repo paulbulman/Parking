@@ -36,7 +36,7 @@
 
             var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);
             mockRequestRepository
-                .Setup(r => r.GetRequests(nextWorkingDate, nextWorkingDate))
+                .Setup(r => r.GetRequests(nextWorkingDate.ToDateInterval()))
                 .ReturnsAsync(requests);
             mockRequestRepository
                 .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
@@ -55,7 +55,7 @@
                 new Request("user2", nextWorkingDate, RequestStatus.SoftInterrupted)
             };
 
-            mockRequestRepository.Verify(r => r.GetRequests(nextWorkingDate, nextWorkingDate), Times.Once);
+            mockRequestRepository.Verify(r => r.GetRequests(nextWorkingDate.ToDateInterval()), Times.Once);
             mockRequestRepository.Verify(r => r.SaveRequests(
                     It.Is<IReadOnlyCollection<Request>>(actual => CheckRequests(expectedRequests, actual.ToList()))),
                 Times.Once);
@@ -81,7 +81,7 @@
 
             var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);
             mockRequestRepository
-                .Setup(r => r.GetRequests(nextWorkingDate, nextWorkingDate))
+                .Setup(r => r.GetRequests(nextWorkingDate.ToDateInterval()))
                 .ReturnsAsync(requests);
             mockRequestRepository
                 .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
@@ -94,7 +94,7 @@
 
             await softInterruptionUpdater.Run();
 
-            mockRequestRepository.Verify(r => r.GetRequests(nextWorkingDate, nextWorkingDate), Times.Once);
+            mockRequestRepository.Verify(r => r.GetRequests(nextWorkingDate.ToDateInterval()), Times.Once);
             mockRequestRepository.Verify(
                 r => r.SaveRequests(It.Is<IReadOnlyCollection<Request>>(actual => actual.Count == 0)),
                 Times.Once);

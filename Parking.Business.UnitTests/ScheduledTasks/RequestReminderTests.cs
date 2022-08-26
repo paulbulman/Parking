@@ -5,6 +5,7 @@
     using Data;
     using Model;
     using Moq;
+    using NodaTime;
     using NodaTime.Testing.Extensions;
     using TestHelpers;
     using Xunit;
@@ -31,9 +32,11 @@
                 new Request("user1", 21.December(2020), RequestStatus.Cancelled)
             };
 
+            var dateInterval = new DateInterval(22.October(2020), 22.December(2020));
+
             var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);
             mockRequestRepository
-                .Setup(r => r.GetRequests(22.October(2020), 22.December(2020)))
+                .Setup(r => r.GetRequests(dateInterval))
                 .ReturnsAsync(requests);
 
             var user = CreateUser.With(userId: "user1", emailAddress: "1@abc.com");
@@ -76,9 +79,11 @@
                 new Request("user1", 21.December(2020), RequestStatus.Cancelled)
             };
 
+            var dateInterval = new DateInterval(22.October(2020), 22.December(2020));
+
             var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);
             mockRequestRepository
-                .Setup(r => r.GetRequests(22.October(2020), 22.December(2020)))
+                .Setup(r => r.GetRequests(dateInterval))
                 .ReturnsAsync(requests);
 
             var user = CreateUser.With(userId: "user1", emailAddress: "1@abc.com", requestReminderEnabled: false);
@@ -117,9 +122,11 @@
                 new Request("user1", 21.December(2020), RequestStatus.Pending)
             };
 
+            var dateInterval = new DateInterval(22.October(2020), 22.December(2020));
+
             var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);
             mockRequestRepository
-                .Setup(r => r.GetRequests(22.October(2020), 22.December(2020)))
+                .Setup(r => r.GetRequests(dateInterval))
                 .ReturnsAsync(requests);
 
             var user = CreateUser.With(userId: "user1", emailAddress: "1@abc.com");
@@ -157,9 +164,11 @@
                 new Request("user1", 18.December(2020), RequestStatus.Cancelled),
             };
 
+            var dateInterval = new DateInterval(22.October(2020), 22.December(2020));
+
             var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);
             mockRequestRepository
-                .Setup(r => r.GetRequests(22.October(2020), 22.December(2020)))
+                .Setup(r => r.GetRequests(dateInterval))
                 .ReturnsAsync(requests);
 
             var users = new[]

@@ -11,6 +11,8 @@
         public static LocalDate StartOfWeek(this LocalDate localDate) =>
             localDate.Previous(IsoDayOfWeek.Sunday).Next(IsoDayOfWeek.Monday);
 
+        public static DateInterval ToDateInterval(this LocalDate localDate) => new DateInterval(localDate, localDate);
+
         public static IEnumerable<YearMonth> YearMonths(this DateInterval dateInterval) =>
             dateInterval.Select(d => d.ToYearMonth()).Distinct();
 
@@ -24,6 +26,15 @@
                 .ToArray();
 
             return $"{orderedDates.First().ToEmailDisplayString()} - {orderedDates.Last().ToEmailDisplayString()}";
+        }
+
+        public static DateInterval ToDateInterval(this IEnumerable<LocalDate> localDateCollection)
+        {
+            var orderedDates = localDateCollection
+                .OrderBy(d => d)
+                .ToArray();
+
+            return new DateInterval(orderedDates.First(), orderedDates.Last());
         }
 
         public static bool IsRequested(this RequestStatus requestStatus) => RequestedStatuses.Contains(requestStatus);

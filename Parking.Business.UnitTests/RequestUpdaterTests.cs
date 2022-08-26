@@ -35,8 +35,7 @@
             .Concat(LongLeadTimeDates)
             .ToArray();
 
-        private static readonly LocalDate EarliestConsideredDate = 4.October(2020);
-        private static readonly LocalDate LastConsideredDate = 6.December(2020);
+        private static readonly DateInterval CacheInterval = new DateInterval(4.October(2020), 6.December(2020));
 
         private static readonly IReadOnlyCollection<Request> InitialRequests = new[]
         {
@@ -175,7 +174,7 @@
 
             var mockReservationRepository = new Mock<IReservationRepository>(MockBehavior.Strict);
             mockReservationRepository
-                .Setup(r => r.GetReservations(EarliestConsideredDate, LastConsideredDate))
+                .Setup(r => r.GetReservations(CacheInterval))
                 .ReturnsAsync(reservations);
 
             var arbitraryUser = CreateUser.With(userId: "user1");
@@ -240,7 +239,7 @@
             var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);
 
             mockRequestRepository
-                .Setup(r => r.GetRequests(EarliestConsideredDate, LastConsideredDate))
+                .Setup(r => r.GetRequests(CacheInterval))
                 .ReturnsAsync(InitialRequests);
             mockRequestRepository
                 .Setup(r => r.SaveRequests(

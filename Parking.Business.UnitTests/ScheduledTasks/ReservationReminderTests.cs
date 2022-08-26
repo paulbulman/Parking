@@ -28,7 +28,7 @@
 
             var mockReservationRepository = new Mock<IReservationRepository>(MockBehavior.Strict);
             mockReservationRepository
-                .Setup(r => r.GetReservations(nextWorkingDate, nextWorkingDate))
+                .Setup(r => r.GetReservations(nextWorkingDate.ToDateInterval()))
                 .ReturnsAsync(new List<Reservation>());
             
             var teamLeaderUsers = new[]
@@ -75,7 +75,7 @@
 
             var mockReservationRepository = new Mock<IReservationRepository>(MockBehavior.Strict);
             mockReservationRepository
-                .Setup(r => r.GetReservations(nextWorkingDate, nextWorkingDate))
+                .Setup(r => r.GetReservations(nextWorkingDate.ToDateInterval()))
                 .ReturnsAsync(new List<Reservation>());
 
             var teamLeaderUsers = new[]
@@ -115,7 +115,7 @@
             
             var mockReservationRepository = new Mock<IReservationRepository>(MockBehavior.Strict);
             mockReservationRepository
-                .Setup(r => r.GetReservations(nextWorkingDate, nextWorkingDate))
+                .Setup(r => r.GetReservations(nextWorkingDate.ToDateInterval()))
                 .ReturnsAsync(reservations);
 
             var reservationReminder = new ReservationReminder(

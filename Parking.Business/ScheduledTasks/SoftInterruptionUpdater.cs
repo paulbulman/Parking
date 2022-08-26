@@ -28,7 +28,7 @@
         {
             var nextWorkingDate = this.dateCalculator.GetNextWorkingDate();
 
-            var requests = await this.requestRepository.GetRequests(nextWorkingDate, nextWorkingDate);
+            var requests = await this.requestRepository.GetRequests(nextWorkingDate.ToDateInterval());
 
             var updatedRequests = requests
                 .Where(r => r.Status == RequestStatus.Interrupted)

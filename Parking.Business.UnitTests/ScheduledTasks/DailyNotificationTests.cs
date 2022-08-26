@@ -32,7 +32,7 @@
 
             var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);
             mockRequestRepository
-                .Setup(r => r.GetRequests(nextWorkingDate, nextWorkingDate))
+                .Setup(r => r.GetRequests(nextWorkingDate.ToDateInterval()))
                 .ReturnsAsync(requests);
 
             var users = new[]
@@ -78,7 +78,7 @@
 
             var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);
             mockRequestRepository
-                .Setup(r => r.GetRequests(nextWorkingDate, nextWorkingDate))
+                .Setup(r => r.GetRequests(nextWorkingDate.ToDateInterval()))
                 .ReturnsAsync(requests);
 
             var mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);

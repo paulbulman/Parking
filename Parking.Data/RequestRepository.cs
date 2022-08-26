@@ -28,33 +28,33 @@
             this.userRepository = userRepository;
         }
 
-        public async Task<IReadOnlyCollection<Request>> GetRequests(LocalDate firstDate, LocalDate lastDate)
+        public async Task<IReadOnlyCollection<Request>> GetRequests(DateInterval dateInterval)
         {
             var users = await this.userRepository.GetUsers();
 
             var requests = new List<Request>();
 
-            foreach (var yearMonth in new DateInterval(firstDate, lastDate).YearMonths())
+            foreach (var yearMonth in dateInterval.YearMonths())
             {
                 var queryResult = await this.databaseProvider.GetRequests(yearMonth);
 
-                requests.AddRange(CreateFilteredRequests(queryResult, users, yearMonth, firstDate, lastDate));
+                requests.AddRange(CreateFilteredRequests(queryResult, users, yearMonth, dateInterval));
             }
 
             return requests;
         }
 
-        public async Task<IReadOnlyCollection<Request>> GetRequests(string userId, LocalDate firstDate, LocalDate lastDate)
+        public async Task<IReadOnlyCollection<Request>> GetRequests(string userId, DateInterval dateInterval)
         {
             var users = await this.userRepository.GetUsers();
 
             var requests = new List<Request>();
 
-            foreach (var yearMonth in new DateInterval(firstDate, lastDate).YearMonths())
+            foreach (var yearMonth in dateInterval.YearMonths())
             {
                 var queryResult = await this.databaseProvider.GetRequests(userId, yearMonth);
 
-                requests.AddRange(CreateFilteredRequests(queryResult, users, yearMonth, firstDate, lastDate));
+                requests.AddRange(CreateFilteredRequests(queryResult, users, yearMonth, dateInterval));
             }
 
             return requests;
@@ -80,11 +80,13 @@
             var firstDate = orderedRequests.First().Date.With(DateAdjusters.StartOfMonth);
             var lastDate = orderedRequests.Last().Date.With(DateAdjusters.EndOfMonth);
 
+            var dateInterval = new DateInterval(firstDate, lastDate);
+
             var isSingleUser = orderedRequests.Select(r => r.UserId).Distinct().Count() == 1;
 
             var existingRequests = isSingleUser
-                ? await this.GetRequests(orderedRequests.First().UserId, firstDate, lastDate)
-                : await this.GetRequests(firstDate, lastDate);
+                ? await this.GetRequests(orderedRequests.First().UserId, dateInterval)
+                : await this.GetRequests(dateInterval);
 
             var combinedRequests = existingRequests
                 .Where(existingRequest => !IsOverwritten(existingRequest, requests))
@@ -119,10 +121,9 @@
             IReadOnlyCollection<RawItem> rawItems,
             IReadOnlyCollection<User> users,
             YearMonth yearMonth,
-            LocalDate firstDate,
-            LocalDate lastDate) =>
+            DateInterval dateInterval) =>
             rawItems.SelectMany(r => CreateWholeMonthRequests(r, yearMonth))
-                .Where(r => r.Date >= firstDate && r.Date <= lastDate && users.Select(u => u.UserId).Contains(r.UserId))
+                .Where(r => dateInterval.Contains(r.Date) && users.Select(u => u.UserId).Contains(r.UserId))
                 .ToArray();
 
         private static IEnumerable<Request> CreateWholeMonthRequests(RawItem rawItem, YearMonth yearMonth)

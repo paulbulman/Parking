@@ -2,6 +2,7 @@
 {
     using System.Collections.Generic;
     using System.Linq;
+    using Business;
     using Business.Data;
     using Model;
     using Moq;
@@ -16,7 +17,7 @@
             var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);
 
             mockRequestRepository
-                .Setup(r => r.GetRequests(activeDates.First(), activeDates.Last()))
+                .Setup(r => r.GetRequests(activeDates.ToDateInterval()))
                 .ReturnsAsync(requests);
 
             return mockRequestRepository.Object;
@@ -42,7 +43,7 @@
             var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);
 
             mockRequestRepository
-                .Setup(r => r.GetRequests(userId, activeDates.First(), activeDates.Last()))
+                .Setup(r => r.GetRequests(userId, activeDates.ToDateInterval()))
                 .ReturnsAsync(requests);
 
             return mockRequestRepository;

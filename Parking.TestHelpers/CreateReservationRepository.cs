@@ -2,6 +2,7 @@
 {
     using System.Collections.Generic;
     using System.Linq;
+    using Business;
     using Business.Data;
     using Model;
     using Moq;
@@ -19,7 +20,7 @@
             var mockReservationRepository = new Mock<IReservationRepository>(MockBehavior.Strict);
 
             mockReservationRepository
-                .Setup(r => r.GetReservations(activeDates.First(), activeDates.Last()))
+                .Setup(r => r.GetReservations(activeDates.ToDateInterval()))
                 .ReturnsAsync(reservations);
             return mockReservationRepository;
         }

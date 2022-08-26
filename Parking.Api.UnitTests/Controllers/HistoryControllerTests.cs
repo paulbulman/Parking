@@ -188,7 +188,7 @@
         {
             var mockReservationRepository = new Mock<IReservationRepository>();
             mockReservationRepository
-                .Setup(r => r.GetReservations(It.IsAny<LocalDate>(), It.IsAny<LocalDate>()))
+                .Setup(r => r.GetReservations(It.IsAny<DateInterval>()))
                 .ReturnsAsync(new List<Reservation>());
 
             return mockReservationRepository.Object;
@@ -198,7 +198,7 @@
         {
             var mockRequestRepository = new Mock<IRequestRepository>();
             mockRequestRepository
-                .Setup(r => r.GetRequests(It.IsAny<LocalDate>(), It.IsAny<LocalDate>()))
+                .Setup(r => r.GetRequests(It.IsAny<DateInterval>()))
                 .ReturnsAsync(new List<Request>());
 
             return mockRequestRepository.Object;

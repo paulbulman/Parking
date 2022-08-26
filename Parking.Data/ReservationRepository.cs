@@ -28,13 +28,13 @@
             this.userRepository = userRepository;
         }
 
-        public async Task<IReadOnlyCollection<Reservation>> GetReservations(LocalDate firstDate, LocalDate lastDate)
+        public async Task<IReadOnlyCollection<Reservation>> GetReservations(DateInterval dateInterval)
         {
             var users = await this.userRepository.GetUsers();
 
             var matchingReservations = new List<Reservation>();
 
-            foreach (var yearMonth in new DateInterval(firstDate, lastDate).YearMonths())
+            foreach (var yearMonth in dateInterval.YearMonths())
             {
                 var queryResult = await this.databaseProvider.GetReservations(yearMonth);
 
@@ -43,7 +43,7 @@
 
                 matchingReservations.AddRange(
                     wholeMonthReservations.Where(r =>
-                        r.Date >= firstDate && r.Date <= lastDate && users.Select(u => u.UserId).Contains(r.UserId)));
+                        dateInterval.Contains(r.Date) && users.Select(u => u.UserId).Contains(r.UserId)));
             }
 
             return matchingReservations;
@@ -69,7 +69,9 @@
             var firstDate = orderedReservations.First().Date.With(DateAdjusters.StartOfMonth);
             var lastDate = orderedReservations.Last().Date.With(DateAdjusters.EndOfMonth);
 
-            var existingReservations = await this.GetReservations(firstDate, lastDate);
+            var dateInterval = new DateInterval(firstDate, lastDate);
+
+            var existingReservations = await this.GetReservations(dateInterval);
 
             var combinedReservations = existingReservations
                 .Where(existing => !IsOverwritten(existing, reservations))

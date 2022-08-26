@@ -99,7 +99,7 @@
         {
             var activeDates = this.dateCalculator.GetActiveDates();
 
-            var requests = await this.requestRepository.GetRequests(userId, activeDates.First(), activeDates.Last());
+            var requests = await this.requestRepository.GetRequests(userId, activeDates.ToDateInterval());
 
             var data = activeDates.ToDictionary(
                 d => d,

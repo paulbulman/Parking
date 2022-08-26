@@ -39,6 +39,17 @@
         }
 
         [Fact]
+        public static void ToDateInterval_returns_interval_of_single_LocalDate()
+        {
+            var localDate = 26.August(2022);
+
+            var actual = localDate.ToDateInterval();
+
+            Assert.Equal(localDate, actual.Start);
+            Assert.Equal(localDate, actual.End);
+        }
+
+        [Fact]
         public static void YearMonths_returns_single_YearMonth_when_Interval_is_within_single_month()
         {
             var dateInterval = new DateInterval(17.February(2021), 17.February(2021));
@@ -96,6 +107,23 @@
 
             Assert.Equal(expectedResult, dateInterval.ToEmailDisplayString());
             Assert.Equal(expectedResult, dateInterval.Reverse().ToEmailDisplayString());
+        }
+
+        [Fact]
+        public static void ToDateInterval_returns_DateInterval_with_Start_and_End_set_to_earliest_and_latest_LocalDates()
+        {
+            var localDateCollection = new[]
+            {
+                26.August(2022),
+                27.August(2022),
+                22.August(2022),
+                25.August(2022)
+            };
+
+            var actual = localDateCollection.ToDateInterval();
+
+            Assert.Equal(22.August(2022), actual.Start);
+            Assert.Equal(27.August(2022), actual.End);
         }
 
         [Theory]

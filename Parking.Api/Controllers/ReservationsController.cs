@@ -71,7 +71,7 @@
 
             var activeDates = this.dateCalculator.GetActiveDates();
 
-            var reservations = await this.reservationRepository.GetReservations(activeDates.First(), activeDates.Last());
+            var reservations = await this.reservationRepository.GetReservations(activeDates.ToDateInterval());
 
             var calendarData = activeDates.ToDictionary(
                 d => d,

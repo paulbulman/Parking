@@ -34,7 +34,7 @@
         {
             var nextWorkingDate = dateCalculator.GetNextWorkingDate();
 
-            var reservations = await reservationRepository.GetReservations(nextWorkingDate, nextWorkingDate);
+            var reservations = await reservationRepository.GetReservations(nextWorkingDate.ToDateInterval());
 
             if (!reservations.Any())
             {

@@ -37,7 +37,7 @@ namespace Parking.Data.UnitTests
                 mockDatabaseProvider.Object,
                 CreateDefaultUserRepository());
 
-            var result = await reservationRepository.GetReservations(1.August(2020), 30.September(2020));
+            var result = await reservationRepository.GetReservations(new DateInterval(1.August(2020), 30.September(2020)));
 
             Assert.NotNull(result);
             Assert.Empty(result);
@@ -66,7 +66,7 @@ namespace Parking.Data.UnitTests
                 mockDatabaseProvider.Object,
                 CreateDefaultUserRepository());
 
-            var result = await reservationRepository.GetReservations(1.August(2020), 30.September(2020));
+            var result = await reservationRepository.GetReservations(new DateInterval(1.August(2020), 30.September(2020)));
 
             Assert.NotNull(result);
 
@@ -93,7 +93,7 @@ namespace Parking.Data.UnitTests
                 mockDatabaseProvider.Object,
                 CreateDefaultUserRepository());
 
-            var result = await reservationRepository.GetReservations(3.August(2020), 31.August(2020));
+            var result = await reservationRepository.GetReservations(new DateInterval(3.August(2020), 31.August(2020)));
 
             Assert.NotNull(result);
             Assert.Empty(result);
@@ -121,7 +121,7 @@ namespace Parking.Data.UnitTests
                 mockDatabaseProvider.Object,
                 mockUserRepository.Object);
 
-            var result = await reservationRepository.GetReservations(1.August(2020), 31.August(2020));
+            var result = await reservationRepository.GetReservations(new DateInterval(1.August(2020), 31.August(2020)));
 
             Assert.Equal(1, result.Count);
 

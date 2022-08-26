@@ -35,9 +35,11 @@
         {
             var nextWeeklyNotificationDates = dateCalculator.GetNextWeeklyNotificationDates();
 
-            var requests = await requestRepository.GetRequests(
+            var dateInterval = new DateInterval(
                 nextWeeklyNotificationDates.First().PlusDays(-60),
                 nextWeeklyNotificationDates.Last());
+
+            var requests = await requestRepository.GetRequests(dateInterval);
 
             var users = await userRepository.GetUsers();
 

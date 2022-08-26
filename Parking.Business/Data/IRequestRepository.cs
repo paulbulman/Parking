@@ -7,9 +7,9 @@
 
     public interface IRequestRepository
     {
-        Task<IReadOnlyCollection<Request>> GetRequests(LocalDate firstDate, LocalDate lastDate);
+        Task<IReadOnlyCollection<Request>> GetRequests(DateInterval dateInterval);
 
-        Task<IReadOnlyCollection<Request>> GetRequests(string userId, LocalDate firstDate, LocalDate lastDate);
+        Task<IReadOnlyCollection<Request>> GetRequests(string userId, DateInterval dateInterval);
 
         Task SaveRequests(IReadOnlyCollection<Request> requests);
     }

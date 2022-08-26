@@ -45,7 +45,7 @@
         {
             var activeDates = this.dateCalculator.GetActiveDates();
 
-            var requests = await this.requestRepository.GetRequests(activeDates.First(), activeDates.Last());
+            var requests = await this.requestRepository.GetRequests(activeDates.ToDateInterval());
 
             var users = await this.userRepository.GetUsers();
 
@@ -66,10 +66,7 @@
         {
             var requests = await this.requestRepository.GetRequests(
                 this.GetCognitoUserId(),
-                patchRequest.LocalDate,
-                patchRequest.LocalDate);
-
-            var users = await this.userRepository.GetUsers();
+                patchRequest.LocalDate.ToDateInterval());
 
             var request = requests.SingleOrDefault();
 

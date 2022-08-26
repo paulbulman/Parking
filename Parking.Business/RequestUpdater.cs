@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using Data;
     using Model;
+    using NodaTime;
 
     public class RequestUpdater
     {
@@ -45,8 +46,10 @@
             var firstCacheDate = shortLeadTimeAllocationDates.First().PlusDays(-60);
             var lastCacheDate = longLeadTimeAllocationDates.Last();
 
-            var requests = await this.requestRepository.GetRequests(firstCacheDate, lastCacheDate);
-            var reservations = await this.reservationRepository.GetReservations(firstCacheDate, lastCacheDate);
+            var cacheInterval = new DateInterval(firstCacheDate, lastCacheDate);
+
+            var requests = await this.requestRepository.GetRequests(cacheInterval);
+            var reservations = await this.reservationRepository.GetReservations(cacheInterval);
 
             var users = await this.userRepository.GetUsers();
             var configuration = await this.configurationRepository.GetConfiguration();

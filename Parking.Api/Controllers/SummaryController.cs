@@ -34,10 +34,8 @@
         {
             var activeDates = this.dateCalculator.GetActiveDates();
 
-            var requests = await this.requestRepository.GetRequests(
-                this.GetCognitoUserId(),
-                activeDates.First(),
-                activeDates.Last());
+            var requests =
+                await this.requestRepository.GetRequests(this.GetCognitoUserId(), activeDates.ToDateInterval());
 
             var data = activeDates.ToDictionary(
                 d => d,

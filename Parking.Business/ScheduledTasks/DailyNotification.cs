@@ -34,7 +34,7 @@
         {
             var nextWorkingDate = dateCalculator.GetNextWorkingDate();
 
-            var requests = await requestRepository.GetRequests(nextWorkingDate, nextWorkingDate);
+            var requests = await requestRepository.GetRequests(nextWorkingDate.ToDateInterval());
 
             var users = await userRepository.GetUsers();
 

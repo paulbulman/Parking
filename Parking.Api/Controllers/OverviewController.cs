@@ -36,7 +36,7 @@
         {
             var activeDates = this.dateCalculator.GetActiveDates();
 
-            var requests = await this.requestRepository.GetRequests(activeDates.First(), activeDates.Last());
+            var requests = await this.requestRepository.GetRequests(activeDates.ToDateInterval());
 
             var users = await this.userRepository.GetUsers();
 

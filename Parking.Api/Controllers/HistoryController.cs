@@ -37,10 +37,12 @@
         {
             var firstDate = lastDate.PlusDays(-60);
 
-            var allRequests = await this.requestRepository.GetRequests(firstDate, lastDate);
-            var reservations = await this.reservationRepository.GetReservations(firstDate, lastDate);
+            var dateInterval = new DateInterval(firstDate, lastDate);
 
-            var captions = new DateInterval(firstDate, lastDate)
+            var allRequests = await this.requestRepository.GetRequests(dateInterval);
+            var reservations = await this.reservationRepository.GetReservations(dateInterval);
+
+            var captions = dateInterval
                 .Where(this.dateCalculator.IsWorkingDay)
                 .ToDictionary(d => d, d => GetCaption(d, userId, allRequests, reservations));
 
