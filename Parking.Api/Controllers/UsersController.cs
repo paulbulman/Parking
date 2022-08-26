@@ -97,7 +97,7 @@
                 requestReminderEnabled: existingUser.RequestReminderEnabled,
                 reservationReminderEnabled: existingUser.ReservationReminderEnabled);
 
-            await this.userRepository.SaveUser(updatedUser);
+            await this.userRepository.UpdateUser(updatedUser);
 
             var usersData = CreateUsersData(updatedUser);
 

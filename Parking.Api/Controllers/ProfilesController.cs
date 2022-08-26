@@ -54,7 +54,7 @@
                 requestReminderEnabled: request.RequestReminderEnabled ?? true,
                 reservationReminderEnabled: request.ReservationReminderEnabled ?? true);
 
-            await this.userRepository.SaveUser(updatedUser);
+            await this.userRepository.UpdateUser(updatedUser);
 
             var response = CreateResponse(updatedUser);
 

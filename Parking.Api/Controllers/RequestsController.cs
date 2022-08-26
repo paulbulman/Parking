@@ -18,11 +18,8 @@
     public class RequestsController : ControllerBase
     {
         private readonly IDateCalculator dateCalculator;
-
         private readonly IRequestRepository requestRepository;
-
         private readonly ITriggerRepository triggerRepository;
-
         private readonly IUserRepository userRepository;
 
         public RequestsController(

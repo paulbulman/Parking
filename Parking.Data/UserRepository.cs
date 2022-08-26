@@ -69,13 +69,6 @@
                 .ToArray();
         }
 
-        public async Task SaveUser(User user)
-        {
-            await this.identityProvider.UpdateUser(user.UserId, user.FirstName, user.LastName);
-
-            await this.databaseProvider.SaveItem(CreateRawItem(user));
-        }
-
         public async Task<IReadOnlyCollection<User>> GetTeamLeaderUsers()
         {
             var allUsers = await this.GetUsers();
@@ -85,6 +78,13 @@
             return allUsers
                 .Where(u => teamLeaderUserIds.Contains(u.UserId))
                 .ToArray();
+        }
+
+        public async Task UpdateUser(User user)
+        {
+            await this.identityProvider.UpdateUser(user.UserId, user.FirstName, user.LastName);
+
+            await this.databaseProvider.SaveItem(CreateRawItem(user));
         }
 
         public async Task DeleteUser(User user)

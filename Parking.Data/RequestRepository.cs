@@ -18,6 +18,8 @@
         private readonly IDatabaseProvider databaseProvider;
         private readonly IUserRepository userRepository;
 
+        private IReadOnlyCollection<User>? cachedUsers;
+
         public RequestRepository(
             ILogger<RequestRepository> logger,
             IDatabaseProvider databaseProvider,
@@ -30,7 +32,7 @@
 
         public async Task<IReadOnlyCollection<Request>> GetRequests(DateInterval dateInterval)
         {
-            var users = await this.userRepository.GetUsers();
+            var users = await this.GetUsers();
 
             var requests = new List<Request>();
 
@@ -46,7 +48,7 @@
 
         public async Task<IReadOnlyCollection<Request>> GetRequests(string userId, DateInterval dateInterval)
         {
-            var users = await this.userRepository.GetUsers();
+            var users = await this.GetUsers();
 
             var requests = new List<Request>();
 
@@ -67,7 +69,7 @@
                 return;
             }
 
-            var users = await this.userRepository.GetUsers();
+            var users = await this.GetUsers();
 
             var fullNames = users.ToDictionary(u => u.UserId, u => $"{u.FirstName} {u.LastName}");
 
@@ -187,5 +189,8 @@
                 RequestStatus.SoftInterrupted => "S",
                 _ => throw new ArgumentOutOfRangeException(nameof(request))
             };
+
+        private async Task<IReadOnlyCollection<User>> GetUsers() =>
+            this.cachedUsers ??= await this.userRepository.GetUsers();
     }
 }

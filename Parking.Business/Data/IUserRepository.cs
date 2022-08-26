@@ -14,9 +14,9 @@
 
         Task<IReadOnlyCollection<User>> GetUsers();
 
-        Task SaveUser(User user);
-
         Task<IReadOnlyCollection<User>> GetTeamLeaderUsers();
+
+        Task UpdateUser(User user);
 
         Task DeleteUser(User user);
     }

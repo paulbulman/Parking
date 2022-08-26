@@ -186,7 +186,7 @@ namespace Parking.Api.UnitTests.Controllers
             mockUserRepository.Verify(r => r.GetUser(UserId), Times.Once);
 
             mockUserRepository.Verify(
-                r => r.SaveUser(
+                r => r.UpdateUser(
                     It.Is<User>(u =>
                         u.UserId == UserId &&
                         u.AlternativeRegistrationNumber == "__NEW_ALTERNATIVE_REG__" &&

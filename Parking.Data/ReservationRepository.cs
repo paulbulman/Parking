@@ -18,6 +18,8 @@
         private readonly IDatabaseProvider databaseProvider;
         private readonly IUserRepository userRepository;
 
+        private IReadOnlyCollection<User>? cachedUsers;
+
         public ReservationRepository(
             ILogger<ReservationRepository> logger,
             IDatabaseProvider databaseProvider,
@@ -30,7 +32,7 @@
 
         public async Task<IReadOnlyCollection<Reservation>> GetReservations(DateInterval dateInterval)
         {
-            var users = await this.userRepository.GetUsers();
+            var users = await this.GetUsers();
 
             var matchingReservations = new List<Reservation>();
 
@@ -56,7 +58,7 @@
                 return;
             }
 
-            var users = await this.userRepository.GetUsers();
+            var users = await this.GetUsers();
 
             var fullNames = users.ToDictionary(u => u.UserId, u => $"{u.FirstName} {u.LastName}");
 
@@ -127,5 +129,8 @@
                 .ToDictionary(
                     g => g.Key.Day.ToString("D2", CultureInfo.InvariantCulture),
                     g => g.Select(r => r.UserId).Where(u => !string.IsNullOrEmpty(u)).ToList());
+
+        private async Task<IReadOnlyCollection<User>> GetUsers() =>
+            this.cachedUsers ??= await this.userRepository.GetUsers();
     }
 }

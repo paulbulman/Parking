@@ -19,11 +19,8 @@
     public class ReservationsController : ControllerBase
     {
         private readonly IConfigurationRepository configurationRepository;
-
         private readonly IDateCalculator dateCalculator;
-
         private readonly IReservationRepository reservationRepository;
-
         private readonly IUserRepository userRepository;
 
         public ReservationsController(

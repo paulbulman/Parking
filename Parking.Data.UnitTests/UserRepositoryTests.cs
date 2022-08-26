@@ -385,7 +385,7 @@ namespace Parking.Data.UnitTests
                 Mock.Of<IDatabaseProvider>(),
                 mockIdentityProvider.Object);
 
-            await userRepository.SaveUser(user);
+            await userRepository.UpdateUser(user);
 
             mockIdentityProvider.Verify(p => p.UpdateUser("User1", "John", "Doe"), Times.Once);
         }
@@ -411,7 +411,7 @@ namespace Parking.Data.UnitTests
                 mockDatabaseProvider.Object,
                 Mock.Of<IIdentityProvider>());
 
-            await userRepository.SaveUser(user);
+            await userRepository.UpdateUser(user);
 
             mockDatabaseProvider.Verify(
                 p => p.SaveItem(It.Is<RawItem>(actual =>
