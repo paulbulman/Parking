@@ -101,12 +101,14 @@
                 .WithGetRequests(dateInterval, requests)
                 .Build();
                 
-            var reservationsRepository = CreateReservationRepository.WithReservations(dateInterval.ToArray(), reservations);
+            var reservationRepository = new ReservationRepositoryBuilder()
+                .WithGetReservations(dateInterval, reservations)
+                .Build();
 
             var controller = new HistoryController(
                 CreateDefaultDateCalculator(),
                 requestRepository,
-                reservationsRepository);
+                reservationRepository);
 
             var result = await controller.GetAsync("USER1", LastDate);
 
@@ -164,12 +166,14 @@
                 .WithGetRequests(dateInterval, requests)
                 .Build();
 
-            var reservationsRepository = CreateReservationRepository.WithReservations(dateInterval.ToArray(), reservations);
+            var reservationRepository = new ReservationRepositoryBuilder()
+                .WithGetReservations(dateInterval, reservations)
+                .Build();
 
             var controller = new HistoryController(
                 CreateDefaultDateCalculator(),
                 requestRepository,
-                reservationsRepository);
+                reservationRepository);
 
             var result = await controller.GetAsync("USER1", LastDate);
 

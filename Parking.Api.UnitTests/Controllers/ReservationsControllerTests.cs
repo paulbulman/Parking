@@ -6,6 +6,7 @@ namespace Parking.Api.UnitTests.Controllers
     using System.Threading.Tasks;
     using Api.Controllers;
     using Api.Json.Reservations;
+    using Business;
     using Business.Data;
     using Model;
     using Moq;
@@ -29,10 +30,14 @@ namespace Parking.Api.UnitTests.Controllers
         {
             var activeDates = new[] { 15.February(2021), 16.February(2021), 18.February(2021) };
 
+            var reservationRepository = new ReservationRepositoryBuilder()
+                .WithGetReservations(activeDates.ToDateInterval(), new List<Reservation>())
+                .Build();
+
             var controller = new ReservationsController(
                 CreateConfigurationRepository.WithDefaultConfiguration(),
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateReservationRepository.WithReservations(activeDates, new List<Reservation>()),
+                reservationRepository,
                 CreateUserRepository.WithUsers(DefaultUsers));
 
             var result = await controller.GetAsync();
@@ -60,10 +65,14 @@ namespace Parking.Api.UnitTests.Controllers
                 new Reservation("User3", 15.February(2021)),
             };
 
+            var reservationRepository = new ReservationRepositoryBuilder()
+                .WithGetReservations(activeDates.ToDateInterval(), reservations)
+                .Build();
+
             var controller = new ReservationsController(
                 CreateConfigurationRepository.WithDefaultConfiguration(),
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateReservationRepository.WithReservations(activeDates, reservations),
+                reservationRepository,
                 CreateUserRepository.WithUsers(DefaultUsers));
 
             var result = await controller.GetAsync();
@@ -82,10 +91,14 @@ namespace Parking.Api.UnitTests.Controllers
 
             var activeDates = new[] { 15.February(2021) };
 
+            var reservationRepository = new ReservationRepositoryBuilder()
+                .WithGetReservations(activeDates.ToDateInterval(), new List<Reservation>())
+                .Build();
+
             var controller = new ReservationsController(
                 CreateConfigurationRepository.WithConfiguration(configuration),
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateReservationRepository.WithReservations(activeDates, new List<Reservation>()),
+                reservationRepository,
                 CreateUserRepository.WithUsers(new List<User>()));
 
             var result = await controller.GetAsync();
@@ -100,10 +113,14 @@ namespace Parking.Api.UnitTests.Controllers
         {
             var activeDates = new[] { 15.February(2021) };
 
+            var reservationRepository = new ReservationRepositoryBuilder()
+                .WithGetReservations(activeDates.ToDateInterval(), new List<Reservation>())
+                .Build();
+
             var controller = new ReservationsController(
                 CreateConfigurationRepository.WithDefaultConfiguration(),
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateReservationRepository.WithReservations(activeDates, new List<Reservation>()),
+                reservationRepository,
                 CreateUserRepository.WithUsers(DefaultUsers));
 
             var result = await controller.GetAsync();
@@ -131,10 +148,14 @@ namespace Parking.Api.UnitTests.Controllers
         {
             var activeDates = new[] { 15.February(2021) };
 
+            var reservationRepository = new ReservationRepositoryBuilder()
+                .WithGetReservations(activeDates.ToDateInterval(), new List<Reservation>())
+                .Build();
+
             var controller = new ReservationsController(
                 CreateConfigurationRepository.WithDefaultConfiguration(),
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateReservationRepository.WithReservations(activeDates, new List<Reservation>()),
+                reservationRepository,
                 CreateUserRepository.WithUsers(new List<User>()));
 
             var result = await controller.GetAsync();
@@ -153,12 +174,9 @@ namespace Parking.Api.UnitTests.Controllers
         {
             var activeDates = new[] { 2.February(2021), 3.February(2021) };
 
-            var mockReservationRepository =
-                CreateReservationRepository.MockWithReservations(activeDates, new List<Reservation>());
-
-            mockReservationRepository
-                .Setup(r => r.SaveReservations(It.IsAny<IReadOnlyCollection<Reservation>>()))
-                .Returns(Task.CompletedTask);
+            var mockReservationRepository = new ReservationRepositoryBuilder()
+                .WithGetReservations(activeDates.ToDateInterval(), new List<Reservation>())
+                .BuildMock();
 
             var patchRequest = new ReservationsPatchRequest(new[]
             {
@@ -190,12 +208,9 @@ namespace Parking.Api.UnitTests.Controllers
         {
             var activeDates = new[] { 2.February(2021), 3.February(2021) };
 
-            var mockReservationRepository =
-                CreateReservationRepository.MockWithReservations(activeDates, new List<Reservation>());
-
-            mockReservationRepository
-                .Setup(r => r.SaveReservations(It.IsAny<IReadOnlyCollection<Reservation>>()))
-                .Returns(Task.CompletedTask);
+            var mockReservationRepository = new ReservationRepositoryBuilder()
+                .WithGetReservations(activeDates.ToDateInterval(), new List<Reservation>())
+                .BuildMock();
 
             var patchRequest = new ReservationsPatchRequest(new[]
             {
@@ -227,12 +242,9 @@ namespace Parking.Api.UnitTests.Controllers
                 new Reservation("User3", 3.February(2021)),
             };
 
-            var mockReservationRepository =
-                CreateReservationRepository.MockWithReservations(activeDates, returnedReservations);
-
-            mockReservationRepository
-                .Setup(r => r.SaveReservations(It.IsAny<IReadOnlyCollection<Reservation>>()))
-                .Returns(Task.CompletedTask);
+            var reservationRepository = new ReservationRepositoryBuilder()
+                .WithGetReservations(activeDates.ToDateInterval(), returnedReservations)
+                .Build();
 
             var patchRequest = new ReservationsPatchRequest(new[]
             {
@@ -242,7 +254,7 @@ namespace Parking.Api.UnitTests.Controllers
             var controller = new ReservationsController(
                 CreateConfigurationRepository.WithDefaultConfiguration(),
                 CreateDateCalculator.WithActiveDates(activeDates),
-                mockReservationRepository.Object,
+                reservationRepository,
                 CreateUserRepository.WithUsers(DefaultUsers));
 
             var result = await controller.PatchAsync(patchRequest);
