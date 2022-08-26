@@ -11,7 +11,6 @@ namespace Parking.Api.UnitTests.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Model;
     using Moq;
-    using NodaTime;
     using NodaTime.Testing.Extensions;
     using TestHelpers;
     using Xunit;
@@ -27,9 +26,13 @@ namespace Parking.Api.UnitTests.Controllers
 
             var dateCalculator = CreateDateCalculator.WithActiveDates(activeDates);
 
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(activeDates.ToDateInterval(), new List<Request>())
+                .Build();
+
             var controller = new DailyDetailsController(
                 dateCalculator,
-                CreateRequestRepository.WithRequests(activeDates, new List<Request>()),
+                requestRepository,
                 Mock.Of<ITriggerRepository>(),
                 CreateUserRepository.WithUsers(new List<User>()))
             {
@@ -70,9 +73,13 @@ namespace Parking.Api.UnitTests.Controllers
                 new Request("user6", 12.July(2021), RequestStatus.Pending),
             };
 
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(activeDates.ToDateInterval(), requests)
+                .Build();
+
             var controller = new DailyDetailsController(
                 dateCalculator,
-                CreateRequestRepository.WithRequests(activeDates, requests),
+                requestRepository,
                 Mock.Of<ITriggerRepository>(),
                 CreateUserRepository.WithUsers(users))
             {
@@ -111,9 +118,13 @@ namespace Parking.Api.UnitTests.Controllers
                 new Request("user3", 17.July(2021), RequestStatus.Cancelled),
             };
 
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(activeDates.ToDateInterval(), requests)
+                .Build();
+
             var controller = new DailyDetailsController(
                 dateCalculator,
-                CreateRequestRepository.WithRequests(activeDates, requests),
+                requestRepository,
                 Mock.Of<ITriggerRepository>(),
                 CreateUserRepository.WithUsers(users))
             {
@@ -154,9 +165,13 @@ namespace Parking.Api.UnitTests.Controllers
                 new Request("user2", 18.July(2021), RequestStatus.Pending),
             };
 
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(activeDates.ToDateInterval(), requests)
+                .Build();
+
             var controller = new DailyDetailsController(
                 dateCalculator,
-                CreateRequestRepository.WithRequests(activeDates, requests),
+                requestRepository,
                 Mock.Of<ITriggerRepository>(),
                 CreateUserRepository.WithUsers(users))
             {
@@ -208,9 +223,13 @@ namespace Parking.Api.UnitTests.Controllers
                 CreateUser.With(userId: "user2", firstName: "Hynda", lastName: "Lindback"),
             };
 
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(activeDates.ToDateInterval(), requests)
+                .Build();
+
             var controller = new DailyDetailsController(
                 dateCalculator,
-                CreateRequestRepository.WithRequests(activeDates, requests),
+                requestRepository,
                 Mock.Of<ITriggerRepository>(),
                 CreateUserRepository.WithUsers(users))
             {
@@ -244,9 +263,13 @@ namespace Parking.Api.UnitTests.Controllers
                 CreateUser.With(userId: "user1", firstName: "Cathie", lastName: "Phoenix"),
             };
 
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(activeDates.ToDateInterval(), requests)
+                .Build();
+
             var controller = new DailyDetailsController(
                 dateCalculator,
-                CreateRequestRepository.WithRequests(activeDates, requests),
+                requestRepository,
                 Mock.Of<ITriggerRepository>(),
                 CreateUserRepository.WithUsers(users))
             {
@@ -269,9 +292,13 @@ namespace Parking.Api.UnitTests.Controllers
         public static async Task Returns_404_response_when_existing_request_cannot_be_found(
             bool acceptInterruption)
         {
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests("user1", 12.July(2021).ToDateInterval(), new List<Request>())
+                .Build();
+
             var controller = new DailyDetailsController(
                 Mock.Of<IDateCalculator>(),
-                CreateRequestRepository.WithRequests("user1", 12.July(2021), new List<Request>()),
+                requestRepository,
                 Mock.Of<ITriggerRepository>(),
                 Mock.Of<IUserRepository>())
             {
@@ -294,9 +321,13 @@ namespace Parking.Api.UnitTests.Controllers
         {
             var requests = new[] { new Request("user1", 12.July(2021), requestStatus) };
 
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests("user1", 12.July(2021).ToDateInterval(), requests)
+                .Build();
+
             var controller = new DailyDetailsController(
                 Mock.Of<IDateCalculator>(),
-                CreateRequestRepository.WithRequests("user1", 12.July(2021), requests),
+                requestRepository,
                 Mock.Of<ITriggerRepository>(),
                 Mock.Of<IUserRepository>())
             {
@@ -325,14 +356,10 @@ namespace Parking.Api.UnitTests.Controllers
 
             var existingRequests = new[] { new Request("user1", requestDate, initialRequestStatus) };
 
-            var mockRequestRepository = CreateRequestRepository.MockWithRequests("user1", activeDates, existingRequests);
-
-            mockRequestRepository
-                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
-                .Returns(Task.CompletedTask);
-            mockRequestRepository
-                .Setup(r => r.GetRequests(It.IsAny<DateInterval>()))
-                .ReturnsAsync(new List<Request>());
+            var mockRequestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests("user1", activeDates.ToDateInterval(), existingRequests)
+                .WithGetRequests(activeDates.ToDateInterval(), new List<Request>())
+                .BuildMock();
 
             var users = new[]
             {
@@ -353,7 +380,8 @@ namespace Parking.Api.UnitTests.Controllers
 
             var expectedRequests = new[] { new Request("user1", requestDate, expectedRequestStatus) };
 
-            mockRequestRepository.Verify(r => r.SaveRequests(
+            mockRequestRepository.Verify(
+                r => r.SaveRequests(
                     It.Is<IReadOnlyCollection<Request>>(actual => CheckRequests(expectedRequests, actual.ToList()))),
                 Times.Once);
         }
@@ -369,14 +397,10 @@ namespace Parking.Api.UnitTests.Controllers
 
             var existingRequests = new[] { new Request("user1", requestDate, RequestStatus.SoftInterrupted) };
 
-            var mockRequestRepository = CreateRequestRepository.MockWithRequests("user1", activeDates, existingRequests);
-
-            mockRequestRepository
-                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
-                .Returns(Task.CompletedTask);
-            mockRequestRepository
-                .Setup(r => r.GetRequests(It.IsAny<DateInterval>()))
-                .ReturnsAsync(new List<Request>());
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests("user1", activeDates.ToDateInterval(), existingRequests)
+                .WithGetRequests(activeDates.ToDateInterval(), new List<Request>())
+                .Build();
 
             var users = new[]
             {
@@ -387,7 +411,7 @@ namespace Parking.Api.UnitTests.Controllers
 
             var controller = new DailyDetailsController(
                 dateCalculator,
-                mockRequestRepository.Object,
+                requestRepository,
                 mockTriggerRepository.Object,
                 CreateUserRepository.WithUsers(users))
             {
@@ -419,18 +443,10 @@ namespace Parking.Api.UnitTests.Controllers
                 new Request("user1", 29.June(2021), RequestStatus.Interrupted),
             };
 
-            var mockRequestRepository =
-                CreateRequestRepository.MockWithRequests("user1", activeDates, new[] {initialRequest});
-
-            mockRequestRepository
-                .Setup(r => r.GetRequests("user1", 28.June(2021).ToDateInterval()))
-                .ReturnsAsync(new[] { initialRequest });
-            mockRequestRepository
-                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
-                .Returns(Task.CompletedTask);
-            mockRequestRepository
-                .Setup(r => r.GetRequests(new DateInterval(28.June(2021), 29.June(2021))))
-                .ReturnsAsync(updatedRequests);
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests("user1", 28.June(2021).ToDateInterval(), new[] { initialRequest })
+                .WithGetRequests(activeDates.ToDateInterval(), updatedRequests)
+                .Build();
 
             var users = new[]
             {
@@ -439,7 +455,7 @@ namespace Parking.Api.UnitTests.Controllers
 
             var controller = new DailyDetailsController(
                 dateCalculator,
-                mockRequestRepository.Object,
+                requestRepository,
                 Mock.Of<ITriggerRepository>(),
                 CreateUserRepository.WithUsers(users))
             {

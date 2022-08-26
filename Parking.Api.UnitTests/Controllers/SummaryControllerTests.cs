@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using Api.Controllers;
     using Api.Json.Summary;
+    using Business;
     using Model;
     using NodaTime.Testing.Extensions;
     using TestHelpers;
@@ -21,9 +22,11 @@
 
             var dateCalculator = CreateDateCalculator.WithActiveDates(activeDates);
 
-            var controller = new SummaryController(
-                dateCalculator,
-                CreateRequestRepository.WithRequests("user1", activeDates, new List<Request>()))
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests("user1", activeDates.ToDateInterval(), new List<Request>())
+                .Build();
+
+            var controller = new SummaryController(dateCalculator, requestRepository)
             {
                 ControllerContext = CreateControllerContext.WithUsername("user1")
             };
@@ -52,13 +55,15 @@
         {
             var activeDates = new[] { 28.June(2021) };
 
-            var requests = new[] { new Request("user1", 28.June(2021), requestStatus) };
-
             var dateCalculator = CreateDateCalculator.WithActiveDates(activeDates);
 
-            var controller = new SummaryController(
-                dateCalculator,
-                CreateRequestRepository.WithRequests("user1", activeDates, requests))
+            var requests = new[] { new Request("user1", 28.June(2021), requestStatus) };
+
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests("user1", activeDates.ToDateInterval(), requests)
+                .Build();
+
+            var controller = new SummaryController(dateCalculator, requestRepository)
             {
                 ControllerContext = CreateControllerContext.WithUsername("user1")
             };
@@ -80,9 +85,11 @@
 
             var dateCalculator = CreateDateCalculator.WithActiveDates(activeDates);
 
-            var controller = new SummaryController(
-                dateCalculator,
-                CreateRequestRepository.WithRequests("user1", activeDates, new List<Request>()))
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests("user1", activeDates.ToDateInterval(), new List<Request>())
+                .Build();
+
+            var controller = new SummaryController(dateCalculator, requestRepository)
             {
                 ControllerContext = CreateControllerContext.WithUsername("user1")
             };
@@ -102,13 +109,15 @@
         {
             var activeDates = new[] { 28.June(2021) };
 
-            var requests = new[] { new Request("user1", 28.June(2021), RequestStatus.Cancelled) };
-
             var dateCalculator = CreateDateCalculator.WithActiveDates(activeDates);
 
-            var controller = new SummaryController(
-                dateCalculator,
-                CreateRequestRepository.WithRequests("user1", activeDates, requests))
+            var requests = new[] { new Request("user1", 28.June(2021), RequestStatus.Cancelled) };
+
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests("user1", activeDates.ToDateInterval(), requests)
+                .Build();
+
+            var controller = new SummaryController(dateCalculator, requestRepository)
             {
                 ControllerContext = CreateControllerContext.WithUsername("user1")
             };

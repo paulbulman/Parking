@@ -6,6 +6,7 @@ namespace Parking.Api.UnitTests.Controllers
     using System.Threading.Tasks;
     using Api.Controllers;
     using Api.Json.Overview;
+    using Business;
     using Model;
     using NodaTime.Testing.Extensions;
     using TestHelpers;
@@ -20,9 +21,13 @@ namespace Parking.Api.UnitTests.Controllers
         {
             var activeDates = new[] { 15.February(2021), 16.February(2021), 18.February(2021) };
 
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(activeDates.ToDateInterval(), new List<Request>())
+                .Build();
+
             var controller = new OverviewController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateRequestRepository.WithRequests(activeDates, new List<Request>()),
+                requestRepository,
                 CreateUserRepository.WithUsers(new List<User>()))
             {
                 ControllerContext = CreateControllerContext.WithUsername("user1")
@@ -60,9 +65,13 @@ namespace Parking.Api.UnitTests.Controllers
                 new Request("user4", 15.February(2021), RequestStatus.Interrupted),
             };
 
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(activeDates.ToDateInterval(), requests)
+                .Build();
+
             var controller = new OverviewController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateRequestRepository.WithRequests(activeDates, requests),
+                requestRepository,
                 CreateUserRepository.WithUsers(users))
             {
                 ControllerContext = CreateControllerContext.WithUsername("user1")
@@ -83,9 +92,13 @@ namespace Parking.Api.UnitTests.Controllers
         {
             var activeDates = new[] { 15.February(2021) };
 
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(activeDates.ToDateInterval(), new List<Request>())
+                .Build();
+
             var controller = new OverviewController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateRequestRepository.WithRequests(activeDates, new List<Request>()),
+                requestRepository,
                 CreateUserRepository.WithUsers(new List<User>()))
             {
                 ControllerContext = CreateControllerContext.WithUsername("user1")
@@ -108,9 +121,13 @@ namespace Parking.Api.UnitTests.Controllers
 
             var requests = new[] { new Request("user1", 15.February(2021), RequestStatus.Cancelled) };
 
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(activeDates.ToDateInterval(), requests)
+                .Build();
+
             var controller = new OverviewController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateRequestRepository.WithRequests(activeDates, requests),
+                requestRepository,
                 CreateUserRepository.WithUsers(new List<User>()))
             {
                 ControllerContext = CreateControllerContext.WithUsername("user1")
@@ -145,9 +162,13 @@ namespace Parking.Api.UnitTests.Controllers
                 new Request("user2", 16.February(2021), RequestStatus.Allocated),
             };
 
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(activeDates.ToDateInterval(), requests)
+                .Build();
+
             var controller = new OverviewController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateRequestRepository.WithRequests(activeDates, requests),
+                requestRepository,
                 CreateUserRepository.WithUsers(users))
             {
                 ControllerContext = CreateControllerContext.WithUsername("user2")

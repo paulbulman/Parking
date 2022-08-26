@@ -95,10 +95,13 @@
                 new Reservation("USER1", 22.September(2021)),
             };
 
-            var dateInterval = new DateInterval(FirstDate, LastDate).ToArray();
+            var dateInterval = new DateInterval(FirstDate, LastDate);
 
-            var requestRepository = CreateRequestRepository.WithRequests(dateInterval, requests);
-            var reservationsRepository = CreateReservationRepository.WithReservations(dateInterval, reservations);
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(dateInterval, requests)
+                .Build();
+                
+            var reservationsRepository = CreateReservationRepository.WithReservations(dateInterval.ToArray(), reservations);
 
             var controller = new HistoryController(
                 CreateDefaultDateCalculator(),
@@ -155,10 +158,13 @@
                 new Reservation("USER1", 22.September(2021)),
             };
 
-            var dateInterval = new DateInterval(FirstDate, LastDate).ToArray();
+            var dateInterval = new DateInterval(FirstDate, LastDate);
 
-            var requestRepository = CreateRequestRepository.WithRequests(dateInterval, requests);
-            var reservationsRepository = CreateReservationRepository.WithReservations(dateInterval, reservations);
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(dateInterval, requests)
+                .Build();
+
+            var reservationsRepository = CreateReservationRepository.WithReservations(dateInterval.ToArray(), reservations);
 
             var controller = new HistoryController(
                 CreateDefaultDateCalculator(),

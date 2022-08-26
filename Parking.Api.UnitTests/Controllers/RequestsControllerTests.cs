@@ -30,9 +30,13 @@
         {
             var activeDates = new[] { 2.February(2021), 3.February(2021), 4.February(2021) };
 
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(UserId, activeDates.ToDateInterval(), new List<Request>())
+                .Build();
+
             var controller = new RequestsController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateRequestRepository.WithRequests(UserId, activeDates, new List<Request>()),
+                requestRepository,
                 Mock.Of<ITriggerRepository>(),
                 CreateUserRepository.WithUserExists(UserId, true))
             {
@@ -62,9 +66,13 @@
 
             var requests = new[] { new Request(UserId, 2.February(2021), requestStatus) };
 
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(UserId, activeDates.ToDateInterval(), requests)
+                .Build();
+
             var controller = new RequestsController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateRequestRepository.WithRequests(UserId, activeDates, requests),
+                requestRepository,
                 Mock.Of<ITriggerRepository>(),
                 CreateUserRepository.WithUserExists(UserId, true))
             {
@@ -85,9 +93,13 @@
         {
             var activeDates = new[] { 2.February(2021) };
 
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(UserId, activeDates.ToDateInterval(), new List<Request>())
+                .Build();
+
             var controller = new RequestsController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateRequestRepository.WithRequests(UserId, activeDates, new List<Request>()),
+                requestRepository,
                 Mock.Of<ITriggerRepository>(),
                 CreateUserRepository.WithUserExists(UserId, true))
             {
@@ -110,9 +122,13 @@
 
             var requests = new[] { new Request(UserId, 2.February(2021), RequestStatus.Cancelled) };
 
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(UserId, activeDates.ToDateInterval(), requests)
+                .Build();
+
             var controller = new RequestsController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateRequestRepository.WithRequests(UserId, activeDates, requests),
+                requestRepository,
                 Mock.Of<ITriggerRepository>(),
                 CreateUserRepository.WithUserExists(UserId, true))
             {
@@ -135,9 +151,13 @@
 
             var requests = new[] { new Request(UserId, 2.February(2021), RequestStatus.Interrupted) };
 
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(UserId, activeDates.ToDateInterval(), requests)
+                .Build();
+
             var controller = new RequestsController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                CreateRequestRepository.WithRequests(UserId, activeDates, requests),
+                requestRepository,
                 Mock.Of<ITriggerRepository>(),
                 CreateUserRepository.WithUserExists(UserId, true));
 
@@ -169,12 +189,9 @@
         {
             var activeDates = new[] { 2.February(2021), 3.February(2021) };
 
-            var mockRequestRepository =
-                CreateRequestRepository.MockWithRequests(UserId, activeDates, new List<Request>());
-
-            mockRequestRepository
-                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
-                .Returns(Task.CompletedTask);
+            var mockRequestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(UserId, activeDates.ToDateInterval(), new List<Request>())
+                .BuildMock();
 
             var patchRequest = new RequestsPatchRequest(new[]
             {
@@ -207,12 +224,9 @@
         {
             var activeDates = new[] { 2.February(2021) };
 
-            var mockRequestRepository =
-                CreateRequestRepository.MockWithRequests(UserId, activeDates, new List<Request>());
-
-            mockRequestRepository
-                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
-                .Returns(Task.CompletedTask);
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(UserId, activeDates.ToDateInterval(), new List<Request>())
+                .Build();
 
             var mockTriggerRepository = new Mock<ITriggerRepository>();
             
@@ -220,7 +234,7 @@
 
             var controller = new RequestsController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                mockRequestRepository.Object,
+                requestRepository,
                 mockTriggerRepository.Object,
                 CreateUserRepository.WithUsers(DefaultUsers))
             {
@@ -237,12 +251,9 @@
         {
             var activeDates = new[] { 2.February(2021), 3.February(2021) };
 
-            var mockRequestRepository =
-                CreateRequestRepository.MockWithRequests(UserId, activeDates, new List<Request>());
-
-            mockRequestRepository
-                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
-                .Returns(Task.CompletedTask);
+            var mockRequestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(UserId, activeDates.ToDateInterval(), new List<Request>())
+                .BuildMock();
 
             var patchRequest = new RequestsPatchRequest(new[]
             {
@@ -279,12 +290,9 @@
         {
             var activeDates = new[] { 2.February(2021), 3.February(2021) };
 
-            var mockRequestRepository =
-                CreateRequestRepository.MockWithRequests(UserId, activeDates, new List<Request>());
-
-            mockRequestRepository
-                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
-                .Returns(Task.CompletedTask);
+            var mockRequestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(UserId, activeDates.ToDateInterval(), new List<Request>())
+                .BuildMock();
 
             var patchRequest = new RequestsPatchRequest(new[]
             {
@@ -313,12 +321,9 @@
         {
             var activeDates = new[] { 2.February(2021), 3.February(2021) };
 
-            var mockRequestRepository =
-                CreateRequestRepository.MockWithRequests(UserId, activeDates, new List<Request>());
-
-            mockRequestRepository
-                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
-                .Returns(Task.CompletedTask);
+            var mockRequestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(UserId, activeDates.ToDateInterval(), new List<Request>())
+                .BuildMock();
 
             var patchRequest = new RequestsPatchRequest(new[]
             {
@@ -345,12 +350,9 @@
         {
             var activeDates = new[] { 2.February(2021) };
 
-            var mockRequestRepository =
-                CreateRequestRepository.MockWithRequests(UserId, activeDates, new List<Request>());
-
-            mockRequestRepository
-                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
-                .Returns(Task.CompletedTask);
+            var mockRequestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(UserId, activeDates.ToDateInterval(), new List<Request>())
+                .BuildMock();
 
             var patchRequest = new RequestsPatchRequest(new[]
             {
@@ -378,19 +380,16 @@
 
             var returnedRequests = new[] { new Request(UserId, 2.February(2021), RequestStatus.Pending) };
 
-            var mockRequestRepository =
-                CreateRequestRepository.MockWithRequests(UserId, activeDates, returnedRequests);
-
-            mockRequestRepository
-                .Setup(r => r.SaveRequests(It.IsAny<IReadOnlyCollection<Request>>()))
-                .Returns(Task.CompletedTask);
+            var requestRepository = new RequestRepositoryBuilder()
+                .WithGetRequests(UserId, activeDates.ToDateInterval(), returnedRequests)
+                .Build();
 
             var patchRequest =
                 new RequestsPatchRequest(new[] { new RequestsPatchRequestDailyData(2.February(2021), true) });
 
             var controller = new RequestsController(
                 CreateDateCalculator.WithActiveDates(activeDates),
-                mockRequestRepository.Object,
+                requestRepository,
                 Mock.Of<ITriggerRepository>(),
                 CreateUserRepository.WithUsers(DefaultUsers))
             {
