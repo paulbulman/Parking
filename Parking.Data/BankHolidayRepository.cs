@@ -17,6 +17,7 @@
                 new BankHoliday(new LocalDate(2022, 6, 2)),
                 new BankHoliday(new LocalDate(2022, 6, 3)),
                 new BankHoliday(new LocalDate(2022, 8, 29)),
+                new BankHoliday(new LocalDate(2022, 9, 19)),
                 new BankHoliday(new LocalDate(2022, 12, 26)),
                 new BankHoliday(new LocalDate(2022, 12, 27)),
                 new BankHoliday(new LocalDate(2023, 1, 2)),
