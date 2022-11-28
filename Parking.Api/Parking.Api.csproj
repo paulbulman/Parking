@@ -19,7 +19,7 @@
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.4.2" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.9.42" />
     <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.0.195" />
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.96" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.100.23" />
     <PackageReference Include="NodaTime" Version="3.1.2" />
     <PackageReference Include="Serilog.AspNetCore" Version="6.0.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.22.0" />
