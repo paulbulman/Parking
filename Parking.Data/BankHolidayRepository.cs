@@ -10,24 +10,33 @@
         public IReadOnlyCollection<BankHoliday> GetBankHolidays() =>
             new[]
             {
-                new BankHoliday(new LocalDate(2022, 1, 3)),
-                new BankHoliday(new LocalDate(2022, 4, 15)),
-                new BankHoliday(new LocalDate(2022, 4, 18)),
-                new BankHoliday(new LocalDate(2022, 5, 2)),
-                new BankHoliday(new LocalDate(2022, 6, 2)),
-                new BankHoliday(new LocalDate(2022, 6, 3)),
-                new BankHoliday(new LocalDate(2022, 8, 29)),
-                new BankHoliday(new LocalDate(2022, 9, 19)),
-                new BankHoliday(new LocalDate(2022, 12, 26)),
-                new BankHoliday(new LocalDate(2022, 12, 27)),
                 new BankHoliday(new LocalDate(2023, 1, 2)),
                 new BankHoliday(new LocalDate(2023, 4, 7)),
                 new BankHoliday(new LocalDate(2023, 4, 10)),
                 new BankHoliday(new LocalDate(2023, 5, 1)),
+                new BankHoliday(new LocalDate(2023, 5, 8)),
                 new BankHoliday(new LocalDate(2023, 5, 29)),
                 new BankHoliday(new LocalDate(2023, 8, 28)),
                 new BankHoliday(new LocalDate(2023, 12, 25)),
                 new BankHoliday(new LocalDate(2023, 12, 26)),
+
+                new BankHoliday(new LocalDate(2024, 1, 1)),
+                new BankHoliday(new LocalDate(2024, 3, 29)),
+                new BankHoliday(new LocalDate(2024, 4, 1)),
+                new BankHoliday(new LocalDate(2024, 5, 6)),
+                new BankHoliday(new LocalDate(2024, 5, 27)),
+                new BankHoliday(new LocalDate(2024, 8, 26)),
+                new BankHoliday(new LocalDate(2024, 12, 25)),
+                new BankHoliday(new LocalDate(2024, 12, 26)),
+
+                new BankHoliday(new LocalDate(2025, 1, 1)),
+                new BankHoliday(new LocalDate(2025, 4, 18)),
+                new BankHoliday(new LocalDate(2025, 4, 21)),
+                new BankHoliday(new LocalDate(2025, 5, 5)),
+                new BankHoliday(new LocalDate(2025, 5, 26)),
+                new BankHoliday(new LocalDate(2025, 8, 25)),
+                new BankHoliday(new LocalDate(2025, 12, 25)),
+                new BankHoliday(new LocalDate(2025, 12, 26)),
             };
     }
 }
