@@ -2,7 +2,6 @@ namespace Parking.Service.IntegrationTests
 {
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text.Json;
     using System.Threading.Tasks;
     using TestHelpers;
     using TestHelpers.Aws;
@@ -14,7 +13,6 @@ namespace Parking.Service.IntegrationTests
         {
             await DatabaseHelpers.ResetDatabase();
             await EmailHelpers.ResetEmail();
-            await StorageHelpers.ResetStorage();
 
             await SetupConfiguration();
         }
@@ -157,18 +155,16 @@ namespace Parking.Service.IntegrationTests
 
         private static async Task CheckSingleEmail(string expectedTo, string expectedSubject)
         {
-            var savedEmails = await StorageHelpers.GetSavedEmails();
+            var sentEmails = await EmailHelpers.GetSentEmails();
 
-            Assert.Single(savedEmails);
+            Assert.Single(sentEmails);
 
-            var rawSavedEmail = savedEmails.Single();
+            var sentEmail = sentEmails.Single();
 
-            var savedEmail = JsonSerializer.Deserialize<EmailTemplate>(rawSavedEmail);
+            Assert.Single(sentEmail.Destination.ToAddresses);
 
-            Assert.NotNull(savedEmail);
-
-            Assert.Equal(expectedTo, savedEmail!.To);
-            Assert.Equal(expectedSubject, savedEmail.Subject);
+            Assert.Equal(expectedTo, sentEmail.Destination.ToAddresses.Single());
+            Assert.Equal(expectedSubject, sentEmail.Subject);
         }
 
         private static async Task SetupConfiguration() =>
@@ -205,25 +201,6 @@ namespace Parking.Service.IntegrationTests
             };
 
             await DatabaseHelpers.CreateSchedules(rawScheduleData);
-        }
-
-        private class EmailTemplate
-        {
-            public EmailTemplate(string to, string subject, string plainTextBody, string htmlBody)
-            {
-                this.To = to;
-                this.Subject = subject;
-                this.PlainTextBody = plainTextBody;
-                this.HtmlBody = htmlBody;
-            }
-
-            public string To { get; }
-
-            public string Subject { get; }
-
-            public string PlainTextBody { get; }
-
-            public string HtmlBody { get; }
         }
     }
 }

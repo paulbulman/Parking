@@ -40,7 +40,6 @@
             services.AddScoped<IDatabaseProvider, DatabaseProvider>();
             services.AddScoped<IIdentityProvider, IdentityProvider>();
             services.AddScoped<INotificationProvider, NotificationProvider>();
-            services.AddScoped<IStorageProvider, StorageProvider>();
 
             services.AddScoped<IAllocationCreator, AllocationCreator>();
             services.AddScoped<AllocationNotifier>();
@@ -76,7 +75,7 @@
             services.AddScoped<IAmazonCognitoIdentityProvider, AmazonCognitoIdentityProviderClient>();
             services.AddScoped<IAmazonDynamoDB, AmazonDynamoDBClient>();
             services.AddScoped<IAmazonS3, AmazonS3Client>();
-            services.AddScoped<IAmazonSimpleEmailService>(provider => new AmazonSimpleEmailServiceClient(EmailProvider.Config));
+            services.AddScoped<IAmazonSimpleEmailService>(_ => new AmazonSimpleEmailServiceClient(EmailProvider.Config));
             services.AddScoped<IAmazonSimpleNotificationService, AmazonSimpleNotificationServiceClient>();
         }
     }

@@ -25,7 +25,7 @@ jobs:
           - 4566:4566
         env:
           DEFAULT_REGION: eu-west-2
-          SERVICES: dynamodb,s3,ses,sns
+          SERVICES: dynamodb,ses,sns
 
     steps:
       - uses: actions/checkout@v3

@@ -79,14 +79,13 @@ namespace Parking.Api
             services.AddScoped<IAmazonCognitoIdentityProvider, AmazonCognitoIdentityProviderClient>();
             services.AddScoped<IAmazonDynamoDB, AmazonDynamoDBClient>();
             services.AddScoped<IAmazonS3, AmazonS3Client>();
-            services.AddScoped<IAmazonSimpleEmailService>(provider => new AmazonSimpleEmailServiceClient(EmailProvider.Config));
+            services.AddScoped<IAmazonSimpleEmailService>(_ => new AmazonSimpleEmailServiceClient(EmailProvider.Config));
             services.AddScoped<IAmazonSimpleNotificationService, AmazonSimpleNotificationServiceClient>();
 
             services.AddScoped<IEmailProvider, EmailProvider>();
             services.AddScoped<IDatabaseProvider, DatabaseProvider>();
             services.AddScoped<IIdentityProvider, IdentityProvider>();
             services.AddScoped<INotificationProvider, NotificationProvider>();
-            services.AddScoped<IStorageProvider, StorageProvider>();
 
             services.AddScoped<IBankHolidayRepository, BankHolidayRepository>();
             services.AddScoped<IConfigurationRepository, ConfigurationRepository>();

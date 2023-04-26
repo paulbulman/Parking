@@ -15,7 +15,6 @@
             services.AddScoped(provider => DatabaseHelpers.CreateClient());
             services.AddScoped(provider => EmailHelpers.CreateClient());
             services.AddScoped(provider => NotificationHelpers.CreateClient());
-            services.AddScoped(provider => StorageHelpers.CreateClient());
         }
     }
 }
