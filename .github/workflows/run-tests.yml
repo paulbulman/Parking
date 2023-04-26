@@ -10,13 +10,12 @@ env:
 
 on:
   push:
-    branches: ['*']
+    branches: ["*"]
   pull_request:
-    branches: ['*']
+    branches: ["*"]
 
 jobs:
   run-tests:
-
     runs-on: ubuntu-latest
 
     services:
@@ -29,18 +28,18 @@ jobs:
           SERVICES: dynamodb,s3,ses,sns
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 6.0.x
-    - name: API unit tests
-      run: dotnet test Parking.Api.UnitTests/Parking.Api.UnitTests.csproj
-    - name: Business unit tests
-      run: dotnet test Parking.Business.UnitTests/Parking.Business.UnitTests.csproj
-    - name: Data unit tests
-      run: dotnet test Parking.Data.UnitTests/Parking.Data.UnitTests.csproj
-    - name: API integration tests
-      run: dotnet test Parking.Api.IntegrationTests/Parking.Api.IntegrationTests.csproj
-    - name: Service integration tests
-      run: dotnet test Parking.Service.IntegrationTests/Parking.Service.IntegrationTests.csproj
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+      - name: API unit tests
+        run: dotnet test Parking.Api.UnitTests/Parking.Api.UnitTests.csproj
+      - name: Business unit tests
+        run: dotnet test Parking.Business.UnitTests/Parking.Business.UnitTests.csproj
+      - name: Data unit tests
+        run: dotnet test Parking.Data.UnitTests/Parking.Data.UnitTests.csproj
+      - name: API integration tests
+        run: dotnet test Parking.Api.IntegrationTests/Parking.Api.IntegrationTests.csproj
+      - name: Service integration tests
+        run: dotnet test Parking.Service.IntegrationTests/Parking.Service.IntegrationTests.csproj
