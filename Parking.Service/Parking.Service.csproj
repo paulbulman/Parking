@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
@@ -18,7 +18,7 @@
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.102.32" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.104.3" />
     <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.100.118" />
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.101.54" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.101.58" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
     <PackageReference Include="NodaTime" Version="3.1.9" />
