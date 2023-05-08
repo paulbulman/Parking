@@ -9,6 +9,7 @@
     using TestHelpers;
     using Xunit;
     using static ControllerHelpers;
+    using CreateControllerContext = Helpers.CreateControllerContext;
 
     public static class ProfilesControllerTests
     {

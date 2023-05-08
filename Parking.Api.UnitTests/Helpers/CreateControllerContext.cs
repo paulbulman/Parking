@@ -1,4 +1,4 @@
-﻿namespace Parking.TestHelpers
+﻿namespace Parking.Api.UnitTests.Helpers
 {
     using System.Security.Claims;
     using Microsoft.AspNetCore.Http;

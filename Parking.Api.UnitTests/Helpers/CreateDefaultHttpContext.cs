@@ -1,4 +1,4 @@
-﻿namespace Parking.TestHelpers
+﻿namespace Parking.Api.UnitTests.Helpers
 {
     using System.Collections.Generic;
     using Microsoft.AspNetCore.Http;

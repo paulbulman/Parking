@@ -10,6 +10,7 @@
     using Moq;
     using TestHelpers;
     using Xunit;
+    using CreateDefaultHttpContext = Helpers.CreateDefaultHttpContext;
 
     public static class DefaultAuthenticationHandlerTests
     {
