@@ -198,7 +198,7 @@ namespace Parking.Data.UnitTests
 
             var result = await requestRepository.GetRequests(new DateInterval(1.August(2020), 31.August(2020)));
 
-            Assert.Equal(1, result.Count);
+            Assert.Single(result);
 
             CheckRequest(result, "User1", 2.August(2020), RequestStatus.Interrupted);
         }
