@@ -1,6 +1,5 @@
 ﻿namespace Parking.Api.UnitTests.Controllers;
 
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Api.Controllers;
@@ -24,7 +23,7 @@ public static class SummaryControllerTests
         var dateCalculator = CreateDateCalculator.WithActiveDates(activeDates);
 
         var requestRepository = new RequestRepositoryBuilder()
-            .WithGetRequests("user1", activeDates.ToDateInterval(), new List<Request>())
+            .WithGetRequests("user1", activeDates.ToDateInterval(), [])
             .Build();
 
         var controller = new SummaryController(dateCalculator, requestRepository)
@@ -87,7 +86,7 @@ public static class SummaryControllerTests
         var dateCalculator = CreateDateCalculator.WithActiveDates(activeDates);
 
         var requestRepository = new RequestRepositoryBuilder()
-            .WithGetRequests("user1", activeDates.ToDateInterval(), new List<Request>())
+            .WithGetRequests("user1", activeDates.ToDateInterval(), [])
             .Build();
 
         var controller = new SummaryController(dateCalculator, requestRepository)

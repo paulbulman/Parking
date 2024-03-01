@@ -1,7 +1,6 @@
 ﻿// ReSharper disable StringLiteralTypo
 namespace Parking.Api.UnitTests.Controllers;
 
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Api.Controllers;
@@ -23,13 +22,13 @@ public static class OverviewControllerTests
         var activeDates = new[] { 15.February(2021), 16.February(2021), 18.February(2021) };
 
         var requestRepository = new RequestRepositoryBuilder()
-            .WithGetRequests(activeDates.ToDateInterval(), new List<Request>())
+            .WithGetRequests(activeDates.ToDateInterval(), [])
             .Build();
 
         var controller = new OverviewController(
             CreateDateCalculator.WithActiveDates(activeDates),
             requestRepository,
-            CreateUserRepository.WithUsers(new List<User>()))
+            CreateUserRepository.WithUsers([]))
         {
             ControllerContext = CreateControllerContext.WithUsername("user1")
         };
@@ -84,8 +83,11 @@ public static class OverviewControllerTests
 
         var data = GetDailyData(resultValue.Overview, 15.February(2021));
 
-        Assert.Equal(new[] { "Hynda Lindback", "Cathie Phoenix" }, data.AllocatedUsers.Select(u => u.Name));
-        Assert.Equal(new[] { "Marco Call", "Shannen Muddicliffe" }, data.InterruptedUsers.Select(u => u.Name));
+        var expectedAllocatedNames = new[] { "Hynda Lindback", "Cathie Phoenix" };
+        var expectedInterruptedNames = new[] { "Marco Call", "Shannen Muddicliffe" };
+
+        Assert.Equal(expectedAllocatedNames, data.AllocatedUsers.Select(u => u.Name));
+        Assert.Equal(expectedInterruptedNames, data.InterruptedUsers.Select(u => u.Name));
     }
 
     [Fact]
@@ -94,13 +96,13 @@ public static class OverviewControllerTests
         var activeDates = new[] { 15.February(2021) };
 
         var requestRepository = new RequestRepositoryBuilder()
-            .WithGetRequests(activeDates.ToDateInterval(), new List<Request>())
+            .WithGetRequests(activeDates.ToDateInterval(), [])
             .Build();
 
         var controller = new OverviewController(
             CreateDateCalculator.WithActiveDates(activeDates),
             requestRepository,
-            CreateUserRepository.WithUsers(new List<User>()))
+            CreateUserRepository.WithUsers([]))
         {
             ControllerContext = CreateControllerContext.WithUsername("user1")
         };
@@ -129,7 +131,7 @@ public static class OverviewControllerTests
         var controller = new OverviewController(
             CreateDateCalculator.WithActiveDates(activeDates),
             requestRepository,
-            CreateUserRepository.WithUsers(new List<User>()))
+            CreateUserRepository.WithUsers([]))
         {
             ControllerContext = CreateControllerContext.WithUsername("user1")
         };

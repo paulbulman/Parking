@@ -28,14 +28,14 @@ public static class DailyDetailsControllerTests
         var dateCalculator = CreateDateCalculator.WithActiveDates(activeDates);
 
         var requestRepository = new RequestRepositoryBuilder()
-            .WithGetRequests(activeDates.ToDateInterval(), new List<Request>())
+            .WithGetRequests(activeDates.ToDateInterval(), [])
             .Build();
 
         var controller = new DailyDetailsController(
             dateCalculator,
             requestRepository,
             Mock.Of<ITriggerRepository>(),
-            CreateUserRepository.WithUsers(new List<User>()))
+            CreateUserRepository.WithUsers([]))
         {
             ControllerContext = CreateControllerContext.WithUsername("user1")
         };
@@ -294,7 +294,7 @@ public static class DailyDetailsControllerTests
         bool acceptInterruption)
     {
         var requestRepository = new RequestRepositoryBuilder()
-            .WithGetRequests("user1", 12.July(2021).ToDateInterval(), new List<Request>())
+            .WithGetRequests("user1", 12.July(2021).ToDateInterval(), [])
             .Build();
 
         var controller = new DailyDetailsController(
@@ -359,7 +359,7 @@ public static class DailyDetailsControllerTests
 
         var mockRequestRepository = new RequestRepositoryBuilder()
             .WithGetRequests("user1", activeDates.ToDateInterval(), existingRequests)
-            .WithGetRequests(activeDates.ToDateInterval(), new List<Request>())
+            .WithGetRequests(activeDates.ToDateInterval(), [])
             .BuildMock();
 
         var users = new[]
@@ -400,7 +400,7 @@ public static class DailyDetailsControllerTests
 
         var requestRepository = new RequestRepositoryBuilder()
             .WithGetRequests("user1", activeDates.ToDateInterval(), existingRequests)
-            .WithGetRequests(activeDates.ToDateInterval(), new List<Request>())
+            .WithGetRequests(activeDates.ToDateInterval(), [])
             .Build();
 
         var users = new[]

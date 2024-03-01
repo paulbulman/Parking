@@ -1,6 +1,5 @@
 ﻿namespace Parking.Business.UnitTests.EmailTemplates;
 
-using System.Collections.Generic;
 using System.Linq;
 using Business.EmailTemplates;
 using Model;
@@ -17,7 +16,7 @@ public static class WeeklyNotificationTests
     public static void To_returns_email_address_of_corresponding_user(string emailAddress)
     {
         var template = new WeeklyNotification(
-            new List<Request>(),
+            [],
             CreateUser.With(userId: "user1", emailAddress: emailAddress),
             new DateInterval(21.December(2020), 24.December(2020)).ToArray());
 
@@ -40,7 +39,7 @@ public static class WeeklyNotificationTests
             .ToArray();
 
         var template = new WeeklyNotification(
-            new List<Request>(),
+            [],
             CreateUser.With(userId: "user1", emailAddress: "1@abc.com"),
             dateInterval);
 

@@ -16,13 +16,13 @@ using Xunit;
 
 public static class ReservationRepositoryTests
 {
-    private static readonly IReadOnlyCollection<User> DefaultUsers = new List<User>
-    {
+    private static readonly IReadOnlyCollection<User> DefaultUsers =
+    [
         CreateUser.With(userId: "User1", firstName: "User", lastName: "1"),
         CreateUser.With(userId: "User2", firstName: "User", lastName: "2"),
         CreateUser.With(userId: "User3", firstName: "User", lastName: "3"),
         CreateUser.With(userId: "User4", firstName: "User", lastName: "4"),
-    };
+    ];
 
     [Fact]
     public static async Task GetReservations_returns_empty_collection_when_no_matching_raw_item_exists()
@@ -138,7 +138,7 @@ public static class ReservationRepositoryTests
             mockDatabaseProvider.Object,
             CreateDefaultUserRepository());
 
-        await reservationRepository.SaveReservations(new List<Reservation>());
+        await reservationRepository.SaveReservations([]);
 
         mockDatabaseProvider.VerifyNoOtherCalls();
     }

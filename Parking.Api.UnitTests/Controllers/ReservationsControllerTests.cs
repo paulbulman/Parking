@@ -31,7 +31,7 @@ public static class ReservationsControllerTests
         var activeDates = new[] { 15.February(2021), 16.February(2021), 18.February(2021) };
 
         var reservationRepository = new ReservationRepositoryBuilder()
-            .WithGetReservations(activeDates.ToDateInterval(), new List<Reservation>())
+            .WithGetReservations(activeDates.ToDateInterval(), [])
             .Build();
 
         var controller = new ReservationsController(
@@ -92,14 +92,14 @@ public static class ReservationsControllerTests
         var activeDates = new[] { 15.February(2021) };
 
         var reservationRepository = new ReservationRepositoryBuilder()
-            .WithGetReservations(activeDates.ToDateInterval(), new List<Reservation>())
+            .WithGetReservations(activeDates.ToDateInterval(), [])
             .Build();
 
         var controller = new ReservationsController(
             CreateConfigurationRepository.WithConfiguration(configuration),
             CreateDateCalculator.WithActiveDates(activeDates),
             reservationRepository,
-            CreateUserRepository.WithUsers(new List<User>()));
+            CreateUserRepository.WithUsers([]));
 
         var result = await controller.GetAsync();
 
@@ -114,7 +114,7 @@ public static class ReservationsControllerTests
         var activeDates = new[] { 15.February(2021) };
 
         var reservationRepository = new ReservationRepositoryBuilder()
-            .WithGetReservations(activeDates.ToDateInterval(), new List<Reservation>())
+            .WithGetReservations(activeDates.ToDateInterval(), [])
             .Build();
 
         var controller = new ReservationsController(
@@ -149,14 +149,14 @@ public static class ReservationsControllerTests
         var activeDates = new[] { 15.February(2021) };
 
         var reservationRepository = new ReservationRepositoryBuilder()
-            .WithGetReservations(activeDates.ToDateInterval(), new List<Reservation>())
+            .WithGetReservations(activeDates.ToDateInterval(), [])
             .Build();
 
         var controller = new ReservationsController(
             CreateConfigurationRepository.WithDefaultConfiguration(),
             CreateDateCalculator.WithActiveDates(activeDates),
             reservationRepository,
-            CreateUserRepository.WithUsers(new List<User>()));
+            CreateUserRepository.WithUsers([]));
 
         var result = await controller.GetAsync();
 
@@ -175,13 +175,13 @@ public static class ReservationsControllerTests
         var activeDates = new[] { 2.February(2021), 3.February(2021) };
 
         var mockReservationRepository = new ReservationRepositoryBuilder()
-            .WithGetReservations(activeDates.ToDateInterval(), new List<Reservation>())
+            .WithGetReservations(activeDates.ToDateInterval(), [])
             .BuildMock();
 
         var patchRequest = new ReservationsPatchRequest(
         [
-            new ReservationsPatchRequestDailyData(2.February(2021), new List<string> {"User1", "User2"}),
-            new ReservationsPatchRequestDailyData(3.February(2021), new List<string> {"User2", "User3"}),
+            new ReservationsPatchRequestDailyData(2.February(2021), ["User1", "User2"]),
+            new ReservationsPatchRequestDailyData(3.February(2021), ["User2", "User3"]),
         ]);
 
         var controller = new ReservationsController(
@@ -209,13 +209,13 @@ public static class ReservationsControllerTests
         var activeDates = new[] { 2.February(2021), 3.February(2021) };
 
         var mockReservationRepository = new ReservationRepositoryBuilder()
-            .WithGetReservations(activeDates.ToDateInterval(), new List<Reservation>())
+            .WithGetReservations(activeDates.ToDateInterval(), [])
             .BuildMock();
 
         var patchRequest = new ReservationsPatchRequest(
         [
-            new ReservationsPatchRequestDailyData(1.February(2021), new List<string> {"User1", "User2"}),
-            new ReservationsPatchRequestDailyData(4.February(2021), new List<string> {"User1", "User2"}),
+            new ReservationsPatchRequestDailyData(1.February(2021), ["User1", "User2"]),
+            new ReservationsPatchRequestDailyData(4.February(2021), ["User1", "User2"]),
         ]);
 
         var controller = new ReservationsController(
@@ -226,7 +226,7 @@ public static class ReservationsControllerTests
 
         await controller.PatchAsync(patchRequest);
 
-        CheckSavedReservations(mockReservationRepository, new List<Reservation>());
+        CheckSavedReservations(mockReservationRepository, []);
     }
 
     [Fact]

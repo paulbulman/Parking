@@ -14,11 +14,11 @@ using static DateCalculatorTests;
 
 public static class SoftInterruptionUpdaterTests
 {
-    private static readonly IReadOnlyCollection<User> DefaultUsers = new List<User>
-    {
+    private static readonly IReadOnlyCollection<User> DefaultUsers =
+    [
         CreateUser.With(userId: "user1", firstName: "User", lastName: "1"),
         CreateUser.With(userId: "user2", firstName: "User", lastName: "2"),
-    };
+    ];
 
     [Fact]
     public static async Task Updates_unallocated_requests_to_soft_interrupted()

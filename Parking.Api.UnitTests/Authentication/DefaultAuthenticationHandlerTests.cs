@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using TestHelpers;
 using Xunit;
 using CreateDefaultHttpContext = Helpers.CreateDefaultHttpContext;
 

@@ -17,11 +17,11 @@ using Xunit;
 
 public static class RequestRepositoryTests
 {
-    private static readonly IReadOnlyCollection<User> DefaultUsers = new List<User>
-    {
+    private static readonly IReadOnlyCollection<User> DefaultUsers =
+    [
         CreateUser.With(userId: "User1", firstName: "User", lastName: "1"),
         CreateUser.With(userId: "User2", firstName: "User", lastName: "2"),
-    };
+    ];
 
     [Fact]
     public static async Task GetRequests_returns_empty_collection_when_no_matching_raw_item_exists()
@@ -213,7 +213,7 @@ public static class RequestRepositoryTests
             mockDatabaseProvider.Object,
             CreateDefaultUserRepository());
 
-        await requestRepository.SaveRequests(new List<Request>());
+        await requestRepository.SaveRequests([]);
 
         mockDatabaseProvider.VerifyNoOtherCalls();
     }

@@ -19,14 +19,14 @@ public static class RequestSorterTests
 
     private static readonly LocalDate SortDate = 15.October(2021);
 
-    private static readonly IReadOnlyCollection<Reservation> NoReservations = new List<Reservation>();
+    private static readonly IReadOnlyCollection<Reservation> NoReservations = [];
 
-    private static readonly IReadOnlyCollection<User> DefaultUsers = new List<User>
-    {
+    private static readonly IReadOnlyCollection<User> DefaultUsers =
+    [
         CreateUser.With(userId: "user1", firstName: "User", lastName: "1", commuteDistance: NearbyDistance),
         CreateUser.With(userId: "user2", firstName: "User", lastName: "2", commuteDistance: NearbyDistance),
         CreateUser.With(userId: "user3", firstName: "User", lastName: "3", commuteDistance: NearbyDistance)
-    };
+    ];
 
     [Fact]
     public static void Returns_requests_for_given_date()

@@ -47,7 +47,7 @@ public class ReservationsTests(CustomWebApplicationFactory<Startup> factory) : I
 
         AddAuthorizationHeader(client, userType);
 
-        var request = new ReservationsPatchRequest(new List<ReservationsPatchRequestDailyData>());
+        var request = new ReservationsPatchRequest([]);
 
         var response = await client.PatchAsJsonAsync("/reservations", request);
 

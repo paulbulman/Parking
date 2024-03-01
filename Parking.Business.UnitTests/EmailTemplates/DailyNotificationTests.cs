@@ -1,6 +1,5 @@
 ﻿namespace Parking.Business.UnitTests.EmailTemplates;
 
-using System.Collections.Generic;
 using Business.EmailTemplates;
 using Model;
 using NodaTime;
@@ -16,7 +15,7 @@ public static class DailyNotificationTests
     public static void To_returns_email_address_of_corresponding_user(string emailAddress)
     {
         var template = new DailyNotification(
-            new List<Request>(),
+            [],
             CreateUser.With(userId: "user1", emailAddress: emailAddress),
             22.December(2020));
 

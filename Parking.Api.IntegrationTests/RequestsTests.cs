@@ -46,7 +46,7 @@ public class RequestsTests(CustomWebApplicationFactory<Startup> factory) : IAsyn
 
         AddAuthorizationHeader(client, userType);
 
-        var request = new RequestsPatchRequest(new List<RequestsPatchRequestDailyData>());
+        var request = new RequestsPatchRequest([]);
 
         var response = await client.PatchAsJsonAsync("/requests/User1", request);
 
@@ -165,7 +165,7 @@ public class RequestsTests(CustomWebApplicationFactory<Startup> factory) : IAsyn
 
         AddAuthorizationHeader(client, UserType.Normal);
 
-        var request = new RequestsPatchRequest(new List<RequestsPatchRequestDailyData>());
+        var request = new RequestsPatchRequest([]);
 
         await client.PatchAsJsonAsync("/requests", request);
 

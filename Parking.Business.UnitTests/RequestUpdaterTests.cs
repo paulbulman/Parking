@@ -13,11 +13,11 @@ using Xunit;
 
 public static class RequestUpdaterTests
 {
-    private static readonly IReadOnlyCollection<User> DefaultUsers = new List<User>
-    {
+    private static readonly IReadOnlyCollection<User> DefaultUsers =
+    [
         CreateUser.With(userId: "user1", firstName: "User", lastName: "1"),
         CreateUser.With(userId: "user2", firstName: "User", lastName: "2"),
-    };
+    ];
 
     private static readonly IReadOnlyCollection<LocalDate> ShortLeadTimeDates =
     [

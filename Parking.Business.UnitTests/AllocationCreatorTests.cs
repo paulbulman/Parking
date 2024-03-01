@@ -14,10 +14,10 @@ public static class AllocationCreatorTests
     private static readonly LocalDate AllocationDate = 28.November(2020);
 
     // ReSharper disable once CollectionNeverUpdated.Local
-    private static readonly List<User> Users = new List<User>();
+    private static readonly List<User> Users = [];
 
     // ReSharper disable once CollectionNeverUpdated.Local
-    private static readonly List<Reservation> Reservations = new List<Reservation>();
+    private static readonly List<Reservation> Reservations = [];
 
     private static readonly Configuration Configuration =
         new Configuration(nearbyDistance: 1, shortLeadTimeSpaces: 1, totalSpaces: 3);

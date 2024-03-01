@@ -1,6 +1,5 @@
 ﻿namespace Parking.Business.UnitTests.EmailTemplates;
 
-using System.Collections.Generic;
 using Business.EmailTemplates;
 using Model;
 using NodaTime.Testing.Extensions;
@@ -15,7 +14,7 @@ public static class MultipleDayAllocationNotificationTests
     public static void To_returns_email_address_of_corresponding_user(string emailAddress)
     {
         var template = new MultipleDayAllocationNotification(
-            new List<Request>(),
+            [],
             CreateUser.With(userId: "user1", emailAddress: emailAddress));
 
         Assert.Equal(emailAddress, template.To);
@@ -27,7 +26,7 @@ public static class MultipleDayAllocationNotificationTests
         const string ExpectedSubjectText = "Parking spaces allocated for multiple upcoming dates";
             
         var template = new MultipleDayAllocationNotification(
-            new List<Request>(),
+            [],
             CreateUser.With(userId: "user1", emailAddress: "1@abc.com"));
 
         Assert.Equal(ExpectedSubjectText, template.Subject);
