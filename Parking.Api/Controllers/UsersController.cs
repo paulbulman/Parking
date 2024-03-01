@@ -12,17 +12,13 @@ using Model;
 [Authorize(Policy = "IsUserAdmin")]
 [Route("[controller]")]
 [ApiController]
-public class UsersController : ControllerBase
+public class UsersController(IUserRepository userRepository) : ControllerBase
 {
-    private readonly IUserRepository userRepository;
-
-    public UsersController(IUserRepository userRepository) => this.userRepository = userRepository;
-
     [HttpGet]
     [ProducesResponseType(typeof(MultipleUsersResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAsync()
     {
-        var users = await this.userRepository.GetUsers();
+        var users = await userRepository.GetUsers();
 
         var usersData = users.OrderForDisplay().Select(CreateUsersData);
 
@@ -36,7 +32,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetByIdAsync(string userId)
     {
-        var user = await this.userRepository.GetUser(userId);
+        var user = await userRepository.GetUser(userId);
 
         if (user == null)
         {
@@ -65,7 +61,7 @@ public class UsersController : ControllerBase
             requestReminderEnabled: true,
             reservationReminderEnabled: true);
 
-        var user = await this.userRepository.CreateUser(newUser);
+        var user = await userRepository.CreateUser(newUser);
 
         var usersData = CreateUsersData(user);
 
@@ -79,7 +75,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> PatchAsync(string userId, [FromBody] UserPatchRequest request)
     {
-        var existingUser = await this.userRepository.GetUser(userId);
+        var existingUser = await userRepository.GetUser(userId);
 
         if (existingUser == null)
         {
@@ -97,7 +93,7 @@ public class UsersController : ControllerBase
             requestReminderEnabled: existingUser.RequestReminderEnabled,
             reservationReminderEnabled: existingUser.ReservationReminderEnabled);
 
-        await this.userRepository.UpdateUser(updatedUser);
+        await userRepository.UpdateUser(updatedUser);
 
         var usersData = CreateUsersData(updatedUser);
 
@@ -111,14 +107,14 @@ public class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteAsync(string userId)
     {
-        var existingUser = await this.userRepository.GetUser(userId);
+        var existingUser = await userRepository.GetUser(userId);
 
         if (existingUser == null)
         {
             return this.NotFound();
         }
 
-        await this.userRepository.DeleteUser(existingUser);
+        await userRepository.DeleteUser(existingUser);
 
         return this.NoContent();
     }

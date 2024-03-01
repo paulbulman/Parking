@@ -10,12 +10,8 @@ using Xunit;
 using static Helpers.HttpClientHelpers;
 
 [Collection("Database tests")]
-public class RegistrationNumbersTests : IAsyncLifetime
+public class RegistrationNumbersTests(CustomWebApplicationFactory<Startup> factory) : IAsyncLifetime
 {
-    private readonly CustomWebApplicationFactory<Startup> factory;
-
-    public RegistrationNumbersTests(CustomWebApplicationFactory<Startup> factory) => this.factory = factory;
-
     public async Task InitializeAsync() => await DatabaseHelpers.ResetDatabase();
 
     public Task DisposeAsync() => Task.CompletedTask;
@@ -37,7 +33,7 @@ public class RegistrationNumbersTests : IAsyncLifetime
                 lastName: "Wanjek",
                 registrationNumber: "CD34CDE"));
 
-        var client = this.factory.CreateClient();
+        var client = factory.CreateClient();
 
         AddAuthorizationHeader(client, UserType.Normal);
 

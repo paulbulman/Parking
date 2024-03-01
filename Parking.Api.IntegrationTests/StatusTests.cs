@@ -5,11 +5,10 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 using static Helpers.HttpClientHelpers;
 
-public class StatusTests : IClassFixture<CustomWebApplicationFactory<Startup>>
+public class StatusTests(CustomWebApplicationFactory<Startup> factory)
+    : IClassFixture<CustomWebApplicationFactory<Startup>>
 {
-    private readonly WebApplicationFactory<Startup> factory;
-
-    public StatusTests(CustomWebApplicationFactory<Startup> factory) => this.factory = factory;
+    private readonly WebApplicationFactory<Startup> factory = factory;
 
     [Fact]
     public async Task Returns_success()

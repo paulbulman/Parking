@@ -3,11 +3,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-public class RegistrationNumbersResponse
+public class RegistrationNumbersResponse(IEnumerable<RegistrationNumbersData> registrationNumbers)
 {
-    public RegistrationNumbersResponse(IEnumerable<RegistrationNumbersData> registrationNumbers) =>
-        this.RegistrationNumbers = registrationNumbers;
-
     [Required]
-    public IEnumerable<RegistrationNumbersData> RegistrationNumbers { get; }
+    public IEnumerable<RegistrationNumbersData> RegistrationNumbers { get; } = registrationNumbers;
 }

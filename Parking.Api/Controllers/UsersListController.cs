@@ -11,17 +11,13 @@ using Microsoft.AspNetCore.Http;
 [Authorize(Policy = "IsTeamLeader")]
 [Route("[controller]")]
 [ApiController]
-public class UsersListController : ControllerBase
+public class UsersListController(IUserRepository userRepository) : ControllerBase
 {
-    private readonly IUserRepository userRepository;
-
-    public UsersListController(IUserRepository userRepository) => this.userRepository = userRepository;
-
     [HttpGet]
     [ProducesResponseType(typeof(UsersListResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAsync()
     {
-        var users = await this.userRepository.GetUsers();
+        var users = await userRepository.GetUsers();
 
         var userUsers = users
             .OrderForDisplay()

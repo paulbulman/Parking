@@ -3,10 +3,8 @@
 using System.ComponentModel.DataAnnotations;
 using Calendar;
 
-public class RequestsResponse
+public class RequestsResponse(Calendar<RequestsData> requests)
 {
-    public RequestsResponse(Calendar<RequestsData> requests) => this.Requests = requests;
-
     [Required]
-    public Calendar<RequestsData> Requests { get; }
+    public Calendar<RequestsData> Requests { get; } = requests;
 }

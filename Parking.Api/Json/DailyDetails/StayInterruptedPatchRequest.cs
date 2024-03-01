@@ -3,17 +3,11 @@
 using System.ComponentModel.DataAnnotations;
 using NodaTime;
 
-public class StayInterruptedPatchRequest
+public class StayInterruptedPatchRequest(LocalDate localDate, bool stayInterrupted)
 {
-    public StayInterruptedPatchRequest(LocalDate localDate, bool stayInterrupted)
-    {
-        this.LocalDate = localDate;
-        this.StayInterrupted = stayInterrupted;
-    }
+    [Required]
+    public LocalDate LocalDate { get; } = localDate;
 
     [Required]
-    public LocalDate LocalDate { get; }
-
-    [Required]
-    public bool StayInterrupted { get; }
+    public bool StayInterrupted { get; } = stayInterrupted;
 }

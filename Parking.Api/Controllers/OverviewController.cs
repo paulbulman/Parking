@@ -14,31 +14,21 @@ using static Json.Calendar.Helpers;
 
 [Route("[controller]")]
 [ApiController]
-public class OverviewController : ControllerBase
+public class OverviewController(
+    IDateCalculator dateCalculator,
+    IRequestRepository requestRepository,
+    IUserRepository userRepository)
+    : ControllerBase
 {
-    private readonly IDateCalculator dateCalculator;
-    private readonly IRequestRepository requestRepository;
-    private readonly IUserRepository userRepository;
-
-    public OverviewController(
-        IDateCalculator dateCalculator,
-        IRequestRepository requestRepository,
-        IUserRepository userRepository)
-    {
-        this.dateCalculator = dateCalculator;
-        this.requestRepository = requestRepository;
-        this.userRepository = userRepository;
-    }
-
     [HttpGet]
     [ProducesResponseType(typeof(OverviewResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAsync()
     {
-        var activeDates = this.dateCalculator.GetActiveDates();
+        var activeDates = dateCalculator.GetActiveDates();
 
-        var requests = await this.requestRepository.GetRequests(activeDates.ToDateInterval());
+        var requests = await requestRepository.GetRequests(activeDates.ToDateInterval());
 
-        var users = await this.userRepository.GetUsers();
+        var users = await userRepository.GetUsers();
 
         var data = activeDates.ToDictionary(
             d => d,

@@ -7,18 +7,13 @@ using Microsoft.AspNetCore.Mvc;
 
 [Route("[controller]")]
 [ApiController]
-public class TriggersController : ControllerBase
+public class TriggersController(ITriggerRepository triggerRepository) : ControllerBase
 {
-    private readonly ITriggerRepository triggerRepository;
-
-    public TriggersController(ITriggerRepository triggerRepository) =>
-        this.triggerRepository = triggerRepository;
-
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> PostAsync()
     {
-        await this.triggerRepository.AddTrigger();
+        await triggerRepository.AddTrigger();
 
         return this.Ok();
     }

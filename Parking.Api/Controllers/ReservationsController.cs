@@ -16,25 +16,13 @@ using static Json.Calendar.Helpers;
 [Authorize(Policy = "IsTeamLeader")]
 [Route("[controller]")]
 [ApiController]
-public class ReservationsController : ControllerBase
+public class ReservationsController(
+    IConfigurationRepository configurationRepository,
+    IDateCalculator dateCalculator,
+    IReservationRepository reservationRepository,
+    IUserRepository userRepository)
+    : ControllerBase
 {
-    private readonly IConfigurationRepository configurationRepository;
-    private readonly IDateCalculator dateCalculator;
-    private readonly IReservationRepository reservationRepository;
-    private readonly IUserRepository userRepository;
-
-    public ReservationsController(
-        IConfigurationRepository configurationRepository,
-        IDateCalculator dateCalculator,
-        IReservationRepository reservationRepository,
-        IUserRepository userRepository)
-    {
-        this.configurationRepository = configurationRepository;
-        this.dateCalculator = dateCalculator;
-        this.reservationRepository = reservationRepository;
-        this.userRepository = userRepository;
-    }
-
     [HttpGet]
     [ProducesResponseType(typeof(ReservationsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAsync()
@@ -48,14 +36,14 @@ public class ReservationsController : ControllerBase
     [ProducesResponseType(typeof(ReservationsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> PatchAsync([FromBody] ReservationsPatchRequest request)
     {
-        var activeDates = this.dateCalculator.GetActiveDates();
+        var activeDates = dateCalculator.GetActiveDates();
 
         var reservations = request.Reservations
             .Where(r => activeDates.Contains(r.LocalDate))
             .SelectMany(CreateReservations)
             .ToList();
 
-        await this.reservationRepository.SaveReservations(reservations);
+        await reservationRepository.SaveReservations(reservations);
 
         var response = await this.GetReservations();
 
@@ -64,11 +52,11 @@ public class ReservationsController : ControllerBase
 
     private async Task<ReservationsResponse> GetReservations()
     {
-        var configuration = await this.configurationRepository.GetConfiguration();
+        var configuration = await configurationRepository.GetConfiguration();
 
-        var activeDates = this.dateCalculator.GetActiveDates();
+        var activeDates = dateCalculator.GetActiveDates();
 
-        var reservations = await this.reservationRepository.GetReservations(activeDates.ToDateInterval());
+        var reservations = await reservationRepository.GetReservations(activeDates.ToDateInterval());
 
         var calendarData = activeDates.ToDictionary(
             d => d,
@@ -76,7 +64,7 @@ public class ReservationsController : ControllerBase
 
         var calendar = CreateCalendar(calendarData);
 
-        var users = await this.userRepository.GetUsers();
+        var users = await userRepository.GetUsers();
 
         var reservationsUsers = users
             .OrderBy(u => u.LastName)

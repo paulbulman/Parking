@@ -2,10 +2,8 @@
 
 using System.ComponentModel.DataAnnotations;
 
-public class SingleUserResponse
+public class SingleUserResponse(UsersData user)
 {
-    public SingleUserResponse(UsersData user) => this.User = user;
-
     [Required]
-    public UsersData User { get; }
+    public UsersData User { get; } = user;
 }

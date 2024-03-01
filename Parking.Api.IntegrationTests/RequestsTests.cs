@@ -13,12 +13,8 @@ using Xunit;
 using static Helpers.HttpClientHelpers;
 
 [Collection("Database tests")]
-public class RequestsTests : IAsyncLifetime
+public class RequestsTests(CustomWebApplicationFactory<Startup> factory) : IAsyncLifetime
 {
-    private readonly CustomWebApplicationFactory<Startup> factory;
-
-    public RequestsTests(CustomWebApplicationFactory<Startup> factory) => this.factory = factory;
-
     public async Task InitializeAsync()
     {
         await DatabaseHelpers.ResetDatabase();
@@ -32,7 +28,7 @@ public class RequestsTests : IAsyncLifetime
     [InlineData(UserType.UserAdmin)]
     public async Task Get_by_user_returns_forbidden_when_user_is_not_team_leader(UserType userType)
     {
-        var client = this.factory.CreateClient();
+        var client = factory.CreateClient();
 
         AddAuthorizationHeader(client, userType);
 
@@ -46,7 +42,7 @@ public class RequestsTests : IAsyncLifetime
     [InlineData(UserType.UserAdmin)]
     public async Task Patch_by_user_returns_forbidden_when_user_is_not_team_leader(UserType userType)
     {
-        var client = this.factory.CreateClient();
+        var client = factory.CreateClient();
 
         AddAuthorizationHeader(client, userType);
 
@@ -69,7 +65,7 @@ public class RequestsTests : IAsyncLifetime
 
         await DatabaseHelpers.CreateRequests("User1", "2021-03", requests);
 
-        var client = this.factory.CreateClient();
+        var client = factory.CreateClient();
 
         AddAuthorizationHeader(client, UserType.Normal);
 
@@ -97,7 +93,7 @@ public class RequestsTests : IAsyncLifetime
 
         await DatabaseHelpers.CreateRequests("User2", "2021-03", requests);
 
-        var client = this.factory.CreateClient();
+        var client = factory.CreateClient();
 
         AddAuthorizationHeader(client, UserType.TeamLeader);
 
@@ -115,7 +111,7 @@ public class RequestsTests : IAsyncLifetime
     [Fact]
     public async Task Saves_requests()
     {
-        var client = this.factory.CreateClient();
+        var client = factory.CreateClient();
 
         AddAuthorizationHeader(client, UserType.Normal);
 
@@ -140,7 +136,7 @@ public class RequestsTests : IAsyncLifetime
     {
         await DatabaseHelpers.CreateUser(CreateUser.With(userId: "User2"));
 
-        var client = this.factory.CreateClient();
+        var client = factory.CreateClient();
 
         AddAuthorizationHeader(client, UserType.TeamLeader);
 
@@ -165,7 +161,7 @@ public class RequestsTests : IAsyncLifetime
     {
         var initialTriggerFileCount = await DatabaseHelpers.GetTriggerCount();
 
-        var client = this.factory.CreateClient();
+        var client = factory.CreateClient();
 
         AddAuthorizationHeader(client, UserType.Normal);
 

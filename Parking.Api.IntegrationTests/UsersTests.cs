@@ -12,11 +12,9 @@ using Xunit;
 using static Helpers.HttpClientHelpers;
 
 [Collection("Database tests")]
-public class UsersTests : IAsyncLifetime
+public class UsersTests(CustomWebApplicationFactory<Startup> factory) : IAsyncLifetime
 {
-    private readonly WebApplicationFactory<Startup> factory;
-
-    public UsersTests(CustomWebApplicationFactory<Startup> factory) => this.factory = factory;
+    private readonly WebApplicationFactory<Startup> factory = factory;
 
     public async Task InitializeAsync() => await DatabaseHelpers.ResetDatabase();
 

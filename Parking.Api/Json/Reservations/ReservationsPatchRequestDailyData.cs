@@ -4,17 +4,11 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using NodaTime;
 
-public class ReservationsPatchRequestDailyData
+public class ReservationsPatchRequestDailyData(LocalDate localDate, IEnumerable<string> userIds)
 {
-    public ReservationsPatchRequestDailyData(LocalDate localDate, IEnumerable<string> userIds)
-    {
-        this.LocalDate = localDate;
-        this.UserIds = userIds;
-    }
-        
     [Required]
-    public LocalDate LocalDate { get; }
+    public LocalDate LocalDate { get; } = localDate;
 
     [Required]
-    public IEnumerable<string> UserIds { get; }
+    public IEnumerable<string> UserIds { get; } = userIds;
 }

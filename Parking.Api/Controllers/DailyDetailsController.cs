@@ -14,40 +14,28 @@ using NodaTime;
 
 [Route("[controller]")]
 [ApiController]
-public class DailyDetailsController : ControllerBase
+public class DailyDetailsController(
+    IDateCalculator dateCalculator,
+    IRequestRepository requestRepository,
+    ITriggerRepository triggerRepository,
+    IUserRepository userRepository)
+    : ControllerBase
 {
-    private readonly IDateCalculator dateCalculator;
-    private readonly IRequestRepository requestRepository;
-    private readonly ITriggerRepository triggerRepository;
-    private readonly IUserRepository userRepository;
-
     private static readonly IReadOnlyCollection<RequestStatus> UpdateableStatuses = new[]
     {
         RequestStatus.SoftInterrupted,
         RequestStatus.HardInterrupted
     };
 
-    public DailyDetailsController(
-        IDateCalculator dateCalculator,
-        IRequestRepository requestRepository,
-        ITriggerRepository triggerRepository,
-        IUserRepository userRepository)
-    {
-        this.dateCalculator = dateCalculator;
-        this.requestRepository = requestRepository;
-        this.triggerRepository = triggerRepository;
-        this.userRepository = userRepository;
-    }
-
     [HttpGet("/DailyDetails")]
     [ProducesResponseType(typeof(DailyDetailsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAsync()
     {
-        var activeDates = this.dateCalculator.GetActiveDates();
+        var activeDates = dateCalculator.GetActiveDates();
 
-        var requests = await this.requestRepository.GetRequests(activeDates.ToDateInterval());
+        var requests = await requestRepository.GetRequests(activeDates.ToDateInterval());
 
-        var users = await this.userRepository.GetUsers();
+        var users = await userRepository.GetUsers();
 
         var data = activeDates
             .Select(d => CreateDailyData(d, this.GetCognitoUserId(), requests, users))
@@ -64,7 +52,7 @@ public class DailyDetailsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> PatchAsync([FromBody] StayInterruptedPatchRequest patchRequest)
     {
-        var requests = await this.requestRepository.GetRequests(
+        var requests = await requestRepository.GetRequests(
             this.GetCognitoUserId(),
             patchRequest.LocalDate.ToDateInterval());
 
@@ -86,9 +74,9 @@ public class DailyDetailsController : ControllerBase
 
         var updatedRequest = new Request(request.UserId, request.Date, updatedRequestStatus);
 
-        await this.requestRepository.SaveRequests(new[] { updatedRequest });
+        await requestRepository.SaveRequests(new[] { updatedRequest });
 
-        await this.triggerRepository.AddTrigger();
+        await triggerRepository.AddTrigger();
 
         return await this.GetAsync();
     }

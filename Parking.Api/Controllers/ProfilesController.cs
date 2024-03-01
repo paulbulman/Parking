@@ -10,17 +10,13 @@ using Model;
 
 [Route("[controller]")]
 [ApiController]
-public class ProfilesController : ControllerBase
+public class ProfilesController(IUserRepository userRepository) : ControllerBase
 {
-    private readonly IUserRepository userRepository;
-
-    public ProfilesController(IUserRepository userRepository) => this.userRepository = userRepository;
-
     [HttpGet]
     [ProducesResponseType(typeof(ProfileResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAsync()
     {
-        var user = await this.userRepository.GetUser(this.GetCognitoUserId());
+        var user = await userRepository.GetUser(this.GetCognitoUserId());
 
         if (user == null)
         {
@@ -36,7 +32,7 @@ public class ProfilesController : ControllerBase
     [ProducesResponseType(typeof(ProfileResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> PatchAsync([FromBody] ProfilePatchRequest request)
     {
-        var existingUser = await this.userRepository.GetUser(this.GetCognitoUserId());
+        var existingUser = await userRepository.GetUser(this.GetCognitoUserId());
 
         if (existingUser == null)
         {
@@ -54,7 +50,7 @@ public class ProfilesController : ControllerBase
             requestReminderEnabled: request.RequestReminderEnabled ?? true,
             reservationReminderEnabled: request.ReservationReminderEnabled ?? true);
 
-        await this.userRepository.UpdateUser(updatedUser);
+        await userRepository.UpdateUser(updatedUser);
 
         var response = CreateResponse(updatedUser);
 

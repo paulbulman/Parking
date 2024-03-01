@@ -3,10 +3,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-public class ReservationsData
+public class ReservationsData(IEnumerable<string> userIds)
 {
-    public ReservationsData(IEnumerable<string> userIds) => this.UserIds = userIds;
-
     [Required]
-    public IEnumerable<string> UserIds { get; }
+    public IEnumerable<string> UserIds { get; } = userIds;
 }

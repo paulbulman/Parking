@@ -3,29 +3,21 @@
 using System.ComponentModel.DataAnnotations;
 using Calendar;
 
-public class HistoryResponse
+public class HistoryResponse(
+    Calendar<string> history,
+    int allocatedContestedRequestsCount,
+    int totalContestedRequestsCount,
+    decimal allocationRatio)
 {
-    public HistoryResponse(
-        Calendar<string> history,
-        int allocatedContestedRequestsCount,
-        int totalContestedRequestsCount,
-        decimal allocationRatio)
-    {
-        this.History = history;
-        this.AllocatedContestedRequestsCount = allocatedContestedRequestsCount;
-        this.TotalContestedRequestsCount = totalContestedRequestsCount;
-        this.AllocationRatio = allocationRatio;
-    }
+    [Required]
+    public Calendar<string> History { get; } = history;
 
     [Required]
-    public Calendar<string> History { get; }
+    public int TotalContestedRequestsCount { get; } = totalContestedRequestsCount;
 
     [Required]
-    public int TotalContestedRequestsCount { get; }
-        
+    public int AllocatedContestedRequestsCount { get; } = allocatedContestedRequestsCount;
+
     [Required]
-    public int AllocatedContestedRequestsCount { get; }
-        
-    [Required]
-    public decimal AllocationRatio { get; }
+    public decimal AllocationRatio { get; } = allocationRatio;
 }

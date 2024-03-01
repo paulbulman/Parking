@@ -15,22 +15,12 @@ using static Json.Calendar.Helpers;
 
 [Route("[controller]")]
 [ApiController]
-public class HistoryController : Controller
+public class HistoryController(
+    IDateCalculator dateCalculator,
+    IRequestRepository requestRepository,
+    IReservationRepository reservationRepository)
+    : Controller
 {
-    private readonly IDateCalculator dateCalculator;
-    private readonly IRequestRepository requestRepository;
-    private readonly IReservationRepository reservationRepository;
-
-    public HistoryController(
-        IDateCalculator dateCalculator,
-        IRequestRepository requestRepository,
-        IReservationRepository reservationRepository)
-    {
-        this.dateCalculator = dateCalculator;
-        this.requestRepository = requestRepository;
-        this.reservationRepository = reservationRepository;
-    }
-
     [HttpGet]
     [ProducesResponseType(typeof(HistoryResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAsync([FromQuery] string userId, [FromQuery] LocalDate lastDate)
@@ -39,11 +29,11 @@ public class HistoryController : Controller
 
         var dateInterval = new DateInterval(firstDate, lastDate);
 
-        var allRequests = await this.requestRepository.GetRequests(dateInterval);
-        var reservations = await this.reservationRepository.GetReservations(dateInterval);
+        var allRequests = await requestRepository.GetRequests(dateInterval);
+        var reservations = await reservationRepository.GetReservations(dateInterval);
 
         var captions = dateInterval
-            .Where(this.dateCalculator.IsWorkingDay)
+            .Where(dateCalculator.IsWorkingDay)
             .ToDictionary(d => d, d => GetCaption(d, userId, allRequests, reservations));
 
         var allUsersInterruptionDates = allRequests

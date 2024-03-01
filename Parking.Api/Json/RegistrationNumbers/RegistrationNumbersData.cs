@@ -2,17 +2,11 @@
 
 using System.ComponentModel.DataAnnotations;
 
-public class RegistrationNumbersData
+public class RegistrationNumbersData(string registrationNumber, string name)
 {
-    public RegistrationNumbersData(string registrationNumber, string name)
-    {
-        this.RegistrationNumber = registrationNumber;
-        this.Name = name;
-    }
+    [Required]
+    public string RegistrationNumber { get; } = registrationNumber;
 
     [Required]
-    public string RegistrationNumber { get; }
-        
-    [Required]
-    public string Name { get; }
+    public string Name { get; } = name;
 }

@@ -2,36 +2,26 @@
 
 using System.ComponentModel.DataAnnotations;
 
-public class UserPostRequest
+public class UserPostRequest(
+    string? alternativeRegistrationNumber,
+    decimal? commuteDistance,
+    string emailAddress,
+    string firstName,
+    string lastName,
+    string? registrationNumber)
 {
-    public UserPostRequest(
-        string? alternativeRegistrationNumber,
-        decimal? commuteDistance,
-        string emailAddress,
-        string firstName,
-        string lastName,
-        string? registrationNumber)
-    {
-        this.AlternativeRegistrationNumber = alternativeRegistrationNumber;
-        this.CommuteDistance = commuteDistance;
-        this.EmailAddress = emailAddress;
-        this.FirstName = firstName;
-        this.LastName = lastName;
-        this.RegistrationNumber = registrationNumber;
-    }
-        
-    public string? AlternativeRegistrationNumber { get; }
-        
-    public decimal? CommuteDistance { get; }
-        
-    [Required]
-    public string EmailAddress { get; }
+    public string? AlternativeRegistrationNumber { get; } = alternativeRegistrationNumber;
+
+    public decimal? CommuteDistance { get; } = commuteDistance;
 
     [Required]
-    public string FirstName { get; }
-        
+    public string EmailAddress { get; } = emailAddress;
+
     [Required]
-    public string LastName { get; }
-        
-    public string? RegistrationNumber { get; }
+    public string FirstName { get; } = firstName;
+
+    [Required]
+    public string LastName { get; } = lastName;
+
+    public string? RegistrationNumber { get; } = registrationNumber;
 }

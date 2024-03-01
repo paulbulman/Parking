@@ -11,29 +11,18 @@ using Microsoft.Extensions.Primitives;
 using Parking.Business.Data;
 using Serilog;
 
-public class HttpLoggingMiddleware
+public class HttpLoggingMiddleware(
+    ILogger<HttpLoggingMiddleware> logger,
+    RequestDelegate next,
+    IDiagnosticContext diagnosticContext)
 {
-    private readonly ILogger<HttpLoggingMiddleware> logger;
-    private readonly RequestDelegate next;
-    private readonly IDiagnosticContext diagnosticContext;
-
-    public HttpLoggingMiddleware(
-        ILogger<HttpLoggingMiddleware> logger,
-        RequestDelegate next,
-        IDiagnosticContext diagnosticContext)
-    {
-        this.logger = logger;
-        this.next = next;
-        this.diagnosticContext = diagnosticContext;
-    }
-
     public async Task Invoke(
         HttpContext context,
         INotificationRepository notificationRepository)
     {
         try
         {
-            await this.next(context);
+            await next(context);
         }
         catch (Exception initialException)
         {
@@ -46,12 +35,12 @@ public class HttpLoggingMiddleware
         }
         finally
         {
-            this.diagnosticContext.Set("RemoteIpAddress", context.Connection.RemoteIpAddress);
-            this.diagnosticContext.Set("UserClaims", context.User?.Claims?.Select(c => KeyValuePair.Create(c.Type, c.Value)));
+            diagnosticContext.Set("RemoteIpAddress", context.Connection.RemoteIpAddress);
+            diagnosticContext.Set("UserClaims", context.User?.Claims?.Select(c => KeyValuePair.Create(c.Type, c.Value)));
 
             var request = context.Request;
 
-            this.diagnosticContext.Set("RequestHeaders", request.Headers.Select(FormatHeaderValues).ToArray());
+            diagnosticContext.Set("RequestHeaders", request.Headers.Select(FormatHeaderValues).ToArray());
 
             if (request.Body.CanSeek)
             {
@@ -63,12 +52,12 @@ public class HttpLoggingMiddleware
 
             if (body.Length > 0)
             {
-                this.diagnosticContext.Set("RequestBody", body);
+                diagnosticContext.Set("RequestBody", body);
             }
 
             var statusCode = context.Response.StatusCode;
 
-            this.diagnosticContext.Set("StatusCode", statusCode);
+            diagnosticContext.Set("StatusCode", statusCode);
 
             if (statusCode >= 400)
             {
@@ -95,7 +84,7 @@ public class HttpLoggingMiddleware
         }
         catch (Exception exception)
         {
-            this.logger.LogError(
+            logger.LogError(
                 exception,
                 "Exception occurred attempting to send exception notification.");
         }

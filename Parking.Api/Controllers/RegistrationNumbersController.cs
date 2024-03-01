@@ -14,17 +14,13 @@ using Model;
 
 [Route("[controller]")]
 [ApiController]
-public class RegistrationNumbersController : ControllerBase
+public class RegistrationNumbersController(IUserRepository userRepository) : ControllerBase
 {
-    private readonly IUserRepository userRepository;
-
-    public RegistrationNumbersController(IUserRepository userRepository) => this.userRepository = userRepository;
-
     [HttpGet("{searchString}")]
     [ProducesResponseType(typeof(RegistrationNumbersResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAsync(string searchString)
     {
-        var users = await this.userRepository.GetUsers();
+        var users = await userRepository.GetUsers();
 
         var data = users
             .Select(CreateRegistrationNumbersData)

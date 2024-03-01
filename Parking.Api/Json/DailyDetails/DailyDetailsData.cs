@@ -3,29 +3,21 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-public class DailyDetailsData
+public class DailyDetailsData(
+    IEnumerable<DailyDetailsUser> allocatedUsers,
+    IEnumerable<DailyDetailsUser> interruptedUsers,
+    IEnumerable<DailyDetailsUser> pendingUsers,
+    StayInterruptedStatus stayInterruptedStatus)
 {
-    public DailyDetailsData(
-        IEnumerable<DailyDetailsUser> allocatedUsers,
-        IEnumerable<DailyDetailsUser> interruptedUsers,
-        IEnumerable<DailyDetailsUser> pendingUsers,
-        StayInterruptedStatus stayInterruptedStatus)
-    {
-        this.AllocatedUsers = allocatedUsers;
-        this.InterruptedUsers = interruptedUsers;
-        this.PendingUsers = pendingUsers;
-        this.StayInterruptedStatus = stayInterruptedStatus;
-    }
+    [Required]
+    public IEnumerable<DailyDetailsUser> AllocatedUsers { get; } = allocatedUsers;
 
     [Required]
-    public IEnumerable<DailyDetailsUser> AllocatedUsers { get; }
-        
-    [Required]
-    public IEnumerable<DailyDetailsUser> InterruptedUsers { get; }
-        
-    [Required]
-    public IEnumerable<DailyDetailsUser> PendingUsers { get; }
+    public IEnumerable<DailyDetailsUser> InterruptedUsers { get; } = interruptedUsers;
 
     [Required]
-    public StayInterruptedStatus StayInterruptedStatus { get; }
+    public IEnumerable<DailyDetailsUser> PendingUsers { get; } = pendingUsers;
+
+    [Required]
+    public StayInterruptedStatus StayInterruptedStatus { get; } = stayInterruptedStatus;
 }

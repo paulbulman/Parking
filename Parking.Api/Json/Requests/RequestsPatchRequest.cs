@@ -3,10 +3,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-public class RequestsPatchRequest
+public class RequestsPatchRequest(IEnumerable<RequestsPatchRequestDailyData> requests)
 {
-    public RequestsPatchRequest(IEnumerable<RequestsPatchRequestDailyData> requests) => this.Requests = requests;
-
     [Required]
-    public IEnumerable<RequestsPatchRequestDailyData> Requests { get; }
+    public IEnumerable<RequestsPatchRequestDailyData> Requests { get; } = requests;
 }

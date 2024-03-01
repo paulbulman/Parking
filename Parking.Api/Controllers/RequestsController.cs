@@ -15,25 +15,13 @@ using static Json.Calendar.Helpers;
 
 [Route("[controller]")]
 [ApiController]
-public class RequestsController : ControllerBase
+public class RequestsController(
+    IDateCalculator dateCalculator,
+    IRequestRepository requestRepository,
+    ITriggerRepository triggerRepository,
+    IUserRepository userRepository)
+    : ControllerBase
 {
-    private readonly IDateCalculator dateCalculator;
-    private readonly IRequestRepository requestRepository;
-    private readonly ITriggerRepository triggerRepository;
-    private readonly IUserRepository userRepository;
-
-    public RequestsController(
-        IDateCalculator dateCalculator,
-        IRequestRepository requestRepository,
-        ITriggerRepository triggerRepository,
-        IUserRepository userRepository)
-    {
-        this.dateCalculator = dateCalculator;
-        this.requestRepository = requestRepository;
-        this.triggerRepository = triggerRepository;
-        this.userRepository = userRepository;
-    }
-
     [HttpGet]
     [ProducesResponseType(typeof(RequestsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAsync()
@@ -51,7 +39,7 @@ public class RequestsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetByIdAsync(string userId)
     {
-        if (!await this.userRepository.UserExists(userId))
+        if (!await userRepository.UserExists(userId))
         {
             return this.NotFound();
         }
@@ -80,7 +68,7 @@ public class RequestsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> PatchByIdAsync(string userId, [FromBody] RequestsPatchRequest request)
     {
-        if (!await this.userRepository.UserExists(userId))
+        if (!await userRepository.UserExists(userId))
         {
             return this.NotFound();
         }
@@ -94,9 +82,9 @@ public class RequestsController : ControllerBase
 
     private async Task<RequestsResponse> GetRequests(string userId)
     {
-        var activeDates = this.dateCalculator.GetActiveDates();
+        var activeDates = dateCalculator.GetActiveDates();
 
-        var requests = await this.requestRepository.GetRequests(userId, activeDates.ToDateInterval());
+        var requests = await requestRepository.GetRequests(userId, activeDates.ToDateInterval());
 
         var data = activeDates.ToDictionary(
             d => d,
@@ -118,7 +106,7 @@ public class RequestsController : ControllerBase
 
     private async Task UpdateRequests(string userId, RequestsPatchRequest request)
     {
-        var activeDates = this.dateCalculator.GetActiveDates();
+        var activeDates = dateCalculator.GetActiveDates();
 
         var requestsToSave = request.Requests
             .Where(r => activeDates.Contains(r.LocalDate))
@@ -128,9 +116,9 @@ public class RequestsController : ControllerBase
             .Select(v => CreateRequest(userId, v))
             .ToArray();
 
-        await this.requestRepository.SaveRequests(requestsToSave);
+        await requestRepository.SaveRequests(requestsToSave);
 
-        await this.triggerRepository.AddTrigger();
+        await triggerRepository.AddTrigger();
     }
 
     private static bool ValuesCancelOut(

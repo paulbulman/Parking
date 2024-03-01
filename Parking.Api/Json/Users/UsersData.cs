@@ -2,30 +2,26 @@
 
 using System.ComponentModel.DataAnnotations;
 
-public class UsersData
+public class UsersData(
+    string userId,
+    string? alternativeRegistrationNumber,
+    decimal? commuteDistance,
+    string firstName,
+    string lastName,
+    string? registrationNumber)
 {
-    public UsersData(string userId, string? alternativeRegistrationNumber, decimal? commuteDistance, string firstName, string lastName, string? registrationNumber)
-    {
-        this.UserId = userId;
-        this.AlternativeRegistrationNumber = alternativeRegistrationNumber;
-        this.CommuteDistance = commuteDistance;
-        this.FirstName = firstName;
-        this.LastName = lastName;
-        this.RegistrationNumber = registrationNumber;
-    }
-        
     [Required]
-    public string UserId { get; }
-        
-    public string? AlternativeRegistrationNumber { get; }
-        
-    public decimal? CommuteDistance { get; }
-        
+    public string UserId { get; } = userId;
+
+    public string? AlternativeRegistrationNumber { get; } = alternativeRegistrationNumber;
+
+    public decimal? CommuteDistance { get; } = commuteDistance;
+
     [Required]
-    public string FirstName { get; }
-        
+    public string FirstName { get; } = firstName;
+
     [Required]
-    public string LastName { get; }
-        
-    public string? RegistrationNumber { get; }
+    public string LastName { get; } = lastName;
+
+    public string? RegistrationNumber { get; } = registrationNumber;
 }

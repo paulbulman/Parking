@@ -7,12 +7,8 @@ using Xunit;
 using static Helpers.HttpClientHelpers;
 
 [Collection("Database tests")]
-public class TriggersTests : IAsyncLifetime
+public class TriggersTests(CustomWebApplicationFactory<Startup> factory) : IAsyncLifetime
 {
-    private readonly CustomWebApplicationFactory<Startup> factory;
-
-    public TriggersTests(CustomWebApplicationFactory<Startup> factory) => this.factory = factory;
-
     public async Task InitializeAsync() => await DatabaseHelpers.ResetDatabase();
 
     public Task DisposeAsync() => Task.CompletedTask;
@@ -22,7 +18,7 @@ public class TriggersTests : IAsyncLifetime
     {
         var initialTriggerFileCount = await DatabaseHelpers.GetTriggerCount();
 
-        var client = this.factory.CreateClient();
+        var client = factory.CreateClient();
 
         AddAuthorizationHeader(client, UserType.Normal);
 

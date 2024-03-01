@@ -2,10 +2,8 @@
 
 using System.ComponentModel.DataAnnotations;
 
-public class RequestsData
+public class RequestsData(bool requested)
 {
-    public RequestsData(bool requested) => this.Requested = requested;
-
     [Required]
-    public bool Requested { get; }
+    public bool Requested { get; } = requested;
 }

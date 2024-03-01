@@ -2,17 +2,11 @@
 
 using System.ComponentModel.DataAnnotations;
 
-public class StayInterruptedStatus
+public class StayInterruptedStatus(bool isAllowed, bool isSet)
 {
-    public StayInterruptedStatus(bool isAllowed, bool isSet)
-    {
-        this.IsAllowed = isAllowed;
-        this.IsSet = isSet;
-    }
+    [Required]
+    public bool IsAllowed { get; } = isAllowed;
 
     [Required]
-    public bool IsAllowed { get; }
-        
-    [Required]
-    public bool IsSet { get; }
+    public bool IsSet { get; } = isSet;
 }

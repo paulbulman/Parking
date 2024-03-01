@@ -1,24 +1,16 @@
 ﻿namespace Parking.Api.Json.Profiles;
 
-public class ProfilePatchRequest
+public class ProfilePatchRequest(
+    string? alternativeRegistrationNumber,
+    string? registrationNumber,
+    bool? requestReminderEnabled = null,
+    bool? reservationReminderEnabled = null)
 {
-    public ProfilePatchRequest(
-        string? alternativeRegistrationNumber,
-        string? registrationNumber,
-        bool? requestReminderEnabled = null,
-        bool? reservationReminderEnabled = null)
-    {
-        this.AlternativeRegistrationNumber = alternativeRegistrationNumber;
-        this.RegistrationNumber = registrationNumber;
-        this.RequestReminderEnabled = requestReminderEnabled;
-        this.ReservationReminderEnabled = reservationReminderEnabled;
-    }
+    public string? AlternativeRegistrationNumber { get; } = alternativeRegistrationNumber;
 
-    public string? AlternativeRegistrationNumber { get; }
+    public string? RegistrationNumber { get; } = registrationNumber;
 
-    public string? RegistrationNumber { get; }
+    public bool? RequestReminderEnabled { get; } = requestReminderEnabled;
 
-    public bool? RequestReminderEnabled { get; }
-
-    public bool? ReservationReminderEnabled { get; }
+    public bool? ReservationReminderEnabled { get; } = reservationReminderEnabled;
 }

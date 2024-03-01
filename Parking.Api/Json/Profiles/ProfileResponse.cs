@@ -2,10 +2,8 @@
 
 using System.ComponentModel.DataAnnotations;
 
-public class ProfileResponse
+public class ProfileResponse(ProfileData profile)
 {
-    public ProfileResponse(ProfileData profile) => this.Profile = profile;
-
     [Required]
-    public ProfileData Profile { get; }
+    public ProfileData Profile { get; } = profile;
 }

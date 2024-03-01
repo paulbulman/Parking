@@ -2,17 +2,11 @@
 
 using System.ComponentModel.DataAnnotations;
 
-public class DailyDetailsUser
+public class DailyDetailsUser(string name, bool isHighlighted)
 {
-    public DailyDetailsUser(string name, bool isHighlighted)
-    {
-        this.Name = name;
-        this.IsHighlighted = isHighlighted;
-    }
-        
     [Required]
-    public string Name { get; }
+    public string Name { get; } = name;
 
     [Required]
-    public bool IsHighlighted { get; }
+    public bool IsHighlighted { get; } = isHighlighted;
 }

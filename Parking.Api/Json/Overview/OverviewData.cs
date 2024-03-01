@@ -3,17 +3,11 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-public class OverviewData
+public class OverviewData(IEnumerable<OverviewUser> allocatedUsers, IEnumerable<OverviewUser> interruptedUsers)
 {
-    public OverviewData(IEnumerable<OverviewUser> allocatedUsers, IEnumerable<OverviewUser> interruptedUsers)
-    {
-        this.AllocatedUsers = allocatedUsers;
-        this.InterruptedUsers = interruptedUsers;
-    }
+    [Required]
+    public IEnumerable<OverviewUser> AllocatedUsers { get; } = allocatedUsers;
 
     [Required]
-    public IEnumerable<OverviewUser> AllocatedUsers { get; }
-        
-    [Required]
-    public IEnumerable<OverviewUser> InterruptedUsers { get; }
+    public IEnumerable<OverviewUser> InterruptedUsers { get; } = interruptedUsers;
 }

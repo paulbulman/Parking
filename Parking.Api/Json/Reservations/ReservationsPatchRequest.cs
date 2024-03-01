@@ -3,11 +3,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-public class ReservationsPatchRequest
+public class ReservationsPatchRequest(IEnumerable<ReservationsPatchRequestDailyData> reservations)
 {
-    public ReservationsPatchRequest(IEnumerable<ReservationsPatchRequestDailyData> reservations) =>
-        this.Reservations = reservations;
-
     [Required]
-    public IEnumerable<ReservationsPatchRequestDailyData> Reservations { get; }
+    public IEnumerable<ReservationsPatchRequestDailyData> Reservations { get; } = reservations;
 }

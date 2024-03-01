@@ -3,10 +3,8 @@
 using System.ComponentModel.DataAnnotations;
 using Calendar;
 
-public class OverviewResponse
+public class OverviewResponse(Calendar<OverviewData> overview)
 {
-    public OverviewResponse(Calendar<OverviewData> overview) => this.Overview = overview;
-
     [Required]
-    public Calendar<OverviewData> Overview { get; }
+    public Calendar<OverviewData> Overview { get; } = overview;
 }

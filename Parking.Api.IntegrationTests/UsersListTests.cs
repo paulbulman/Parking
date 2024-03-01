@@ -10,12 +10,8 @@ using Xunit;
 using static Helpers.HttpClientHelpers;
 
 [Collection("Database tests")]
-public class UsersListTests : IAsyncLifetime
+public class UsersListTests(CustomWebApplicationFactory<Startup> factory) : IAsyncLifetime
 {
-    private readonly CustomWebApplicationFactory<Startup> factory;
-
-    public UsersListTests(CustomWebApplicationFactory<Startup> factory) => this.factory = factory;
-
     public async Task InitializeAsync() => await DatabaseHelpers.ResetDatabase();
 
     public Task DisposeAsync() => Task.CompletedTask;
@@ -27,7 +23,7 @@ public class UsersListTests : IAsyncLifetime
     {
         await NotificationHelpers.ResetNotifications();
 
-        var client = this.factory.CreateClient();
+        var client = factory.CreateClient();
 
         AddAuthorizationHeader(client, userType);
 
@@ -44,7 +40,7 @@ public class UsersListTests : IAsyncLifetime
         await DatabaseHelpers.CreateUser(
             CreateUser.With(userId: "User2", firstName: "Chen", lastName: "Mesias"));
 
-        var client = this.factory.CreateClient();
+        var client = factory.CreateClient();
 
         AddAuthorizationHeader(client, UserType.TeamLeader);
 

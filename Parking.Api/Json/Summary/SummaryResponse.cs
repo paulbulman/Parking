@@ -4,10 +4,8 @@ namespace Parking.Api.Json.Summary;
 
 using System.ComponentModel.DataAnnotations;
 
-public class SummaryResponse
+public class SummaryResponse(Calendar<SummaryData> summary)
 {
-    public SummaryResponse(Calendar<SummaryData> summary) => this.Summary = summary;
-
     [Required]
-    public Calendar<SummaryData> Summary { get; }
+    public Calendar<SummaryData> Summary { get; } = summary;
 }

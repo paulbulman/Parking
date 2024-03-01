@@ -4,24 +4,17 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Calendar;
 
-public class ReservationsResponse
+public class ReservationsResponse(
+    Calendar<ReservationsData> reservations,
+    int shortLeadTimeSpaces,
+    IEnumerable<ReservationsUser> users)
 {
-    public ReservationsResponse(
-        Calendar<ReservationsData> reservations,
-        int shortLeadTimeSpaces,
-        IEnumerable<ReservationsUser> users)
-    {
-        this.Reservations = reservations;
-        this.ShortLeadTimeSpaces = shortLeadTimeSpaces;
-        this.Users = users;
-    }
+    [Required]
+    public Calendar<ReservationsData> Reservations { get; } = reservations;
 
     [Required]
-    public Calendar<ReservationsData> Reservations { get; }
-        
-    [Required]
-    public int ShortLeadTimeSpaces { get; }
+    public int ShortLeadTimeSpaces { get; } = shortLeadTimeSpaces;
 
     [Required]
-    public IEnumerable<ReservationsUser> Users { get; }
+    public IEnumerable<ReservationsUser> Users { get; } = users;
 }

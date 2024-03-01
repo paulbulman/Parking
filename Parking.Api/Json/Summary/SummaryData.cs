@@ -2,17 +2,10 @@
 
 using System.ComponentModel.DataAnnotations;
 
-public class SummaryData
+public class SummaryData(SummaryStatus? status, bool isProblem)
 {
+    public SummaryStatus? Status { get; } = status;
 
-    public SummaryData(SummaryStatus? status, bool isProblem)
-    {
-        this.Status = status;
-        this.IsProblem = isProblem;
-    }
-
-    public SummaryStatus? Status { get; }
-        
     [Required]
-    public bool IsProblem { get; }
+    public bool IsProblem { get; } = isProblem;
 }

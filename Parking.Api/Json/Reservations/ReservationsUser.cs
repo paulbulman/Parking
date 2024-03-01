@@ -2,17 +2,11 @@
 
 using System.ComponentModel.DataAnnotations;
 
-public class ReservationsUser
+public class ReservationsUser(string userId, string name)
 {
-    public ReservationsUser(string userId, string name)
-    {
-        this.UserId = userId;
-        this.Name = name;
-    }
+    [Required]
+    public string UserId { get; } = userId;
 
     [Required]
-    public string UserId { get; }
-
-    [Required]
-    public string Name { get; }
+    public string Name { get; } = name;
 }

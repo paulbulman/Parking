@@ -14,12 +14,8 @@ using Xunit;
 using static Helpers.HttpClientHelpers;
 
 [Collection("Database tests")]
-public class ReservationsTests : IAsyncLifetime
+public class ReservationsTests(CustomWebApplicationFactory<Startup> factory) : IAsyncLifetime
 {
-    private readonly CustomWebApplicationFactory<Startup> factory;
-
-    public ReservationsTests(CustomWebApplicationFactory<Startup> factory) => this.factory = factory;
-
     public async Task InitializeAsync()
     {
         await DatabaseHelpers.ResetDatabase();
@@ -33,7 +29,7 @@ public class ReservationsTests : IAsyncLifetime
     [InlineData(UserType.UserAdmin)]
     public async Task Get_returns_forbidden_when_user_is_not_team_leader(UserType userType)
     {
-        var client = this.factory.CreateClient();
+        var client = factory.CreateClient();
 
         AddAuthorizationHeader(client, userType);
 
@@ -47,7 +43,7 @@ public class ReservationsTests : IAsyncLifetime
     [InlineData(UserType.UserAdmin)]
     public async Task Patch_returns_forbidden_when_user_is_not_team_leader(UserType userType)
     {
-        var client = this.factory.CreateClient();
+        var client = factory.CreateClient();
 
         AddAuthorizationHeader(client, userType);
 
@@ -79,7 +75,7 @@ public class ReservationsTests : IAsyncLifetime
             {"nearbyDistance", "1.5"}
         });
 
-        var client = this.factory.CreateClient();
+        var client = factory.CreateClient();
 
         AddAuthorizationHeader(client, UserType.TeamLeader);
 
@@ -111,7 +107,7 @@ public class ReservationsTests : IAsyncLifetime
     [Fact]
     public async Task Saves_new_reservations()
     {
-        var client = this.factory.CreateClient();
+        var client = factory.CreateClient();
 
         AddAuthorizationHeader(client, UserType.TeamLeader);
 

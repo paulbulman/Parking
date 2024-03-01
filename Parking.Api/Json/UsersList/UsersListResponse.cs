@@ -3,10 +3,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-public class UsersListResponse
+public class UsersListResponse(IEnumerable<UsersListUser> users)
 {
-    public UsersListResponse(IEnumerable<UsersListUser> users) => this.Users = users;
-
     [Required]
-    public IEnumerable<UsersListUser> Users { get; }
+    public IEnumerable<UsersListUser> Users { get; } = users;
 }
