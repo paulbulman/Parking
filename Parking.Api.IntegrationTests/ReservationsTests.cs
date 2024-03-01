@@ -1,134 +1,133 @@
 ﻿// ReSharper disable StringLiteralTypo
-namespace Parking.Api.IntegrationTests
+namespace Parking.Api.IntegrationTests;
+
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+using Json.Reservations;
+using NodaTime.Testing.Extensions;
+using TestHelpers;
+using TestHelpers.Aws;
+using UnitTests.Json.Calendar;
+using Xunit;
+using static Helpers.HttpClientHelpers;
+
+[Collection("Database tests")]
+public class ReservationsTests : IAsyncLifetime
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Net;
-    using System.Threading.Tasks;
-    using Json.Reservations;
-    using NodaTime.Testing.Extensions;
-    using TestHelpers;
-    using TestHelpers.Aws;
-    using UnitTests.Json.Calendar;
-    using Xunit;
-    using static Helpers.HttpClientHelpers;
+    private readonly CustomWebApplicationFactory<Startup> factory;
 
-    [Collection("Database tests")]
-    public class ReservationsTests : IAsyncLifetime
+    public ReservationsTests(CustomWebApplicationFactory<Startup> factory) => this.factory = factory;
+
+    public async Task InitializeAsync()
     {
-        private readonly CustomWebApplicationFactory<Startup> factory;
+        await DatabaseHelpers.ResetDatabase();
+        await NotificationHelpers.ResetNotifications();
+    }
 
-        public ReservationsTests(CustomWebApplicationFactory<Startup> factory) => this.factory = factory;
+    public Task DisposeAsync() => Task.CompletedTask;
 
-        public async Task InitializeAsync()
-        {
-            await DatabaseHelpers.ResetDatabase();
-            await NotificationHelpers.ResetNotifications();
-        }
+    [Theory]
+    [InlineData(UserType.Normal)]
+    [InlineData(UserType.UserAdmin)]
+    public async Task Get_returns_forbidden_when_user_is_not_team_leader(UserType userType)
+    {
+        var client = this.factory.CreateClient();
 
-        public Task DisposeAsync() => Task.CompletedTask;
+        AddAuthorizationHeader(client, userType);
 
-        [Theory]
-        [InlineData(UserType.Normal)]
-        [InlineData(UserType.UserAdmin)]
-        public async Task Get_returns_forbidden_when_user_is_not_team_leader(UserType userType)
-        {
-            var client = this.factory.CreateClient();
+        var response = await client.GetAsync("/reservations");
 
-            AddAuthorizationHeader(client, userType);
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
 
-            var response = await client.GetAsync("/reservations");
+    [Theory]
+    [InlineData(UserType.Normal)]
+    [InlineData(UserType.UserAdmin)]
+    public async Task Patch_returns_forbidden_when_user_is_not_team_leader(UserType userType)
+    {
+        var client = this.factory.CreateClient();
 
-            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
-        }
+        AddAuthorizationHeader(client, userType);
 
-        [Theory]
-        [InlineData(UserType.Normal)]
-        [InlineData(UserType.UserAdmin)]
-        public async Task Patch_returns_forbidden_when_user_is_not_team_leader(UserType userType)
-        {
-            var client = this.factory.CreateClient();
+        var request = new ReservationsPatchRequest(new List<ReservationsPatchRequestDailyData>());
 
-            AddAuthorizationHeader(client, userType);
+        var response = await client.PatchAsJsonAsync("/reservations", request);
 
-            var request = new ReservationsPatchRequest(new List<ReservationsPatchRequestDailyData>());
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
 
-            var response = await client.PatchAsJsonAsync("/reservations", request);
+    [Fact]
+    public async Task Returns_existing_reservations()
+    {
+        await DatabaseHelpers.CreateUser(CreateUser.With(userId: "User1", firstName: "Thornie", lastName: "Newis"));
+        await DatabaseHelpers.CreateUser(CreateUser.With(userId: "User2", firstName: "Sully", lastName: "Paolino"));
+        await DatabaseHelpers.CreateDeletedUser(CreateUser.With(userId: "User3"));
 
-            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
-        }
-
-        [Fact]
-        public async Task Returns_existing_reservations()
-        {
-            await DatabaseHelpers.CreateUser(CreateUser.With(userId: "User1", firstName: "Thornie", lastName: "Newis"));
-            await DatabaseHelpers.CreateUser(CreateUser.With(userId: "User2", firstName: "Sully", lastName: "Paolino"));
-            await DatabaseHelpers.CreateDeletedUser(CreateUser.With(userId: "User3"));
-
-            await DatabaseHelpers.CreateReservations("2021-03",
-                new Dictionary<string, List<string>>
-                {
-                    {"01", new List<string> {"User1", "User2"}},
-                    {"02", new List<string> {"User2", "User3"}}
-                });
-
-            await DatabaseHelpers.CreateConfiguration(new Dictionary<string, string>
+        await DatabaseHelpers.CreateReservations("2021-03",
+            new Dictionary<string, List<string>>
             {
-                {"shortLeadTimeSpaces", "2"},
-                {"totalSpaces", "9"},
-                {"nearbyDistance", "1.5"}
+                {"01", new List<string> {"User1", "User2"}},
+                {"02", new List<string> {"User2", "User3"}}
             });
 
-            var client = this.factory.CreateClient();
-
-            AddAuthorizationHeader(client, UserType.TeamLeader);
-
-            var response = await client.GetAsync("/reservations");
-
-            response.EnsureSuccessStatusCode();
-
-            var reservationsResponse = await response.DeserializeAsType<ReservationsResponse>();
-
-            var day1Data = CalendarHelpers.GetDailyData(reservationsResponse.Reservations, 1.March(2021));
-            var day2Data = CalendarHelpers.GetDailyData(reservationsResponse.Reservations, 2.March(2021));
-
-            Assert.Equal(new[] { "User1", "User2" }, day1Data.UserIds);
-            Assert.Equal(new[] { "User2" }, day2Data.UserIds);
-
-            Assert.Equal(2, reservationsResponse.ShortLeadTimeSpaces);
-
-            var actualUsers = reservationsResponse.Users.ToArray();
-
-            Assert.Equal(2, actualUsers.Length);
-
-            Assert.Equal("User1", actualUsers[0].UserId);
-            Assert.Equal("Thornie Newis", actualUsers[0].Name);
-
-            Assert.Equal("User2", actualUsers[1].UserId);
-            Assert.Equal("Sully Paolino", actualUsers[1].Name);
-        }
-
-        [Fact]
-        public async Task Saves_new_reservations()
+        await DatabaseHelpers.CreateConfiguration(new Dictionary<string, string>
         {
-            var client = this.factory.CreateClient();
+            {"shortLeadTimeSpaces", "2"},
+            {"totalSpaces", "9"},
+            {"nearbyDistance", "1.5"}
+        });
 
-            AddAuthorizationHeader(client, UserType.TeamLeader);
+        var client = this.factory.CreateClient();
 
-            var request = new ReservationsPatchRequest(new[]
-            {
-                new ReservationsPatchRequestDailyData(1.March(2021), new[] {"User3", "User4"}),
-                new ReservationsPatchRequestDailyData(2.March(2021), new[] {"User4", "User5"})
-            });
+        AddAuthorizationHeader(client, UserType.TeamLeader);
 
-            await client.PatchAsJsonAsync("/reservations", request);
+        var response = await client.GetAsync("/reservations");
 
-            var savedReservations = await DatabaseHelpers.ReadReservations("2021-03");
+        response.EnsureSuccessStatusCode();
 
-            Assert.Equal(new[] { "01", "02" }, savedReservations.Keys);
+        var reservationsResponse = await response.DeserializeAsType<ReservationsResponse>();
 
-            Assert.Equal(new[] { "User3", "User4" }, savedReservations["01"]);
-            Assert.Equal(new[] { "User4", "User5" }, savedReservations["02"]);
-        }
+        var day1Data = CalendarHelpers.GetDailyData(reservationsResponse.Reservations, 1.March(2021));
+        var day2Data = CalendarHelpers.GetDailyData(reservationsResponse.Reservations, 2.March(2021));
+
+        Assert.Equal(new[] { "User1", "User2" }, day1Data.UserIds);
+        Assert.Equal(new[] { "User2" }, day2Data.UserIds);
+
+        Assert.Equal(2, reservationsResponse.ShortLeadTimeSpaces);
+
+        var actualUsers = reservationsResponse.Users.ToArray();
+
+        Assert.Equal(2, actualUsers.Length);
+
+        Assert.Equal("User1", actualUsers[0].UserId);
+        Assert.Equal("Thornie Newis", actualUsers[0].Name);
+
+        Assert.Equal("User2", actualUsers[1].UserId);
+        Assert.Equal("Sully Paolino", actualUsers[1].Name);
+    }
+
+    [Fact]
+    public async Task Saves_new_reservations()
+    {
+        var client = this.factory.CreateClient();
+
+        AddAuthorizationHeader(client, UserType.TeamLeader);
+
+        var request = new ReservationsPatchRequest(new[]
+        {
+            new ReservationsPatchRequestDailyData(1.March(2021), new[] {"User3", "User4"}),
+            new ReservationsPatchRequestDailyData(2.March(2021), new[] {"User4", "User5"})
+        });
+
+        await client.PatchAsJsonAsync("/reservations", request);
+
+        var savedReservations = await DatabaseHelpers.ReadReservations("2021-03");
+
+        Assert.Equal(new[] { "01", "02" }, savedReservations.Keys);
+
+        Assert.Equal(new[] { "User3", "User4" }, savedReservations["01"]);
+        Assert.Equal(new[] { "User4", "User5" }, savedReservations["02"]);
     }
 }

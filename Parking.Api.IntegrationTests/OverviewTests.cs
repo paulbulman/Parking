@@ -1,64 +1,63 @@
 ﻿// ReSharper disable StringLiteralTypo
-namespace Parking.Api.IntegrationTests
+namespace Parking.Api.IntegrationTests;
+
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Json.Overview;
+using Microsoft.AspNetCore.Mvc.Testing;
+using NodaTime.Testing.Extensions;
+using TestHelpers;
+using TestHelpers.Aws;
+using UnitTests.Json.Calendar;
+using Xunit;
+using static Helpers.HttpClientHelpers;
+
+[Collection("Database tests")]
+public class OverviewTests : IAsyncLifetime
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using Json.Overview;
-    using Microsoft.AspNetCore.Mvc.Testing;
-    using NodaTime.Testing.Extensions;
-    using TestHelpers;
-    using TestHelpers.Aws;
-    using UnitTests.Json.Calendar;
-    using Xunit;
-    using static Helpers.HttpClientHelpers;
+    private readonly WebApplicationFactory<Startup> factory;
 
-    [Collection("Database tests")]
-    public class OverviewTests : IAsyncLifetime
+    public OverviewTests(CustomWebApplicationFactory<Startup> factory) => this.factory = factory;
+
+    public async Task InitializeAsync() => await DatabaseHelpers.ResetDatabase();
+
+    public Task DisposeAsync() => Task.CompletedTask;
+
+    [Fact]
+    public async Task Returns_users_with_requests()
     {
-        private readonly WebApplicationFactory<Startup> factory;
+        await SeedDatabase();
 
-        public OverviewTests(CustomWebApplicationFactory<Startup> factory) => this.factory = factory;
+        var client = this.factory.CreateClient();
 
-        public async Task InitializeAsync() => await DatabaseHelpers.ResetDatabase();
+        AddAuthorizationHeader(client, UserType.Normal);
 
-        public Task DisposeAsync() => Task.CompletedTask;
+        var response = await client.GetAsync("/overview");
 
-        [Fact]
-        public async Task Returns_users_with_requests()
-        {
-            await SeedDatabase();
+        response.EnsureSuccessStatusCode();
 
-            var client = this.factory.CreateClient();
+        var overviewResponse = await response.DeserializeAsType<OverviewResponse>();
 
-            AddAuthorizationHeader(client, UserType.Normal);
+        var day1Data = CalendarHelpers.GetDailyData(overviewResponse.Overview, 1.March(2021));
+        var day2Data = CalendarHelpers.GetDailyData(overviewResponse.Overview, 2.March(2021));
 
-            var response = await client.GetAsync("/overview");
+        Assert.Empty(day1Data.AllocatedUsers);
+        Assert.Equal(new[] { "Cash Meaders" }, day1Data.InterruptedUsers.Select(u => u.Name));
 
-            response.EnsureSuccessStatusCode();
+        Assert.Equal(new[] { "Cash Meaders" }, day2Data.AllocatedUsers.Select(u => u.Name));
+        Assert.Equal(new[] { "Kimball Ventom" }, day2Data.InterruptedUsers.Select(u => u.Name));
+    }
 
-            var overviewResponse = await response.DeserializeAsType<OverviewResponse>();
+    private static async Task SeedDatabase()
+    {
+        await DatabaseHelpers.CreateUser(CreateUser.With(userId: "User1", firstName: "Cash", lastName: "Meaders"));
+        await DatabaseHelpers.CreateUser(CreateUser.With(userId: "User2", firstName: "Kimball", lastName: "Ventom"));
 
-            var day1Data = CalendarHelpers.GetDailyData(overviewResponse.Overview, 1.March(2021));
-            var day2Data = CalendarHelpers.GetDailyData(overviewResponse.Overview, 2.March(2021));
+        var user1Requests = new Dictionary<string, string> {{"01", "S"}, {"02", "A"}};
+        var user2Requests = new Dictionary<string, string> {{"02", "I"}};
 
-            Assert.Empty(day1Data.AllocatedUsers);
-            Assert.Equal(new[] { "Cash Meaders" }, day1Data.InterruptedUsers.Select(u => u.Name));
-
-            Assert.Equal(new[] { "Cash Meaders" }, day2Data.AllocatedUsers.Select(u => u.Name));
-            Assert.Equal(new[] { "Kimball Ventom" }, day2Data.InterruptedUsers.Select(u => u.Name));
-        }
-
-        private static async Task SeedDatabase()
-        {
-            await DatabaseHelpers.CreateUser(CreateUser.With(userId: "User1", firstName: "Cash", lastName: "Meaders"));
-            await DatabaseHelpers.CreateUser(CreateUser.With(userId: "User2", firstName: "Kimball", lastName: "Ventom"));
-
-            var user1Requests = new Dictionary<string, string> {{"01", "S"}, {"02", "A"}};
-            var user2Requests = new Dictionary<string, string> {{"02", "I"}};
-
-            await DatabaseHelpers.CreateRequests("User1", "2021-03", user1Requests);
-            await DatabaseHelpers.CreateRequests("User2", "2021-03", user2Requests);
-        }
+        await DatabaseHelpers.CreateRequests("User1", "2021-03", user1Requests);
+        await DatabaseHelpers.CreateRequests("User2", "2021-03", user2Requests);
     }
 }

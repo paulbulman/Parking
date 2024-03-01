@@ -1,13 +1,12 @@
-﻿namespace Parking.Api.Json.Reservations
+﻿namespace Parking.Api.Json.Reservations;
+
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+
+public class ReservationsData
 {
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
+    public ReservationsData(IEnumerable<string> userIds) => this.UserIds = userIds;
 
-    public class ReservationsData
-    {
-        public ReservationsData(IEnumerable<string> userIds) => this.UserIds = userIds;
-
-        [Required]
-        public IEnumerable<string> UserIds { get; }
-    }
+    [Required]
+    public IEnumerable<string> UserIds { get; }
 }

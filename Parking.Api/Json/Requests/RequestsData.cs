@@ -1,12 +1,11 @@
-﻿namespace Parking.Api.Json.Requests
+﻿namespace Parking.Api.Json.Requests;
+
+using System.ComponentModel.DataAnnotations;
+
+public class RequestsData
 {
-    using System.ComponentModel.DataAnnotations;
+    public RequestsData(bool requested) => this.Requested = requested;
 
-    public class RequestsData
-    {
-        public RequestsData(bool requested) => this.Requested = requested;
-
-        [Required]
-        public bool Requested { get; }
-    }
+    [Required]
+    public bool Requested { get; }
 }

@@ -1,68 +1,67 @@
-﻿namespace Parking.Api.IntegrationTests
+﻿namespace Parking.Api.IntegrationTests;
+
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+using Json.UsersList;
+using TestHelpers;
+using TestHelpers.Aws;
+using Xunit;
+using static Helpers.HttpClientHelpers;
+
+[Collection("Database tests")]
+public class UsersListTests : IAsyncLifetime
 {
-    using System.Linq;
-    using System.Net;
-    using System.Threading.Tasks;
-    using Json.UsersList;
-    using TestHelpers;
-    using TestHelpers.Aws;
-    using Xunit;
-    using static Helpers.HttpClientHelpers;
+    private readonly CustomWebApplicationFactory<Startup> factory;
 
-    [Collection("Database tests")]
-    public class UsersListTests : IAsyncLifetime
+    public UsersListTests(CustomWebApplicationFactory<Startup> factory) => this.factory = factory;
+
+    public async Task InitializeAsync() => await DatabaseHelpers.ResetDatabase();
+
+    public Task DisposeAsync() => Task.CompletedTask;
+
+    [Theory]
+    [InlineData(UserType.Normal)]
+    [InlineData(UserType.UserAdmin)]
+    public async Task Returns_forbidden_when_user_is_not_team_leader(UserType userType)
     {
-        private readonly CustomWebApplicationFactory<Startup> factory;
+        await NotificationHelpers.ResetNotifications();
 
-        public UsersListTests(CustomWebApplicationFactory<Startup> factory) => this.factory = factory;
+        var client = this.factory.CreateClient();
 
-        public async Task InitializeAsync() => await DatabaseHelpers.ResetDatabase();
+        AddAuthorizationHeader(client, userType);
 
-        public Task DisposeAsync() => Task.CompletedTask;
+        var response = await client.GetAsync("/usersList");
 
-        [Theory]
-        [InlineData(UserType.Normal)]
-        [InlineData(UserType.UserAdmin)]
-        public async Task Returns_forbidden_when_user_is_not_team_leader(UserType userType)
-        {
-            await NotificationHelpers.ResetNotifications();
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
 
-            var client = this.factory.CreateClient();
+    [Fact]
+    public async Task Returns_existing_users()
+    {
+        await DatabaseHelpers.CreateUser(
+            CreateUser.With(userId: "User1", firstName: "Greer", lastName: "Lipsett"));
+        await DatabaseHelpers.CreateUser(
+            CreateUser.With(userId: "User2", firstName: "Chen", lastName: "Mesias"));
 
-            AddAuthorizationHeader(client, userType);
+        var client = this.factory.CreateClient();
 
-            var response = await client.GetAsync("/usersList");
+        AddAuthorizationHeader(client, UserType.TeamLeader);
 
-            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
-        }
+        var response = await client.GetAsync("/usersList");
 
-        [Fact]
-        public async Task Returns_existing_users()
-        {
-            await DatabaseHelpers.CreateUser(
-                CreateUser.With(userId: "User1", firstName: "Greer", lastName: "Lipsett"));
-            await DatabaseHelpers.CreateUser(
-                CreateUser.With(userId: "User2", firstName: "Chen", lastName: "Mesias"));
+        response.EnsureSuccessStatusCode();
 
-            var client = this.factory.CreateClient();
+        var multipleUsersResponse = await response.DeserializeAsType<UsersListResponse>();
 
-            AddAuthorizationHeader(client, UserType.TeamLeader);
+        var actualUsers = multipleUsersResponse.Users.ToArray();
 
-            var response = await client.GetAsync("/usersList");
+        Assert.Equal(2, actualUsers.Length);
 
-            response.EnsureSuccessStatusCode();
+        Assert.Equal("User1", actualUsers[0].UserId);
+        Assert.Equal("Greer Lipsett", actualUsers[0].Name);
 
-            var multipleUsersResponse = await response.DeserializeAsType<UsersListResponse>();
-
-            var actualUsers = multipleUsersResponse.Users.ToArray();
-
-            Assert.Equal(2, actualUsers.Length);
-
-            Assert.Equal("User1", actualUsers[0].UserId);
-            Assert.Equal("Greer Lipsett", actualUsers[0].Name);
-
-            Assert.Equal("User2", actualUsers[1].UserId);
-            Assert.Equal("Chen Mesias", actualUsers[1].Name);
-        }
+        Assert.Equal("User2", actualUsers[1].UserId);
+        Assert.Equal("Chen Mesias", actualUsers[1].Name);
     }
 }

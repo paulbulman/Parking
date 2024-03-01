@@ -1,26 +1,25 @@
-﻿namespace Parking.Api.Controllers
+﻿namespace Parking.Api.Controllers;
+
+using System.Threading.Tasks;
+using Business.Data;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+[Route("[controller]")]
+[ApiController]
+public class TriggersController : ControllerBase
 {
-    using System.Threading.Tasks;
-    using Business.Data;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
+    private readonly ITriggerRepository triggerRepository;
 
-    [Route("[controller]")]
-    [ApiController]
-    public class TriggersController : ControllerBase
+    public TriggersController(ITriggerRepository triggerRepository) =>
+        this.triggerRepository = triggerRepository;
+
+    [HttpPost]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> PostAsync()
     {
-        private readonly ITriggerRepository triggerRepository;
+        await this.triggerRepository.AddTrigger();
 
-        public TriggersController(ITriggerRepository triggerRepository) =>
-            this.triggerRepository = triggerRepository;
-
-        [HttpPost]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> PostAsync()
-        {
-            await this.triggerRepository.AddTrigger();
-
-            return this.Ok();
-        }
+        return this.Ok();
     }
 }

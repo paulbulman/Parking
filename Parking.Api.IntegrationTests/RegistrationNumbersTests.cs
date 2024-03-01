@@ -1,58 +1,57 @@
 ﻿// ReSharper disable StringLiteralTypo
-namespace Parking.Api.IntegrationTests
+namespace Parking.Api.IntegrationTests;
+
+using System.Linq;
+using System.Threading.Tasks;
+using Json.RegistrationNumbers;
+using TestHelpers;
+using TestHelpers.Aws;
+using Xunit;
+using static Helpers.HttpClientHelpers;
+
+[Collection("Database tests")]
+public class RegistrationNumbersTests : IAsyncLifetime
 {
-    using System.Linq;
-    using System.Threading.Tasks;
-    using Json.RegistrationNumbers;
-    using TestHelpers;
-    using TestHelpers.Aws;
-    using Xunit;
-    using static Helpers.HttpClientHelpers;
+    private readonly CustomWebApplicationFactory<Startup> factory;
 
-    [Collection("Database tests")]
-    public class RegistrationNumbersTests : IAsyncLifetime
+    public RegistrationNumbersTests(CustomWebApplicationFactory<Startup> factory) => this.factory = factory;
+
+    public async Task InitializeAsync() => await DatabaseHelpers.ResetDatabase();
+
+    public Task DisposeAsync() => Task.CompletedTask;
+
+    [Fact]
+    public async Task Returns_existing_registration_numbers()
     {
-        private readonly CustomWebApplicationFactory<Startup> factory;
+        await DatabaseHelpers.CreateUser(
+            CreateUser.With(
+                userId: "User1",
+                alternativeRegistrationNumber: "X123XYZ",
+                firstName: "Kent",
+                lastName: "Attewell",
+                registrationNumber: "AB12ABC"));
+        await DatabaseHelpers.CreateUser(
+            CreateUser.With(
+                userId: "User2",
+                firstName: "Dwayne",
+                lastName: "Wanjek",
+                registrationNumber: "CD34CDE"));
 
-        public RegistrationNumbersTests(CustomWebApplicationFactory<Startup> factory) => this.factory = factory;
+        var client = this.factory.CreateClient();
 
-        public async Task InitializeAsync() => await DatabaseHelpers.ResetDatabase();
+        AddAuthorizationHeader(client, UserType.Normal);
 
-        public Task DisposeAsync() => Task.CompletedTask;
+        var response = await client.GetAsync("/registrationNumbers/CD34CDE");
 
-        [Fact]
-        public async Task Returns_existing_registration_numbers()
-        {
-            await DatabaseHelpers.CreateUser(
-                CreateUser.With(
-                    userId: "User1",
-                    alternativeRegistrationNumber: "X123XYZ",
-                    firstName: "Kent",
-                    lastName: "Attewell",
-                    registrationNumber: "AB12ABC"));
-            await DatabaseHelpers.CreateUser(
-                CreateUser.With(
-                    userId: "User2",
-                    firstName: "Dwayne",
-                    lastName: "Wanjek",
-                    registrationNumber: "CD34CDE"));
+        response.EnsureSuccessStatusCode();
 
-            var client = this.factory.CreateClient();
+        var registrationNumbersResponse = await response.DeserializeAsType<RegistrationNumbersResponse>();
 
-            AddAuthorizationHeader(client, UserType.Normal);
+        var actualRegistrationNumbers = registrationNumbersResponse.RegistrationNumbers.ToArray();
 
-            var response = await client.GetAsync("/registrationNumbers/CD34CDE");
+        Assert.Single(actualRegistrationNumbers);
 
-            response.EnsureSuccessStatusCode();
-
-            var registrationNumbersResponse = await response.DeserializeAsType<RegistrationNumbersResponse>();
-
-            var actualRegistrationNumbers = registrationNumbersResponse.RegistrationNumbers.ToArray();
-
-            Assert.Single(actualRegistrationNumbers);
-
-            Assert.Equal("Dwayne Wanjek", actualRegistrationNumbers[0].Name);
-            Assert.Equal("CD34CDE", actualRegistrationNumbers[0].RegistrationNumber);
-        }
+        Assert.Equal("Dwayne Wanjek", actualRegistrationNumbers[0].Name);
+        Assert.Equal("CD34CDE", actualRegistrationNumbers[0].RegistrationNumber);
     }
 }

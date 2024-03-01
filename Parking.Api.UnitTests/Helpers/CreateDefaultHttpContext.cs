@@ -1,23 +1,22 @@
-﻿namespace Parking.Api.UnitTests.Helpers
+﻿namespace Parking.Api.UnitTests.Helpers;
+
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
+
+public static class CreateDefaultHttpContext
 {
-    using System.Collections.Generic;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.Extensions.Primitives;
-
-    public static class CreateDefaultHttpContext
-    {
-        public static DefaultHttpContext WithBearerToken(string rawTokenValue) =>
-            new DefaultHttpContext
+    public static DefaultHttpContext WithBearerToken(string rawTokenValue) =>
+        new DefaultHttpContext
+        {
+            Request =
             {
-                Request =
+                Headers =
                 {
-                    Headers =
-                    {
-                        KeyValuePair.Create("Authorization", new StringValues($"Bearer {rawTokenValue}"))
-                    }
+                    KeyValuePair.Create("Authorization", new StringValues($"Bearer {rawTokenValue}"))
                 }
-            };
+            }
+        };
 
-        public static DefaultHttpContext WithoutRequestHeaders() => new DefaultHttpContext();
-    }
+    public static DefaultHttpContext WithoutRequestHeaders() => new DefaultHttpContext();
 }

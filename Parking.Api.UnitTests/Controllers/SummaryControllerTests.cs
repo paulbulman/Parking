@@ -1,136 +1,135 @@
-﻿namespace Parking.Api.UnitTests.Controllers
+﻿namespace Parking.Api.UnitTests.Controllers;
+
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Api.Controllers;
+using Api.Json.Summary;
+using Business;
+using Model;
+using NodaTime.Testing.Extensions;
+using TestHelpers;
+using Xunit;
+using static ControllerHelpers;
+using static Json.Calendar.CalendarHelpers;
+using CreateControllerContext = Helpers.CreateControllerContext;
+
+public static class SummaryControllerTests
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using Api.Controllers;
-    using Api.Json.Summary;
-    using Business;
-    using Model;
-    using NodaTime.Testing.Extensions;
-    using TestHelpers;
-    using Xunit;
-    using static ControllerHelpers;
-    using static Json.Calendar.CalendarHelpers;
-    using CreateControllerContext = Helpers.CreateControllerContext;
-
-    public static class SummaryControllerTests
+    [Fact]
+    public static async Task Get_summary_returns_summary_data_for_each_active_date()
     {
-        [Fact]
-        public static async Task Get_summary_returns_summary_data_for_each_active_date()
+        var activeDates = new[] { 28.June(2021), 29.June(2021), 1.July(2021) };
+
+        var dateCalculator = CreateDateCalculator.WithActiveDates(activeDates);
+
+        var requestRepository = new RequestRepositoryBuilder()
+            .WithGetRequests("user1", activeDates.ToDateInterval(), new List<Request>())
+            .Build();
+
+        var controller = new SummaryController(dateCalculator, requestRepository)
         {
-            var activeDates = new[] { 28.June(2021), 29.June(2021), 1.July(2021) };
+            ControllerContext = CreateControllerContext.WithUsername("user1")
+        };
 
-            var dateCalculator = CreateDateCalculator.WithActiveDates(activeDates);
+        var result = await controller.GetSummaryAsync();
 
-            var requestRepository = new RequestRepositoryBuilder()
-                .WithGetRequests("user1", activeDates.ToDateInterval(), new List<Request>())
-                .Build();
+        var resultValue = GetResultValue<SummaryResponse>(result);
 
-            var controller = new SummaryController(dateCalculator, requestRepository)
-            {
-                ControllerContext = CreateControllerContext.WithUsername("user1")
-            };
+        var visibleDays = GetVisibleDays(resultValue.Summary);
 
-            var result = await controller.GetSummaryAsync();
+        Assert.Equal(activeDates, visibleDays.Select(d => d.LocalDate));
 
-            var resultValue = GetResultValue<SummaryResponse>(result);
+        Assert.All(visibleDays, d => Assert.NotNull(d.Data));
+    }
 
-            var visibleDays = GetVisibleDays(resultValue.Summary);
+    [Theory]
+    [InlineData(RequestStatus.Allocated, SummaryStatus.Allocated, false)]
+    [InlineData(RequestStatus.HardInterrupted, SummaryStatus.HardInterrupted, true)]
+    [InlineData(RequestStatus.Interrupted, SummaryStatus.Interrupted, true)]
+    [InlineData(RequestStatus.Pending, SummaryStatus.Pending, false)]
+    [InlineData(RequestStatus.SoftInterrupted, SummaryStatus.Interrupted, true)]
+    public static async Task Get_summary_returns_request_status(
+        RequestStatus requestStatus,
+        SummaryStatus expectedSummaryStatus,
+        bool expectedIsProblem)
+    {
+        var activeDates = new[] { 28.June(2021) };
 
-            Assert.Equal(activeDates, visibleDays.Select(d => d.LocalDate));
+        var dateCalculator = CreateDateCalculator.WithActiveDates(activeDates);
 
-            Assert.All(visibleDays, d => Assert.NotNull(d.Data));
-        }
+        var requests = new[] { new Request("user1", 28.June(2021), requestStatus) };
 
-        [Theory]
-        [InlineData(RequestStatus.Allocated, SummaryStatus.Allocated, false)]
-        [InlineData(RequestStatus.HardInterrupted, SummaryStatus.HardInterrupted, true)]
-        [InlineData(RequestStatus.Interrupted, SummaryStatus.Interrupted, true)]
-        [InlineData(RequestStatus.Pending, SummaryStatus.Pending, false)]
-        [InlineData(RequestStatus.SoftInterrupted, SummaryStatus.Interrupted, true)]
-        public static async Task Get_summary_returns_request_status(
-            RequestStatus requestStatus,
-            SummaryStatus expectedSummaryStatus,
-            bool expectedIsProblem)
+        var requestRepository = new RequestRepositoryBuilder()
+            .WithGetRequests("user1", activeDates.ToDateInterval(), requests)
+            .Build();
+
+        var controller = new SummaryController(dateCalculator, requestRepository)
         {
-            var activeDates = new[] { 28.June(2021) };
+            ControllerContext = CreateControllerContext.WithUsername("user1")
+        };
 
-            var dateCalculator = CreateDateCalculator.WithActiveDates(activeDates);
+        var result = await controller.GetSummaryAsync();
 
-            var requests = new[] { new Request("user1", 28.June(2021), requestStatus) };
+        var resultValue = GetResultValue<SummaryResponse>(result);
 
-            var requestRepository = new RequestRepositoryBuilder()
-                .WithGetRequests("user1", activeDates.ToDateInterval(), requests)
-                .Build();
+        var data = GetDailyData(resultValue.Summary, 28.June(2021));
 
-            var controller = new SummaryController(dateCalculator, requestRepository)
-            {
-                ControllerContext = CreateControllerContext.WithUsername("user1")
-            };
+        Assert.Equal(expectedSummaryStatus, data.Status);
+        Assert.Equal(expectedIsProblem, data.IsProblem);
+    }
 
-            var result = await controller.GetSummaryAsync();
+    [Fact]
+    public static async Task Get_summary_returns_null_status_when_no_request_exists()
+    {
+        var activeDates = new[] { 28.June(2021) };
 
-            var resultValue = GetResultValue<SummaryResponse>(result);
+        var dateCalculator = CreateDateCalculator.WithActiveDates(activeDates);
 
-            var data = GetDailyData(resultValue.Summary, 28.June(2021));
+        var requestRepository = new RequestRepositoryBuilder()
+            .WithGetRequests("user1", activeDates.ToDateInterval(), new List<Request>())
+            .Build();
 
-            Assert.Equal(expectedSummaryStatus, data.Status);
-            Assert.Equal(expectedIsProblem, data.IsProblem);
-        }
-
-        [Fact]
-        public static async Task Get_summary_returns_null_status_when_no_request_exists()
+        var controller = new SummaryController(dateCalculator, requestRepository)
         {
-            var activeDates = new[] { 28.June(2021) };
+            ControllerContext = CreateControllerContext.WithUsername("user1")
+        };
 
-            var dateCalculator = CreateDateCalculator.WithActiveDates(activeDates);
+        var result = await controller.GetSummaryAsync();
 
-            var requestRepository = new RequestRepositoryBuilder()
-                .WithGetRequests("user1", activeDates.ToDateInterval(), new List<Request>())
-                .Build();
+        var resultValue = GetResultValue<SummaryResponse>(result);
 
-            var controller = new SummaryController(dateCalculator, requestRepository)
-            {
-                ControllerContext = CreateControllerContext.WithUsername("user1")
-            };
+        var data = GetDailyData(resultValue.Summary, 28.June(2021));
 
-            var result = await controller.GetSummaryAsync();
+        Assert.Null(data.Status);
+        Assert.False(data.IsProblem);
+    }
 
-            var resultValue = GetResultValue<SummaryResponse>(result);
+    [Fact]
+    public static async Task Get_summary_ignores_cancelled_requests()
+    {
+        var activeDates = new[] { 28.June(2021) };
 
-            var data = GetDailyData(resultValue.Summary, 28.June(2021));
+        var dateCalculator = CreateDateCalculator.WithActiveDates(activeDates);
 
-            Assert.Null(data.Status);
-            Assert.False(data.IsProblem);
-        }
+        var requests = new[] { new Request("user1", 28.June(2021), RequestStatus.Cancelled) };
 
-        [Fact]
-        public static async Task Get_summary_ignores_cancelled_requests()
+        var requestRepository = new RequestRepositoryBuilder()
+            .WithGetRequests("user1", activeDates.ToDateInterval(), requests)
+            .Build();
+
+        var controller = new SummaryController(dateCalculator, requestRepository)
         {
-            var activeDates = new[] { 28.June(2021) };
+            ControllerContext = CreateControllerContext.WithUsername("user1")
+        };
 
-            var dateCalculator = CreateDateCalculator.WithActiveDates(activeDates);
+        var result = await controller.GetSummaryAsync();
 
-            var requests = new[] { new Request("user1", 28.June(2021), RequestStatus.Cancelled) };
+        var resultValue = GetResultValue<SummaryResponse>(result);
 
-            var requestRepository = new RequestRepositoryBuilder()
-                .WithGetRequests("user1", activeDates.ToDateInterval(), requests)
-                .Build();
+        var data = GetDailyData(resultValue.Summary, 28.June(2021));
 
-            var controller = new SummaryController(dateCalculator, requestRepository)
-            {
-                ControllerContext = CreateControllerContext.WithUsername("user1")
-            };
-
-            var result = await controller.GetSummaryAsync();
-
-            var resultValue = GetResultValue<SummaryResponse>(result);
-
-            var data = GetDailyData(resultValue.Summary, 28.June(2021));
-
-            Assert.Null(data.Status);
-            Assert.False(data.IsProblem);
-        }
+        Assert.Null(data.Status);
+        Assert.False(data.IsProblem);
     }
 }

@@ -1,10 +1,9 @@
-﻿namespace Parking.Api.Json.Summary
+﻿namespace Parking.Api.Json.Summary;
+
+public enum SummaryStatus
 {
-    public enum SummaryStatus
-    {
-        Allocated,
-        HardInterrupted,
-        Interrupted,
-        Pending
-    }
+    Allocated,
+    HardInterrupted,
+    Interrupted,
+    Pending
 }

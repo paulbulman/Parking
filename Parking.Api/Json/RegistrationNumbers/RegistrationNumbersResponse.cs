@@ -1,14 +1,13 @@
-﻿namespace Parking.Api.Json.RegistrationNumbers
+﻿namespace Parking.Api.Json.RegistrationNumbers;
+
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+
+public class RegistrationNumbersResponse
 {
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
+    public RegistrationNumbersResponse(IEnumerable<RegistrationNumbersData> registrationNumbers) =>
+        this.RegistrationNumbers = registrationNumbers;
 
-    public class RegistrationNumbersResponse
-    {
-        public RegistrationNumbersResponse(IEnumerable<RegistrationNumbersData> registrationNumbers) =>
-            this.RegistrationNumbers = registrationNumbers;
-
-        [Required]
-        public IEnumerable<RegistrationNumbersData> RegistrationNumbers { get; }
-    }
+    [Required]
+    public IEnumerable<RegistrationNumbersData> RegistrationNumbers { get; }
 }

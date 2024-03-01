@@ -1,23 +1,22 @@
-﻿namespace Parking.Service.IntegrationTests
+﻿namespace Parking.Service.IntegrationTests;
+
+using System;
+using Amazon.CognitoIdentityProvider;
+using Microsoft.Extensions.DependencyInjection;
+using Moq;
+using TestHelpers.Aws;
+
+public static class CustomProviderFactory
 {
-    using System;
-    using Amazon.CognitoIdentityProvider;
-    using Microsoft.Extensions.DependencyInjection;
-    using Moq;
-    using TestHelpers.Aws;
+    public static IServiceProvider CreateServiceProvider() => new CustomStartup().BuildServiceProvider();
 
-    public static class CustomProviderFactory
+    private class CustomStartup : Startup
     {
-        public static IServiceProvider CreateServiceProvider() => new CustomStartup().BuildServiceProvider();
-
-        private class CustomStartup : Startup
+        protected override void ConfigureExternalServices(IServiceCollection services)
         {
-            protected override void ConfigureExternalServices(IServiceCollection services)
-            {
-                services.AddScoped(provider => Mock.Of<IAmazonCognitoIdentityProvider>());
+            services.AddScoped(provider => Mock.Of<IAmazonCognitoIdentityProvider>());
 
-                ConfigurationHelpers.ConfigureExternalServices(services);
-            }
+            ConfigurationHelpers.ConfigureExternalServices(services);
         }
     }
 }

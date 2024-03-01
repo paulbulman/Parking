@@ -1,26 +1,25 @@
-namespace Parking.Api.IntegrationTests
+namespace Parking.Api.IntegrationTests;
+
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Xunit;
+using static Helpers.HttpClientHelpers;
+
+public class StatusTests : IClassFixture<CustomWebApplicationFactory<Startup>>
 {
-    using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Mvc.Testing;
-    using Xunit;
-    using static Helpers.HttpClientHelpers;
+    private readonly WebApplicationFactory<Startup> factory;
 
-    public class StatusTests : IClassFixture<CustomWebApplicationFactory<Startup>>
+    public StatusTests(CustomWebApplicationFactory<Startup> factory) => this.factory = factory;
+
+    [Fact]
+    public async Task Returns_success()
     {
-        private readonly WebApplicationFactory<Startup> factory;
+        var client = this.factory.CreateClient();
 
-        public StatusTests(CustomWebApplicationFactory<Startup> factory) => this.factory = factory;
+        AddAuthorizationHeader(client, UserType.Normal);
 
-        [Fact]
-        public async Task Returns_success()
-        {
-            var client = this.factory.CreateClient();
+        var response = await client.GetAsync("/status");
 
-            AddAuthorizationHeader(client, UserType.Normal);
-
-            var response = await client.GetAsync("/status");
-
-            response.EnsureSuccessStatusCode();
-        }
+        response.EnsureSuccessStatusCode();
     }
 }

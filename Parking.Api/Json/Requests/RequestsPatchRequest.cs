@@ -1,13 +1,12 @@
-﻿namespace Parking.Api.Json.Requests
+﻿namespace Parking.Api.Json.Requests;
+
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+
+public class RequestsPatchRequest
 {
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
+    public RequestsPatchRequest(IEnumerable<RequestsPatchRequestDailyData> requests) => this.Requests = requests;
 
-    public class RequestsPatchRequest
-    {
-        public RequestsPatchRequest(IEnumerable<RequestsPatchRequestDailyData> requests) => this.Requests = requests;
-
-        [Required]
-        public IEnumerable<RequestsPatchRequestDailyData> Requests { get; }
-    }
+    [Required]
+    public IEnumerable<RequestsPatchRequestDailyData> Requests { get; }
 }

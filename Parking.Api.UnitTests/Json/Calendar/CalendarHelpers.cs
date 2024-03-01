@@ -1,32 +1,31 @@
-﻿namespace Parking.Api.UnitTests.Json.Calendar
+﻿namespace Parking.Api.UnitTests.Json.Calendar;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Api.Json.Calendar;
+using NodaTime;
+
+public static class CalendarHelpers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Api.Json.Calendar;
-    using NodaTime;
+    public static IReadOnlyCollection<Day<T>> GetVisibleDays<T>(Calendar<T> calendar) where T : class =>
+        calendar.Weeks
+            .SelectMany(w => w.Days)
+            .Where(d => !d.Hidden)
+            .ToArray();
 
-    public static class CalendarHelpers
+    public static T GetDailyData<T>(Calendar<T> calendar, LocalDate localDate) where T : class =>
+        GetDailyData(calendar.Weeks.SelectMany(w => w.Days), localDate);
+
+    public static T GetDailyData<T>(IEnumerable<Day<T>> days, LocalDate localDate) where T : class
     {
-        public static IReadOnlyCollection<Day<T>> GetVisibleDays<T>(Calendar<T> calendar) where T : class =>
-            calendar.Weeks
-                .SelectMany(w => w.Days)
-                .Where(d => !d.Hidden)
-                .ToArray();
+        var day = days.Single(d => d.LocalDate == localDate);
 
-        public static T GetDailyData<T>(Calendar<T> calendar, LocalDate localDate) where T : class =>
-            GetDailyData(calendar.Weeks.SelectMany(w => w.Days), localDate);
-
-        public static T GetDailyData<T>(IEnumerable<Day<T>> days, LocalDate localDate) where T : class
+        if (day.Data == null)
         {
-            var day = days.Single(d => d.LocalDate == localDate);
-
-            if (day.Data == null)
-            {
-                throw new InvalidOperationException("No data was found for the requested day.");
-            }
-
-            return day.Data;
+            throw new InvalidOperationException("No data was found for the requested day.");
         }
+
+        return day.Data;
     }
 }

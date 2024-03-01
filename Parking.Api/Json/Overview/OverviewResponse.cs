@@ -1,13 +1,12 @@
-﻿namespace Parking.Api.Json.Overview
+﻿namespace Parking.Api.Json.Overview;
+
+using System.ComponentModel.DataAnnotations;
+using Calendar;
+
+public class OverviewResponse
 {
-    using System.ComponentModel.DataAnnotations;
-    using Calendar;
+    public OverviewResponse(Calendar<OverviewData> overview) => this.Overview = overview;
 
-    public class OverviewResponse
-    {
-        public OverviewResponse(Calendar<OverviewData> overview) => this.Overview = overview;
-
-        [Required]
-        public Calendar<OverviewData> Overview { get; }
-    }
+    [Required]
+    public Calendar<OverviewData> Overview { get; }
 }

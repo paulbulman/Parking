@@ -1,149 +1,148 @@
-﻿namespace Parking.Api.Controllers
+﻿namespace Parking.Api.Controllers;
+
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Business;
+using Business.Data;
+using Json.Requests;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Model;
+using NodaTime;
+using static Json.Calendar.Helpers;
+
+[Route("[controller]")]
+[ApiController]
+public class RequestsController : ControllerBase
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using Business;
-    using Business.Data;
-    using Json.Requests;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
-    using Model;
-    using NodaTime;
-    using static Json.Calendar.Helpers;
+    private readonly IDateCalculator dateCalculator;
+    private readonly IRequestRepository requestRepository;
+    private readonly ITriggerRepository triggerRepository;
+    private readonly IUserRepository userRepository;
 
-    [Route("[controller]")]
-    [ApiController]
-    public class RequestsController : ControllerBase
+    public RequestsController(
+        IDateCalculator dateCalculator,
+        IRequestRepository requestRepository,
+        ITriggerRepository triggerRepository,
+        IUserRepository userRepository)
     {
-        private readonly IDateCalculator dateCalculator;
-        private readonly IRequestRepository requestRepository;
-        private readonly ITriggerRepository triggerRepository;
-        private readonly IUserRepository userRepository;
+        this.dateCalculator = dateCalculator;
+        this.requestRepository = requestRepository;
+        this.triggerRepository = triggerRepository;
+        this.userRepository = userRepository;
+    }
 
-        public RequestsController(
-            IDateCalculator dateCalculator,
-            IRequestRepository requestRepository,
-            ITriggerRepository triggerRepository,
-            IUserRepository userRepository)
+    [HttpGet]
+    [ProducesResponseType(typeof(RequestsResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAsync()
+    {
+        var userId = this.GetCognitoUserId();
+
+        var response = await this.GetRequests(userId);
+
+        return this.Ok(response);
+    }
+
+    [Authorize(Policy = "IsTeamLeader")]
+    [HttpGet("{userId}")]
+    [ProducesResponseType(typeof(RequestsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetByIdAsync(string userId)
+    {
+        if (!await this.userRepository.UserExists(userId))
         {
-            this.dateCalculator = dateCalculator;
-            this.requestRepository = requestRepository;
-            this.triggerRepository = triggerRepository;
-            this.userRepository = userRepository;
+            return this.NotFound();
         }
 
-        [HttpGet]
-        [ProducesResponseType(typeof(RequestsResponse), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAsync()
+        var response = await this.GetRequests(userId);
+
+        return this.Ok(response);
+    }
+
+    [HttpPatch]
+    [ProducesResponseType(typeof(RequestsResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> PatchAsync([FromBody] RequestsPatchRequest request)
+    {
+        var userId = this.GetCognitoUserId();
+
+        await this.UpdateRequests(userId, request);
+
+        var response = await this.GetRequests(userId);
+
+        return this.Ok(response);
+    }
+
+    [Authorize(Policy = "IsTeamLeader")]
+    [HttpPatch("{userId}")]
+    [ProducesResponseType(typeof(RequestsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> PatchByIdAsync(string userId, [FromBody] RequestsPatchRequest request)
+    {
+        if (!await this.userRepository.UserExists(userId))
         {
-            var userId = this.GetCognitoUserId();
-
-            var response = await this.GetRequests(userId);
-
-            return this.Ok(response);
+            return this.NotFound();
         }
 
-        [Authorize(Policy = "IsTeamLeader")]
-        [HttpGet("{userId}")]
-        [ProducesResponseType(typeof(RequestsResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetByIdAsync(string userId)
-        {
-            if (!await this.userRepository.UserExists(userId))
-            {
-                return this.NotFound();
-            }
+        await this.UpdateRequests(userId, request);
 
-            var response = await this.GetRequests(userId);
+        var response = await this.GetRequests(userId);
 
-            return this.Ok(response);
-        }
+        return this.Ok(response);
+    }
 
-        [HttpPatch]
-        [ProducesResponseType(typeof(RequestsResponse), StatusCodes.Status200OK)]
-        public async Task<IActionResult> PatchAsync([FromBody] RequestsPatchRequest request)
-        {
-            var userId = this.GetCognitoUserId();
+    private async Task<RequestsResponse> GetRequests(string userId)
+    {
+        var activeDates = this.dateCalculator.GetActiveDates();
 
-            await this.UpdateRequests(userId, request);
+        var requests = await this.requestRepository.GetRequests(userId, activeDates.ToDateInterval());
 
-            var response = await this.GetRequests(userId);
+        var data = activeDates.ToDictionary(
+            d => d,
+            d => CreateDailyData(d, requests));
 
-            return this.Ok(response);
-        }
+        var calendar = CreateCalendar(data);
 
-        [Authorize(Policy = "IsTeamLeader")]
-        [HttpPatch("{userId}")]
-        [ProducesResponseType(typeof(RequestsResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PatchByIdAsync(string userId, [FromBody] RequestsPatchRequest request)
-        {
-            if (!await this.userRepository.UserExists(userId))
-            {
-                return this.NotFound();
-            }
+        return new RequestsResponse(calendar);
+    }
 
-            await this.UpdateRequests(userId, request);
+    private static RequestsData CreateDailyData(LocalDate localDate, IReadOnlyCollection<Request> requests)
+    {
+        var matchingRequest = requests.SingleOrDefault(r => r.Date == localDate);
 
-            var response = await this.GetRequests(userId);
+        var requested = matchingRequest != null && matchingRequest.Status.IsRequested();
 
-            return this.Ok(response);
-        }
+        return new RequestsData(requested);
+    }
 
-        private async Task<RequestsResponse> GetRequests(string userId)
-        {
-            var activeDates = this.dateCalculator.GetActiveDates();
+    private async Task UpdateRequests(string userId, RequestsPatchRequest request)
+    {
+        var activeDates = this.dateCalculator.GetActiveDates();
 
-            var requests = await this.requestRepository.GetRequests(userId, activeDates.ToDateInterval());
+        var requestsToSave = request.Requests
+            .Where(r => activeDates.Contains(r.LocalDate))
+            .GroupBy(r => r.LocalDate)
+            .Where(g => !ValuesCancelOut(g))
+            .Select(AuthoritativeValue)
+            .Select(v => CreateRequest(userId, v))
+            .ToArray();
 
-            var data = activeDates.ToDictionary(
-                d => d,
-                d => CreateDailyData(d, requests));
+        await this.requestRepository.SaveRequests(requestsToSave);
 
-            var calendar = CreateCalendar(data);
+        await this.triggerRepository.AddTrigger();
+    }
 
-            return new RequestsResponse(calendar);
-        }
+    private static bool ValuesCancelOut(
+        IGrouping<LocalDate, RequestsPatchRequestDailyData> dailyRequests) => dailyRequests.Count() % 2 == 0;
 
-        private static RequestsData CreateDailyData(LocalDate localDate, IReadOnlyCollection<Request> requests)
-        {
-            var matchingRequest = requests.SingleOrDefault(r => r.Date == localDate);
+    private static RequestsPatchRequestDailyData AuthoritativeValue(
+        IGrouping<LocalDate, RequestsPatchRequestDailyData> dailyRequests) => dailyRequests.Last();
 
-            var requested = matchingRequest != null && matchingRequest.Status.IsRequested();
+    private static Request CreateRequest(string userId, RequestsPatchRequestDailyData data)
+    {
+        var status = data.Requested ? RequestStatus.Pending : RequestStatus.Cancelled;
 
-            return new RequestsData(requested);
-        }
-
-        private async Task UpdateRequests(string userId, RequestsPatchRequest request)
-        {
-            var activeDates = this.dateCalculator.GetActiveDates();
-
-            var requestsToSave = request.Requests
-                .Where(r => activeDates.Contains(r.LocalDate))
-                .GroupBy(r => r.LocalDate)
-                .Where(g => !ValuesCancelOut(g))
-                .Select(AuthoritativeValue)
-                .Select(v => CreateRequest(userId, v))
-                .ToArray();
-
-            await this.requestRepository.SaveRequests(requestsToSave);
-
-            await this.triggerRepository.AddTrigger();
-        }
-
-        private static bool ValuesCancelOut(
-            IGrouping<LocalDate, RequestsPatchRequestDailyData> dailyRequests) => dailyRequests.Count() % 2 == 0;
-
-        private static RequestsPatchRequestDailyData AuthoritativeValue(
-            IGrouping<LocalDate, RequestsPatchRequestDailyData> dailyRequests) => dailyRequests.Last();
-
-        private static Request CreateRequest(string userId, RequestsPatchRequestDailyData data)
-        {
-            var status = data.Requested ? RequestStatus.Pending : RequestStatus.Cancelled;
-
-            return new Request(userId, data.LocalDate, status);
-        }
+        return new Request(userId, data.LocalDate, status);
     }
 }

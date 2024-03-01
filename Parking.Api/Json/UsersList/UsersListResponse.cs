@@ -1,13 +1,12 @@
-﻿namespace Parking.Api.Json.UsersList
+﻿namespace Parking.Api.Json.UsersList;
+
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+
+public class UsersListResponse
 {
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
+    public UsersListResponse(IEnumerable<UsersListUser> users) => this.Users = users;
 
-    public class UsersListResponse
-    {
-        public UsersListResponse(IEnumerable<UsersListUser> users) => this.Users = users;
-
-        [Required]
-        public IEnumerable<UsersListUser> Users { get; }
-    }
+    [Required]
+    public IEnumerable<UsersListUser> Users { get; }
 }

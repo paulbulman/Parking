@@ -1,19 +1,18 @@
-﻿namespace Parking.Api.Json.Reservations
+﻿namespace Parking.Api.Json.Reservations;
+
+using System.ComponentModel.DataAnnotations;
+
+public class ReservationsUser
 {
-    using System.ComponentModel.DataAnnotations;
-
-    public class ReservationsUser
+    public ReservationsUser(string userId, string name)
     {
-        public ReservationsUser(string userId, string name)
-        {
-            this.UserId = userId;
-            this.Name = name;
-        }
-
-        [Required]
-        public string UserId { get; }
-
-        [Required]
-        public string Name { get; }
+        this.UserId = userId;
+        this.Name = name;
     }
+
+    [Required]
+    public string UserId { get; }
+
+    [Required]
+    public string Name { get; }
 }

@@ -1,85 +1,84 @@
-﻿namespace Parking.Api.IntegrationTests
+﻿namespace Parking.Api.IntegrationTests;
+
+using System.Threading.Tasks;
+using Json.Profiles;
+using Microsoft.AspNetCore.Mvc.Testing;
+using TestHelpers;
+using TestHelpers.Aws;
+using Xunit;
+using static Helpers.HttpClientHelpers;
+
+[Collection("Database tests")]
+public class ProfilesTests : IAsyncLifetime
 {
-    using System.Threading.Tasks;
-    using Json.Profiles;
-    using Microsoft.AspNetCore.Mvc.Testing;
-    using TestHelpers;
-    using TestHelpers.Aws;
-    using Xunit;
-    using static Helpers.HttpClientHelpers;
+    private readonly WebApplicationFactory<Startup> factory;
 
-    [Collection("Database tests")]
-    public class ProfilesTests : IAsyncLifetime
+    public ProfilesTests(CustomWebApplicationFactory<Startup> factory) => this.factory = factory;
+
+    public async Task InitializeAsync() => await DatabaseHelpers.ResetDatabase();
+
+    public Task DisposeAsync() => Task.CompletedTask;
+
+    [Fact]
+    public async Task Returns_existing_profile()
     {
-        private readonly WebApplicationFactory<Startup> factory;
+        await DatabaseHelpers.CreateUser(
+            CreateUser.With(
+                userId: "User1",
+                alternativeRegistrationNumber: "X123XYZ",
+                registrationNumber: "AB12ABC",
+                requestReminderEnabled: true,
+                reservationReminderEnabled: false));
 
-        public ProfilesTests(CustomWebApplicationFactory<Startup> factory) => this.factory = factory;
+        var client = this.factory.CreateClient();
 
-        public async Task InitializeAsync() => await DatabaseHelpers.ResetDatabase();
+        AddAuthorizationHeader(client, UserType.Normal);
 
-        public Task DisposeAsync() => Task.CompletedTask;
+        var response = await client.GetAsync("/profiles");
 
-        [Fact]
-        public async Task Returns_existing_profile()
-        {
-            await DatabaseHelpers.CreateUser(
-                CreateUser.With(
-                    userId: "User1",
-                    alternativeRegistrationNumber: "X123XYZ",
-                    registrationNumber: "AB12ABC",
-                    requestReminderEnabled: true,
-                    reservationReminderEnabled: false));
+        response.EnsureSuccessStatusCode();
 
-            var client = this.factory.CreateClient();
+        var multipleUsersResponse = await response.DeserializeAsType<ProfileResponse>();
 
-            AddAuthorizationHeader(client, UserType.Normal);
+        var actualProfile = multipleUsersResponse.Profile;
 
-            var response = await client.GetAsync("/profiles");
+        Assert.Equal("X123XYZ", actualProfile.AlternativeRegistrationNumber);
+        Assert.Equal("AB12ABC", actualProfile.RegistrationNumber);
+        Assert.True(actualProfile.RequestReminderEnabled);
+        Assert.False(actualProfile.ReservationReminderEnabled);
+    }
 
-            response.EnsureSuccessStatusCode();
+    [Fact]
+    public async Task Updates_existing_profile()
+    {
+        await DatabaseHelpers.CreateUser(
+            CreateUser.With(
+                userId: "User1",
+                alternativeRegistrationNumber: "X123XYZ",
+                commuteDistance: 12.3m,
+                registrationNumber: "AB12ABC",
+                requestReminderEnabled: true,
+                reservationReminderEnabled: false));
 
-            var multipleUsersResponse = await response.DeserializeAsType<ProfileResponse>();
+        var client = this.factory.CreateClient();
 
-            var actualProfile = multipleUsersResponse.Profile;
+        AddAuthorizationHeader(client, UserType.Normal);
 
-            Assert.Equal("X123XYZ", actualProfile.AlternativeRegistrationNumber);
-            Assert.Equal("AB12ABC", actualProfile.RegistrationNumber);
-            Assert.True(actualProfile.RequestReminderEnabled);
-            Assert.False(actualProfile.ReservationReminderEnabled);
-        }
+        var request = new ProfilePatchRequest(
+            alternativeRegistrationNumber: "__ALTERNATIVE_REG__",
+            registrationNumber: "__REG__",
+            requestReminderEnabled: false,
+            reservationReminderEnabled: true);
 
-        [Fact]
-        public async Task Updates_existing_profile()
-        {
-            await DatabaseHelpers.CreateUser(
-                CreateUser.With(
-                    userId: "User1",
-                    alternativeRegistrationNumber: "X123XYZ",
-                    commuteDistance: 12.3m,
-                    registrationNumber: "AB12ABC",
-                    requestReminderEnabled: true,
-                    reservationReminderEnabled: false));
+        var response = await client.PatchAsJsonAsync("/profiles", request);
 
-            var client = this.factory.CreateClient();
+        response.EnsureSuccessStatusCode();
 
-            AddAuthorizationHeader(client, UserType.Normal);
+        var savedUser = await DatabaseHelpers.ReadUser("User1");
 
-            var request = new ProfilePatchRequest(
-                alternativeRegistrationNumber: "__ALTERNATIVE_REG__",
-                registrationNumber: "__REG__",
-                requestReminderEnabled: false,
-                reservationReminderEnabled: true);
-
-            var response = await client.PatchAsJsonAsync("/profiles", request);
-
-            response.EnsureSuccessStatusCode();
-
-            var savedUser = await DatabaseHelpers.ReadUser("User1");
-
-            Assert.Equal("__ALTERNATIVE_REG__", savedUser.AlternativeRegistrationNumber);
-            Assert.Equal("__REG__", savedUser.RegistrationNumber);
-            Assert.False(savedUser.RequestReminderEnabled);
-            Assert.True(savedUser.ReservationReminderEnabled);
-        }
+        Assert.Equal("__ALTERNATIVE_REG__", savedUser.AlternativeRegistrationNumber);
+        Assert.Equal("__REG__", savedUser.RegistrationNumber);
+        Assert.False(savedUser.RequestReminderEnabled);
+        Assert.True(savedUser.ReservationReminderEnabled);
     }
 }

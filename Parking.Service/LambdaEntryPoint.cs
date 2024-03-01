@@ -1,21 +1,20 @@
-namespace Parking.Service
+namespace Parking.Service;
+
+using System;
+using System.Threading.Tasks;
+using Amazon.Lambda.Core;
+using Microsoft.Extensions.DependencyInjection;
+
+public class LambdaEntryPoint
 {
-    using System;
-    using System.Threading.Tasks;
-    using Amazon.Lambda.Core;
-    using Microsoft.Extensions.DependencyInjection;
+    private readonly IServiceProvider serviceProvider;
 
-    public class LambdaEntryPoint
+    public LambdaEntryPoint() => this.serviceProvider = new Startup().BuildServiceProvider();
+
+    public async Task RunTasks(ILambdaContext context)
     {
-        private readonly IServiceProvider serviceProvider;
+        using var scope = this.serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
 
-        public LambdaEntryPoint() => this.serviceProvider = new Startup().BuildServiceProvider();
-
-        public async Task RunTasks(ILambdaContext context)
-        {
-            using var scope = this.serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
-
-            await TaskRunner.RunTasksAsync(scope.ServiceProvider);
-        }
+        await TaskRunner.RunTasksAsync(scope.ServiceProvider);
     }
 }

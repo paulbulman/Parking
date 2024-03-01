@@ -1,146 +1,145 @@
-﻿namespace Parking.Business.UnitTests.ScheduledTasks
+﻿namespace Parking.Business.UnitTests.ScheduledTasks;
+
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Business.ScheduledTasks;
+using Data;
+using Model;
+using Moq;
+using NodaTime.Testing.Extensions;
+using TestHelpers;
+using Xunit;
+using IEmailTemplate = Business.EmailTemplates.IEmailTemplate;
+using static DateCalculatorTests;
+
+public static class DailyNotificationTests
 {
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using Business.ScheduledTasks;
-    using Data;
-    using Model;
-    using Moq;
-    using NodaTime.Testing.Extensions;
-    using TestHelpers;
-    using Xunit;
-    using IEmailTemplate = Business.EmailTemplates.IEmailTemplate;
-    using static DateCalculatorTests;
-
-    public static class DailyNotificationTests
+    [Fact]
+    public static async Task Sends_emails_to_users_with_requests()
     {
-        [Fact]
-        public static async Task Sends_emails_to_users_with_requests()
+        var nextWorkingDate = 23.December(2020);
+
+        var mockDateCalculator = new Mock<IDateCalculator>(MockBehavior.Strict);
+        mockDateCalculator.Setup(c => c.GetNextWorkingDate()).Returns(nextWorkingDate);
+
+        var mockEmailRepository = new Mock<IEmailRepository>();
+
+        var requests = new[]
         {
-            var nextWorkingDate = 23.December(2020);
+            new Request("user1", nextWorkingDate, RequestStatus.Allocated),
+            new Request("user2", nextWorkingDate, RequestStatus.Interrupted)
+        };
 
-            var mockDateCalculator = new Mock<IDateCalculator>(MockBehavior.Strict);
-            mockDateCalculator.Setup(c => c.GetNextWorkingDate()).Returns(nextWorkingDate);
+        var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);
+        mockRequestRepository
+            .Setup(r => r.GetRequests(nextWorkingDate.ToDateInterval()))
+            .ReturnsAsync(requests);
 
-            var mockEmailRepository = new Mock<IEmailRepository>();
-
-            var requests = new[]
-            {
-                new Request("user1", nextWorkingDate, RequestStatus.Allocated),
-                new Request("user2", nextWorkingDate, RequestStatus.Interrupted)
-            };
-
-            var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);
-            mockRequestRepository
-                .Setup(r => r.GetRequests(nextWorkingDate.ToDateInterval()))
-                .ReturnsAsync(requests);
-
-            var users = new[]
-            {
-                CreateUser.With(userId: "user1", emailAddress: "1@abc.com"),
-                CreateUser.With(userId: "user2", emailAddress: "2@xyz.co.uk")
-            };
-
-            var mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
-            mockUserRepository.Setup(r => r.GetUsers()).ReturnsAsync(users);
-
-            var dailyNotification = new DailyNotification(
-                mockDateCalculator.Object,
-                mockEmailRepository.Object,
-                mockRequestRepository.Object,
-                mockUserRepository.Object);
-
-            await dailyNotification.Run();
-
-            mockEmailRepository.Verify(
-                r => r.Send(It.Is<IEmailTemplate>(e =>
-                    e.To == "1@abc.com" && e.Subject == "Parking status for Wed 23 Dec: Allocated")),
-                Times.Once);
-            mockEmailRepository.Verify(
-                r => r.Send(It.Is<IEmailTemplate>(e =>
-                    e.To == "2@xyz.co.uk" && e.Subject == "Parking status for Wed 23 Dec: INTERRUPTED")),
-                Times.Once);
-
-            mockEmailRepository.VerifyNoOtherCalls();
-        }
-
-        [Fact]
-        public static async Task Does_not_send_emails_to_users_with_cancelled_requests()
+        var users = new[]
         {
-            var nextWorkingDate = 23.December(2020);
+            CreateUser.With(userId: "user1", emailAddress: "1@abc.com"),
+            CreateUser.With(userId: "user2", emailAddress: "2@xyz.co.uk")
+        };
 
-            var mockDateCalculator = new Mock<IDateCalculator>(MockBehavior.Strict);
-            mockDateCalculator.Setup(c => c.GetNextWorkingDate()).Returns(nextWorkingDate);
+        var mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
+        mockUserRepository.Setup(r => r.GetUsers()).ReturnsAsync(users);
 
-            var mockEmailRepository = new Mock<IEmailRepository>();
+        var dailyNotification = new DailyNotification(
+            mockDateCalculator.Object,
+            mockEmailRepository.Object,
+            mockRequestRepository.Object,
+            mockUserRepository.Object);
 
-            var requests = new[] { new Request("user1", nextWorkingDate, RequestStatus.Cancelled) };
+        await dailyNotification.Run();
 
-            var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);
-            mockRequestRepository
-                .Setup(r => r.GetRequests(nextWorkingDate.ToDateInterval()))
-                .ReturnsAsync(requests);
+        mockEmailRepository.Verify(
+            r => r.Send(It.Is<IEmailTemplate>(e =>
+                e.To == "1@abc.com" && e.Subject == "Parking status for Wed 23 Dec: Allocated")),
+            Times.Once);
+        mockEmailRepository.Verify(
+            r => r.Send(It.Is<IEmailTemplate>(e =>
+                e.To == "2@xyz.co.uk" && e.Subject == "Parking status for Wed 23 Dec: INTERRUPTED")),
+            Times.Once);
 
-            var mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
-            mockUserRepository.Setup(r => r.GetUsers()).ReturnsAsync(new List<User>());
+        mockEmailRepository.VerifyNoOtherCalls();
+    }
 
-            var dailyNotification = new DailyNotification(
-                mockDateCalculator.Object,
-                mockEmailRepository.Object,
-                mockRequestRepository.Object,
-                mockUserRepository.Object);
+    [Fact]
+    public static async Task Does_not_send_emails_to_users_with_cancelled_requests()
+    {
+        var nextWorkingDate = 23.December(2020);
 
-            await dailyNotification.Run();
+        var mockDateCalculator = new Mock<IDateCalculator>(MockBehavior.Strict);
+        mockDateCalculator.Setup(c => c.GetNextWorkingDate()).Returns(nextWorkingDate);
 
-            mockEmailRepository.VerifyNoOtherCalls();
-        }
+        var mockEmailRepository = new Mock<IEmailRepository>();
 
-        [Fact]
-        public static void ScheduledTaskType_returns_DailyNotification()
-        {
-            var dailyNotification = new DailyNotification(
-                Mock.Of<IDateCalculator>(),
-                Mock.Of<IEmailRepository>(),
-                Mock.Of<IRequestRepository>(),
-                Mock.Of<IUserRepository>());
+        var requests = new[] { new Request("user1", nextWorkingDate, RequestStatus.Cancelled) };
 
-            Assert.Equal(ScheduledTaskType.DailyNotification, dailyNotification.ScheduledTaskType);
-        }
+        var mockRequestRepository = new Mock<IRequestRepository>(MockBehavior.Strict);
+        mockRequestRepository
+            .Setup(r => r.GetRequests(nextWorkingDate.ToDateInterval()))
+            .ReturnsAsync(requests);
 
-        [Theory]
-        [InlineData(21, 22)]
-        [InlineData(24, 29)]
-        public static void GetNextRunTime_returns_1102_am_on_next_working_day(int currentDay, int expectedNextDay)
-        {
-            var bankHolidays = new[] { 25.December(2020), 28.December(2020) };
+        var mockUserRepository = new Mock<IUserRepository>(MockBehavior.Strict);
+        mockUserRepository.Setup(r => r.GetUsers()).ReturnsAsync(new List<User>());
 
-            var dateCalculator = CreateDateCalculator(currentDay.December(2020).At(11, 2, 0).Utc(), bankHolidays);
+        var dailyNotification = new DailyNotification(
+            mockDateCalculator.Object,
+            mockEmailRepository.Object,
+            mockRequestRepository.Object,
+            mockUserRepository.Object);
 
-            var actual = new DailyNotification(
-                dateCalculator,
-                Mock.Of<IEmailRepository>(),
-                Mock.Of<IRequestRepository>(),
-                Mock.Of<IUserRepository>()).GetNextRunTime();
+        await dailyNotification.Run();
 
-            var expected = expectedNextDay.December(2020).At(11, 2, 0).Utc();
+        mockEmailRepository.VerifyNoOtherCalls();
+    }
 
-            Assert.Equal(expected, actual);
-        }
+    [Fact]
+    public static void ScheduledTaskType_returns_DailyNotification()
+    {
+        var dailyNotification = new DailyNotification(
+            Mock.Of<IDateCalculator>(),
+            Mock.Of<IEmailRepository>(),
+            Mock.Of<IRequestRepository>(),
+            Mock.Of<IUserRepository>());
 
-        [Fact]
-        public static void GetNextRunTime_uses_London_time_zone()
-        {
-            var dateCalculator = CreateDateCalculator(27.March(2020).At(11, 2, 0).Utc());
+        Assert.Equal(ScheduledTaskType.DailyNotification, dailyNotification.ScheduledTaskType);
+    }
 
-            var actual = new DailyNotification(
-                dateCalculator,
-                Mock.Of<IEmailRepository>(),
-                Mock.Of<IRequestRepository>(),
-                Mock.Of<IUserRepository>()).GetNextRunTime();
+    [Theory]
+    [InlineData(21, 22)]
+    [InlineData(24, 29)]
+    public static void GetNextRunTime_returns_1102_am_on_next_working_day(int currentDay, int expectedNextDay)
+    {
+        var bankHolidays = new[] { 25.December(2020), 28.December(2020) };
 
-            var expected = 30.March(2020).At(10, 2, 0).Utc();
+        var dateCalculator = CreateDateCalculator(currentDay.December(2020).At(11, 2, 0).Utc(), bankHolidays);
 
-            Assert.Equal(expected, actual);
-        }
+        var actual = new DailyNotification(
+            dateCalculator,
+            Mock.Of<IEmailRepository>(),
+            Mock.Of<IRequestRepository>(),
+            Mock.Of<IUserRepository>()).GetNextRunTime();
+
+        var expected = expectedNextDay.December(2020).At(11, 2, 0).Utc();
+
+        Assert.Equal(expected, actual);
+    }
+
+    [Fact]
+    public static void GetNextRunTime_uses_London_time_zone()
+    {
+        var dateCalculator = CreateDateCalculator(27.March(2020).At(11, 2, 0).Utc());
+
+        var actual = new DailyNotification(
+            dateCalculator,
+            Mock.Of<IEmailRepository>(),
+            Mock.Of<IRequestRepository>(),
+            Mock.Of<IUserRepository>()).GetNextRunTime();
+
+        var expected = 30.March(2020).At(10, 2, 0).Utc();
+
+        Assert.Equal(expected, actual);
     }
 }
