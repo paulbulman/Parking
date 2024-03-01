@@ -3,7 +3,9 @@ version: 0.2
 phases:
   install:
     commands:
-      - /usr/local/bin/dotnet-install.sh --channel LTS
+      # Currently the default global.json specifies to use .NET 6 to run CLI commands, meaning they would fail.
+      # The .NET 8 SDK is already present in the image, so just default to using that.
+      - rm /codebuild/global.json -f
       - dotnet tool install -g Amazon.Lambda.Tools
   build:
     commands:
