@@ -194,11 +194,11 @@ public static class RequestsControllerTests
             .WithGetRequests(UserId, activeDates.ToDateInterval(), new List<Request>())
             .BuildMock();
 
-        var patchRequest = new RequestsPatchRequest(new[]
-        {
+        var patchRequest = new RequestsPatchRequest(
+        [
             new RequestsPatchRequestDailyData(2.February(2021), true),
             new RequestsPatchRequestDailyData(3.February(2021), false),
-        });
+        ]);
 
         var controller = new RequestsController(
             CreateDateCalculator.WithActiveDates(activeDates),
@@ -256,15 +256,15 @@ public static class RequestsControllerTests
             .WithGetRequests(UserId, activeDates.ToDateInterval(), new List<Request>())
             .BuildMock();
 
-        var patchRequest = new RequestsPatchRequest(new[]
-        {
+        var patchRequest = new RequestsPatchRequest(
+        [
             new RequestsPatchRequestDailyData(2.February(2021), true),
             new RequestsPatchRequestDailyData(2.February(2021), false),
             new RequestsPatchRequestDailyData(2.February(2021), true),
             new RequestsPatchRequestDailyData(3.February(2021), false),
             new RequestsPatchRequestDailyData(3.February(2021), true),
             new RequestsPatchRequestDailyData(3.February(2021), false),
-        });
+        ]);
 
         var controller = new RequestsController(
             CreateDateCalculator.WithActiveDates(activeDates),
@@ -295,13 +295,13 @@ public static class RequestsControllerTests
             .WithGetRequests(UserId, activeDates.ToDateInterval(), new List<Request>())
             .BuildMock();
 
-        var patchRequest = new RequestsPatchRequest(new[]
-        {
+        var patchRequest = new RequestsPatchRequest(
+        [
             new RequestsPatchRequestDailyData(2.February(2021), true),
             new RequestsPatchRequestDailyData(2.February(2021), false),
             new RequestsPatchRequestDailyData(3.February(2021), false),
             new RequestsPatchRequestDailyData(3.February(2021), true),
-        });
+        ]);
 
         var controller = new RequestsController(
             CreateDateCalculator.WithActiveDates(activeDates),
@@ -326,11 +326,11 @@ public static class RequestsControllerTests
             .WithGetRequests(UserId, activeDates.ToDateInterval(), new List<Request>())
             .BuildMock();
 
-        var patchRequest = new RequestsPatchRequest(new[]
-        {
+        var patchRequest = new RequestsPatchRequest(
+        [
             new RequestsPatchRequestDailyData(1.February(2021), true),
             new RequestsPatchRequestDailyData(4.February(2021), true)
-        });
+        ]);
 
         var controller = new RequestsController(
             CreateDateCalculator.WithActiveDates(activeDates),
@@ -355,11 +355,11 @@ public static class RequestsControllerTests
             .WithGetRequests(UserId, activeDates.ToDateInterval(), new List<Request>())
             .BuildMock();
 
-        var patchRequest = new RequestsPatchRequest(new[]
-        {
+        var patchRequest = new RequestsPatchRequest(
+        [
             new RequestsPatchRequestDailyData(2.February(2021), true),
             new RequestsPatchRequestDailyData(3.February(2021), false),
-        });
+        ]);
 
         var controller = new RequestsController(
             CreateDateCalculator.WithActiveDates(activeDates),
@@ -386,7 +386,7 @@ public static class RequestsControllerTests
             .Build();
 
         var patchRequest =
-            new RequestsPatchRequest(new[] { new RequestsPatchRequestDailyData(2.February(2021), true) });
+            new RequestsPatchRequest([new RequestsPatchRequestDailyData(2.February(2021), true)]);
 
         var controller = new RequestsController(
             CreateDateCalculator.WithActiveDates(activeDates),

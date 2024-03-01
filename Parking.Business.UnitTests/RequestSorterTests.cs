@@ -96,7 +96,7 @@ public static class RequestSorterTests
 
         var result = SortRequests(requests, NoReservations, DefaultUsers);
 
-        CheckOrder(new[] { "user2", "user1" }, result);
+        CheckOrder(["user2", "user1"], result);
     }
 
     [Fact]
@@ -116,7 +116,7 @@ public static class RequestSorterTests
 
         var result = SortRequests(requests, NoReservations, DefaultUsers);
 
-        CheckOrder(new[] { "user2", "user1" }, result);
+        CheckOrder(["user2", "user1"], result);
     }
 
     [Fact]
@@ -133,7 +133,7 @@ public static class RequestSorterTests
 
         var result = SortRequests(requests, NoReservations, DefaultUsers);
 
-        CheckOrder(new[] { "user1", "user2" }, result);
+        CheckOrder(["user1", "user2"], result);
     }
 
     [Fact]
@@ -151,7 +151,7 @@ public static class RequestSorterTests
 
         var result = SortRequests(requests, NoReservations, DefaultUsers);
 
-        CheckOrder(new[] { "user2", "user1" }, result);
+        CheckOrder(["user2", "user1"], result);
     }
 
     [Fact]
@@ -166,7 +166,7 @@ public static class RequestSorterTests
 
         var result = SortRequests(requests, NoReservations, DefaultUsers);
 
-        CheckOrder(new[] { "user2", "user1", "user3" }, result);
+        CheckOrder(["user2", "user1", "user3"], result);
     }
 
     [Fact]
@@ -183,7 +183,7 @@ public static class RequestSorterTests
 
         var result = SortRequests(requests, NoReservations, DefaultUsers);
 
-        CheckOrder(new[] { "user2", "user3", "user1" }, result);
+        CheckOrder(["user2", "user3", "user1"], result);
     }
 
     [Fact]
@@ -200,7 +200,7 @@ public static class RequestSorterTests
 
         var result = SortRequests(requests, NoReservations, DefaultUsers);
 
-        CheckOrder(new[] { "user1", "user2", "user3" }, result);
+        CheckOrder(["user1", "user2", "user3"], result);
     }
 
     [Fact]
@@ -226,7 +226,7 @@ public static class RequestSorterTests
 
         var result = SortRequests(requests, reservations, DefaultUsers);
 
-        CheckOrder(new[] { "user2", "user1" }, result);
+        CheckOrder(["user2", "user1"], result);
     }
 
     [Fact]
@@ -248,7 +248,7 @@ public static class RequestSorterTests
 
         var result = SortRequests(requests, NoReservations, users);
 
-        CheckOrder(new[] { "user2", "user1" }, result);
+        CheckOrder(["user2", "user1"], result);
     }
 
     [Fact]
@@ -270,7 +270,7 @@ public static class RequestSorterTests
 
         var result = SortRequests(requests, NoReservations, users);
 
-        CheckOrder(new[] { "user2", "user1" }, result);
+        CheckOrder(["user2", "user1"], result);
     }
 
     [Fact]
@@ -297,7 +297,7 @@ public static class RequestSorterTests
 
         var result = SortRequests(requests, reservations, users);
 
-        CheckOrder(new[] { "user2", "user1" }, result);
+        CheckOrder(["user2", "user1"], result);
     }
 
     private static IEnumerable<Request> SortRequests(

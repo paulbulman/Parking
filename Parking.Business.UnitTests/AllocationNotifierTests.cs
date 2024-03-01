@@ -200,7 +200,7 @@ public static class AllocationNotifierTests
             .Returns(true);
         mockDateCalculator
             .Setup(c => c.GetWeeklyNotificationDates())
-            .Returns(new[] { 11.January(2021), 12.January(2021) });
+            .Returns([11.January(2021), 12.January(2021)]);
 
         var mockEmailRepository = new Mock<IEmailRepository>();
 

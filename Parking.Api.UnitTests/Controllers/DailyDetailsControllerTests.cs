@@ -445,7 +445,7 @@ public static class DailyDetailsControllerTests
         };
 
         var requestRepository = new RequestRepositoryBuilder()
-            .WithGetRequests("user1", 28.June(2021).ToDateInterval(), new[] { initialRequest })
+            .WithGetRequests("user1", 28.June(2021).ToDateInterval(), [initialRequest])
             .WithGetRequests(activeDates.ToDateInterval(), updatedRequests)
             .Build();
 

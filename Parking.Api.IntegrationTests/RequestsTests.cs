@@ -115,17 +115,17 @@ public class RequestsTests(CustomWebApplicationFactory<Startup> factory) : IAsyn
 
         AddAuthorizationHeader(client, UserType.Normal);
 
-        var request = new RequestsPatchRequest(new[]
-        {
+        var request = new RequestsPatchRequest(
+        [
             new RequestsPatchRequestDailyData(01.March(2021), true),
             new RequestsPatchRequestDailyData(03.March(2021), false)
-        });
+        ]);
 
         await client.PatchAsJsonAsync("/requests", request);
 
         var savedRequests = await DatabaseHelpers.ReadRequests("User1", "2021-03");
 
-        Assert.Equal(new[] { "01", "03" }, savedRequests.Keys);
+        Assert.Equal(["01", "03"], savedRequests.Keys);
 
         Assert.Equal("P", savedRequests["01"]);
         Assert.Equal("C", savedRequests["03"]);
@@ -140,17 +140,17 @@ public class RequestsTests(CustomWebApplicationFactory<Startup> factory) : IAsyn
 
         AddAuthorizationHeader(client, UserType.TeamLeader);
 
-        var request = new RequestsPatchRequest(new[]
-        {
+        var request = new RequestsPatchRequest(
+        [
             new RequestsPatchRequestDailyData(01.March(2021), true),
             new RequestsPatchRequestDailyData(03.March(2021), false)
-        });
+        ]);
 
         await client.PatchAsJsonAsync("/requests/User2", request);
 
         var savedRequests = await DatabaseHelpers.ReadRequests("User2", "2021-03");
 
-        Assert.Equal(new[] { "01", "03" }, savedRequests.Keys);
+        Assert.Equal(["01", "03"], savedRequests.Keys);
 
         Assert.Equal("P", savedRequests["01"]);
         Assert.Equal("C", savedRequests["03"]);

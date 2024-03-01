@@ -21,11 +21,11 @@ public class DailyDetailsController(
     IUserRepository userRepository)
     : ControllerBase
 {
-    private static readonly IReadOnlyCollection<RequestStatus> UpdateableStatuses = new[]
-    {
+    private static readonly IReadOnlyCollection<RequestStatus> UpdateableStatuses =
+    [
         RequestStatus.SoftInterrupted,
         RequestStatus.HardInterrupted
-    };
+    ];
 
     [HttpGet("/DailyDetails")]
     [ProducesResponseType(typeof(DailyDetailsResponse), StatusCodes.Status200OK)]
@@ -74,7 +74,7 @@ public class DailyDetailsController(
 
         var updatedRequest = new Request(request.UserId, request.Date, updatedRequestStatus);
 
-        await requestRepository.SaveRequests(new[] { updatedRequest });
+        await requestRepository.SaveRequests([updatedRequest]);
 
         await triggerRepository.AddTrigger();
 

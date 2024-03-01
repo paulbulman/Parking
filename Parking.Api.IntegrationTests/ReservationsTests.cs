@@ -111,17 +111,17 @@ public class ReservationsTests(CustomWebApplicationFactory<Startup> factory) : I
 
         AddAuthorizationHeader(client, UserType.TeamLeader);
 
-        var request = new ReservationsPatchRequest(new[]
-        {
-            new ReservationsPatchRequestDailyData(1.March(2021), new[] {"User3", "User4"}),
-            new ReservationsPatchRequestDailyData(2.March(2021), new[] {"User4", "User5"})
-        });
+        var request = new ReservationsPatchRequest(
+        [
+            new ReservationsPatchRequestDailyData(1.March(2021), ["User3", "User4"]),
+            new ReservationsPatchRequestDailyData(2.March(2021), ["User4", "User5"])
+        ]);
 
         await client.PatchAsJsonAsync("/reservations", request);
 
         var savedReservations = await DatabaseHelpers.ReadReservations("2021-03");
 
-        Assert.Equal(new[] { "01", "02" }, savedReservations.Keys);
+        Assert.Equal(["01", "02"], savedReservations.Keys);
 
         Assert.Equal(new[] { "User3", "User4" }, savedReservations["01"]);
         Assert.Equal(new[] { "User4", "User5" }, savedReservations["02"]);

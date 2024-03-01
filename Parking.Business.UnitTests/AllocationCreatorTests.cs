@@ -22,12 +22,12 @@ public static class AllocationCreatorTests
     private static readonly Configuration Configuration =
         new Configuration(nearbyDistance: 1, shortLeadTimeSpaces: 1, totalSpaces: 3);
 
-    private static readonly IReadOnlyCollection<Request> RequestSorterResult = new[]
-    {
+    private static readonly IReadOnlyCollection<Request> RequestSorterResult =
+    [
         new Request("User3", AllocationDate, RequestStatus.Interrupted),
         new Request("User1", AllocationDate, RequestStatus.Interrupted),
         new Request("User2", AllocationDate, RequestStatus.Interrupted)
-    };
+    ];
 
     [Fact]
     public static void Creates_allocated_requests_from_the_sorted_requests()

@@ -45,7 +45,7 @@ public class TaskRunnerTests : IAsyncLifetime
 
         var savedRequests = await DatabaseHelpers.ReadRequests("User1", "2021-03");
 
-        Assert.Equal(new[] { "02" }, savedRequests.Keys);
+        Assert.Equal(["02"], savedRequests.Keys);
         Assert.Equal("I", savedRequests["02"]);
     }
 
@@ -67,7 +67,7 @@ public class TaskRunnerTests : IAsyncLifetime
 
         var savedRequests = await DatabaseHelpers.ReadRequests("User1", "2021-03");
 
-        Assert.Equal(new[] { "01" }, savedRequests.Keys);
+        Assert.Equal(["01"], savedRequests.Keys);
         Assert.Equal("A", savedRequests["01"]);
 
         await CheckSingleEmail("john.doe@example.com", "Parking space allocated for Mon 01 Mar");
@@ -128,7 +128,7 @@ public class TaskRunnerTests : IAsyncLifetime
 
         var savedRequests = await DatabaseHelpers.ReadRequests("User1", "2021-03");
 
-        Assert.Equal(new[] { "02" }, savedRequests.Keys);
+        Assert.Equal(["02"], savedRequests.Keys);
         Assert.Equal("S", savedRequests["02"]);
     }
 

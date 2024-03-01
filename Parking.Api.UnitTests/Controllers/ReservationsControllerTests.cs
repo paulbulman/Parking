@@ -18,12 +18,12 @@ using static Json.Calendar.CalendarHelpers;
 
 public static class ReservationsControllerTests
 {
-    private static readonly IReadOnlyCollection<User> DefaultUsers = new[]
-    {
+    private static readonly IReadOnlyCollection<User> DefaultUsers =
+    [
         CreateUser.With(userId: "User1", firstName: "Silvester", lastName: "Probet"),
         CreateUser.With(userId: "User2", firstName: "Kendricks", lastName: "Hawke"),
         CreateUser.With(userId: "User3", firstName: "Rupert", lastName: "Trollope"),
-    };
+    ];
         
     [Fact]
     public static async Task Returns_reservations_data_for_each_active_date()
@@ -178,11 +178,11 @@ public static class ReservationsControllerTests
             .WithGetReservations(activeDates.ToDateInterval(), new List<Reservation>())
             .BuildMock();
 
-        var patchRequest = new ReservationsPatchRequest(new[]
-        {
+        var patchRequest = new ReservationsPatchRequest(
+        [
             new ReservationsPatchRequestDailyData(2.February(2021), new List<string> {"User1", "User2"}),
             new ReservationsPatchRequestDailyData(3.February(2021), new List<string> {"User2", "User3"}),
-        });
+        ]);
 
         var controller = new ReservationsController(
             CreateConfigurationRepository.WithDefaultConfiguration(),
@@ -212,11 +212,11 @@ public static class ReservationsControllerTests
             .WithGetReservations(activeDates.ToDateInterval(), new List<Reservation>())
             .BuildMock();
 
-        var patchRequest = new ReservationsPatchRequest(new[]
-        {
+        var patchRequest = new ReservationsPatchRequest(
+        [
             new ReservationsPatchRequestDailyData(1.February(2021), new List<string> {"User1", "User2"}),
             new ReservationsPatchRequestDailyData(4.February(2021), new List<string> {"User1", "User2"}),
-        });
+        ]);
 
         var controller = new ReservationsController(
             CreateConfigurationRepository.WithDefaultConfiguration(),
@@ -246,10 +246,10 @@ public static class ReservationsControllerTests
             .WithGetReservations(activeDates.ToDateInterval(), returnedReservations)
             .Build();
 
-        var patchRequest = new ReservationsPatchRequest(new[]
-        {
-            new ReservationsPatchRequestDailyData(2.February(2021), new[] {"User1", "User2"})
-        });
+        var patchRequest = new ReservationsPatchRequest(
+        [
+            new ReservationsPatchRequestDailyData(2.February(2021), ["User1", "User2"])
+        ]);
 
         var controller = new ReservationsController(
             CreateConfigurationRepository.WithDefaultConfiguration(),

@@ -111,7 +111,7 @@ public static class UserRepositoryTests
         Assert.NotNull(result);
 
         CheckUser(
-            result: new[] { result }, 
+            result: [result], 
             expectedUserId: "User1", 
             expectedAlternativeRegistrationNumber: "A999XYZ", 
             expectedCommuteDistance: 1.23m, 
@@ -293,7 +293,7 @@ public static class UserRepositoryTests
         Assert.NotNull(result);
 
         CheckUser(
-            result: new[] { result }, 
+            result: [result], 
             expectedUserId: UserId, 
             expectedAlternativeRegistrationNumber: "W789XYZ", 
             expectedCommuteDistance: 1.23m, 

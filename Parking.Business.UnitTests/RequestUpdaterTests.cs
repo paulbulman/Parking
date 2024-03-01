@@ -19,17 +19,17 @@ public static class RequestUpdaterTests
         CreateUser.With(userId: "user2", firstName: "User", lastName: "2"),
     };
 
-    private static readonly IReadOnlyCollection<LocalDate> ShortLeadTimeDates = new[]
-    {
+    private static readonly IReadOnlyCollection<LocalDate> ShortLeadTimeDates =
+    [
         3.December(2020),
         4.December(2020)
-    };
+    ];
 
-    private static readonly IReadOnlyCollection<LocalDate> LongLeadTimeDates = new[]
-    {
+    private static readonly IReadOnlyCollection<LocalDate> LongLeadTimeDates =
+    [
         5.December(2020),
         6.December(2020)
-    };
+    ];
 
     private static readonly IReadOnlyCollection<LocalDate> AllocationDates = ShortLeadTimeDates
         .Concat(LongLeadTimeDates)
@@ -37,8 +37,8 @@ public static class RequestUpdaterTests
 
     private static readonly DateInterval CacheInterval = new DateInterval(4.October(2020), 6.December(2020));
 
-    private static readonly IReadOnlyCollection<Request> InitialRequests = new[]
-    {
+    private static readonly IReadOnlyCollection<Request> InitialRequests =
+    [
         new Request("user1", 1.December(2020), RequestStatus.Allocated),
         new Request("user2", 1.December(2020), RequestStatus.Allocated),
         new Request("user1", 2.December(2020), RequestStatus.Allocated),
@@ -49,17 +49,17 @@ public static class RequestUpdaterTests
         new Request("user1", 5.December(2020), RequestStatus.Interrupted),
         new Request("user2", 5.December(2020), RequestStatus.Interrupted),
         new Request("user1", 6.December(2020), RequestStatus.Interrupted)
-    };
+    ];
 
-    private static readonly IReadOnlyCollection<Request> NewlyAllocatedRequests = new[]
-    {
+    private static readonly IReadOnlyCollection<Request> NewlyAllocatedRequests =
+    [
         new Request("user1", 3.December(2020), RequestStatus.Allocated),
         new Request("user2", 3.December(2020), RequestStatus.Allocated),
         new Request("user1", 4.December(2020), RequestStatus.Allocated),
         new Request("user1", 5.December(2020), RequestStatus.Allocated),
         new Request("user2", 5.December(2020), RequestStatus.Allocated),
         new Request("user1", 6.December(2020), RequestStatus.Allocated)
-    };
+    ];
 
     [Fact]
     public static async Task Updates_requests_for_long_lead_time_and_short_lead_time()

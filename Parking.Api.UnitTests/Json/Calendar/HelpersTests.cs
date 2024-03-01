@@ -53,10 +53,10 @@ public static class HelpersTests
         Assert.Equal(2, actualWeeks.Length);
 
         Assert.Equal(
-            new[] { 3.February(2021) },
+            [3.February(2021)],
             actualWeeks[0].Days.Where(d => !d.Hidden).Select(d => d.LocalDate));
         Assert.Equal(
-            new[] { 8.February(2021), 12.February(2021) },
+            [8.February(2021), 12.February(2021)],
             actualWeeks[1].Days.Where(d => !d.Hidden).Select(d => d.LocalDate));
     }
 
