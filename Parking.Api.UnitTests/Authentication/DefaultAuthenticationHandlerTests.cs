@@ -91,7 +91,7 @@
             var loggerFactory = Mock.Of<ILoggerFactory>(
                 f => f.CreateLogger(It.IsAny<string>()) == Mock.Of<ILogger<DefaultAuthenticationHandler>>());
 
-            return new DefaultAuthenticationHandler(options, loggerFactory, UrlEncoder.Default, Mock.Of<ISystemClock>());
+            return new DefaultAuthenticationHandler(options, loggerFactory, UrlEncoder.Default);
         }
     }
 }

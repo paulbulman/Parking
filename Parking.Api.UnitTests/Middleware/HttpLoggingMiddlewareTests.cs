@@ -47,8 +47,8 @@
                 Response = { StatusCode = 200 },
             };
 
-            context.Request.Headers.Add("key1", new StringValues(new[] { "value1a", "value1b" }));
-            context.Request.Headers.Add("key2", new StringValues("value2"));
+            context.Request.Headers.Append("key1", new StringValues(new[] { "value1a", "value1b" }));
+            context.Request.Headers.Append("key2", new StringValues("value2"));
 
             await middleware.Invoke(context, Mock.Of<INotificationRepository>());
 
