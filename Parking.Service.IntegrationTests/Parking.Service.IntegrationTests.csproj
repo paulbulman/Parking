@@ -18,7 +18,7 @@
   <ItemGroup>
     <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.400.3" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.400.3" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.400.3" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.402.2" />
     <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.400.3" />
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.400.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
