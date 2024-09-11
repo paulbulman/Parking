@@ -4,7 +4,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Amazon.CognitoIdentityProvider;
 using Amazon.DynamoDBv2;
-using Amazon.S3;
 using Amazon.SimpleEmail;
 using Amazon.SimpleNotificationService;
 using Authentication;
@@ -78,7 +77,6 @@ public class Startup
 
         services.AddScoped<IAmazonCognitoIdentityProvider, AmazonCognitoIdentityProviderClient>();
         services.AddScoped<IAmazonDynamoDB, AmazonDynamoDBClient>();
-        services.AddScoped<IAmazonS3, AmazonS3Client>();
         services.AddScoped<IAmazonSimpleEmailService>(_ => new AmazonSimpleEmailServiceClient(EmailProvider.Config));
         services.AddScoped<IAmazonSimpleNotificationService, AmazonSimpleNotificationServiceClient>();
 
