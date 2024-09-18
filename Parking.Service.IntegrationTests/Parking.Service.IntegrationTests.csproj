@@ -16,10 +16,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.402.15" />
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.400.18" />
-    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.401.8" />
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.400.18" />
+    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.403.2" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.400.21" />
+    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.401.11" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.400.21" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="NodaTime.Testing" Version="3.1.12" />
