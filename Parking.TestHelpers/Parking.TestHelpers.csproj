@@ -19,8 +19,8 @@
     <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.401.22" />
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.400.32" />
     <PackageReference Include="Moq" Version="4.20.72" />
-    <PackageReference Include="NodaTime" Version="3.1.12" />
-    <PackageReference Include="NodaTime.Testing" Version="3.1.12" />
+    <PackageReference Include="NodaTime" Version="3.2.0" />
+    <PackageReference Include="NodaTime.Testing" Version="3.2.0" />
   </ItemGroup>
 
   <ItemGroup>
