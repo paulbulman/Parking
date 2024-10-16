@@ -19,7 +19,7 @@
     <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.403.13" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.401.10" />
     <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.401.22" />
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.400.32" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.400.35" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.10" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="Moq" Version="4.20.72" />
