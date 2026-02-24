@@ -110,18 +110,18 @@
 
         public async Task SaveItem(RawItem rawItem)
         {
-            using var context = new DynamoDBContext(this.dynamoDbClient);
+            using var context = this.CreateContext();
 
-            var config = new DynamoDBOperationConfig { OverrideTableName = TableName };
+            var config = new SaveConfig { OverrideTableName = TableName };
 
             await context.SaveAsync(rawItem, config);
         }
 
         public async Task SaveItems(IEnumerable<RawItem> rawItems)
         {
-            using var context = new DynamoDBContext(this.dynamoDbClient);
+            using var context = this.CreateContext();
 
-            var config = new DynamoDBOperationConfig { OverrideTableName = TableName };
+            var config = new SaveConfig { OverrideTableName = TableName };
 
             foreach (var rawItem in rawItems)
             {
@@ -131,9 +131,9 @@
 
         public async Task DeleteItems(IEnumerable<RawItem> rawItems)
         {
-            using var context = new DynamoDBContext(this.dynamoDbClient);
+            using var context = this.CreateContext();
 
-            var config = new DynamoDBOperationConfig { OverrideTableName = TableName };
+            var config = new DeleteConfig { OverrideTableName = TableName };
 
             foreach (var rawItem in rawItems)
             {
@@ -143,9 +143,9 @@
 
         private async Task<IReadOnlyCollection<RawItem>> QueryPartitionKey(string hashKeyValue)
         {
-            using var context = new DynamoDBContext(this.dynamoDbClient);
+            using var context = this.CreateContext();
 
-            var config = new DynamoDBOperationConfig { OverrideTableName = TableName };
+            var config = new QueryConfig { OverrideTableName = TableName };
 
             var query = context.QueryAsync<RawItem>(hashKeyValue, config);
 
@@ -154,9 +154,9 @@
 
         private async Task<IReadOnlyCollection<RawItem>> QueryPartitionKey(string hashKeyValue, string conditionValue)
         {
-            using var context = new DynamoDBContext(this.dynamoDbClient);
+            using var context = this.CreateContext();
 
-            var config = new DynamoDBOperationConfig { OverrideTableName = TableName };
+            var config = new QueryConfig { OverrideTableName = TableName };
 
             var query = context.QueryAsync<RawItem>(hashKeyValue, QueryOperator.Equal, new[] { conditionValue }, config);
 
@@ -167,9 +167,9 @@
         {
             const string SecondaryIndexName = "SK-PK-index";
 
-            using var context = new DynamoDBContext(this.dynamoDbClient);
+            using var context = this.CreateContext();
 
-            var config = new DynamoDBOperationConfig
+            var config = new QueryConfig
             {
                 OverrideTableName = TableName,
                 IndexName = SecondaryIndexName
@@ -179,5 +179,10 @@
 
             return await query.GetRemainingAsync();
         }
+
+        private DynamoDBContext CreateContext() =>
+            new DynamoDBContextBuilder()
+                .WithDynamoDBClient(() => this.dynamoDbClient)
+                .Build();
     }
 }

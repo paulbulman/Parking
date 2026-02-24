@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <AWSProjectType>Lambda</AWSProjectType>
     <!-- This property makes the build directory similar to a publish directory and helps the AWS .NET Lambda Mock Test Tool find project dependencies. -->
@@ -14,14 +14,14 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Amazon.Lambda.AspNetCoreServer" Version="9.0.3" />
-    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="3.7.405.2" />
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.404.3" />
-    <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.402.5" />
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.400.62" />
-    <PackageReference Include="NodaTime" Version="3.2.0" />
-    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.3.0" />
+    <PackageReference Include="Amazon.Lambda.AspNetCoreServer" Version="9.2.1" />
+    <PackageReference Include="AWSSDK.CognitoIdentityProvider" Version="4.0.5.2" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.15" />
+    <PackageReference Include="AWSSDK.SimpleEmail" Version="4.0.2.14" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="4.0.2.17" />
+    <PackageReference Include="NodaTime" Version="3.3.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Parking.Business\Parking.Business.csproj" />

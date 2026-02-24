@@ -37,7 +37,10 @@
         {
             using var client = CreateClient();
 
-            var table = Table.LoadTable(client, TableName);
+            var table = new TableBuilder(client, TableName)
+                .AddHashKey("PK", DynamoDBEntryType.String)
+                .AddRangeKey("SK", DynamoDBEntryType.String)
+                .Build();
 
             var document = new Document
             {
@@ -55,7 +58,10 @@
         {
             using var client = CreateClient();
 
-            var table = Table.LoadTable(client, TableName);
+            var table = new TableBuilder(client, TableName)
+                .AddHashKey("PK", DynamoDBEntryType.String)
+                .AddRangeKey("SK", DynamoDBEntryType.String)
+                .Build();
 
             var document = new Document
             {
@@ -78,7 +84,10 @@
         {
             using var client = CreateClient();
 
-            var table = Table.LoadTable(client, TableName);
+            var table = new TableBuilder(client, TableName)
+                .AddHashKey("PK", DynamoDBEntryType.String)
+                .AddRangeKey("SK", DynamoDBEntryType.String)
+                .Build();
 
             var document = new Document
             {
@@ -102,7 +111,10 @@
         {
             using var client = CreateClient();
 
-            var table = Table.LoadTable(client, TableName);
+            var table = new TableBuilder(client, TableName)
+                .AddHashKey("PK", DynamoDBEntryType.String)
+                .AddRangeKey("SK", DynamoDBEntryType.String)
+                .Build();
 
             var document = await table.GetItemAsync(new Primitive($"USER#{userId}"), new Primitive("PROFILE"));
 
@@ -127,7 +139,10 @@
         {
             using var client = CreateClient();
 
-            var table = Table.LoadTable(client, TableName);
+            var table = new TableBuilder(client, TableName)
+                .AddHashKey("PK", DynamoDBEntryType.String)
+                .AddRangeKey("SK", DynamoDBEntryType.String)
+                .Build();
 
             var document = new Document
             {
@@ -145,7 +160,10 @@
         {
             using var client = CreateClient();
 
-            var table = Table.LoadTable(client, TableName);
+            var table = new TableBuilder(client, TableName)
+                .AddHashKey("PK", DynamoDBEntryType.String)
+                .AddRangeKey("SK", DynamoDBEntryType.String)
+                .Build();
 
             var document = await table.GetItemAsync(new Primitive($"USER#{userId}"), new Primitive($"REQUESTS#{monthKey}"));
 
@@ -158,7 +176,10 @@
         {
             using var client = CreateClient();
 
-            var table = Table.LoadTable(client, TableName);
+            var table = new TableBuilder(client, TableName)
+                .AddHashKey("PK", DynamoDBEntryType.String)
+                .AddRangeKey("SK", DynamoDBEntryType.String)
+                .Build();
 
             var document = new Document
             {
@@ -176,7 +197,10 @@
         {
             using var client = CreateClient();
 
-            var table = Table.LoadTable(client, TableName);
+            var table = new TableBuilder(client, TableName)
+                .AddHashKey("PK", DynamoDBEntryType.String)
+                .AddRangeKey("SK", DynamoDBEntryType.String)
+                .Build();
 
             var document = await table.GetItemAsync(new Primitive("GLOBAL"), new Primitive($"RESERVATIONS#{monthKey}"));
 
@@ -193,7 +217,10 @@
         {
             using var client = CreateClient();
 
-            var table = Table.LoadTable(client, TableName);
+            var table = new TableBuilder(client, TableName)
+                .AddHashKey("PK", DynamoDBEntryType.String)
+                .AddRangeKey("SK", DynamoDBEntryType.String)
+                .Build();
 
             var document = new Document
             {
@@ -211,7 +238,10 @@
         {
             using var client = CreateClient();
 
-            var table = Table.LoadTable(client, TableName);
+            var table = new TableBuilder(client, TableName)
+                .AddHashKey("PK", DynamoDBEntryType.String)
+                .AddRangeKey("SK", DynamoDBEntryType.String)
+                .Build();
 
             var key = Guid.NewGuid().ToString();
 
@@ -229,7 +259,10 @@
         {
             using var client = CreateClient();
 
-            var table = Table.LoadTable(client, TableName);
+            var table = new TableBuilder(client, TableName)
+                .AddHashKey("PK", DynamoDBEntryType.String)
+                .AddRangeKey("SK", DynamoDBEntryType.String)
+                .Build();
 
             var query = table.Query(new Primitive("TRIGGER"), new QueryFilter());
 
