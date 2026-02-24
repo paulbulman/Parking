@@ -12,9 +12,9 @@ using static Helpers.HttpClientHelpers;
 [Collection("Database tests")]
 public class RegistrationNumbersTests(CustomWebApplicationFactory<Startup> factory) : IAsyncLifetime
 {
-    public async Task InitializeAsync() => await DatabaseHelpers.ResetDatabase();
+    public async ValueTask InitializeAsync() => await DatabaseHelpers.ResetDatabase();
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => default;
 
     [Fact]
     public async Task Returns_existing_registration_numbers()
@@ -37,11 +37,11 @@ public class RegistrationNumbersTests(CustomWebApplicationFactory<Startup> facto
 
         AddAuthorizationHeader(client, UserType.Normal);
 
-        var response = await client.GetAsync("/registrationNumbers/CD34CDE");
+        var response = await client.GetAsync("/registrationNumbers/CD34CDE", TestContext.Current.CancellationToken);
 
         response.EnsureSuccessStatusCode();
 
-        var registrationNumbersResponse = await response.DeserializeAsType<RegistrationNumbersResponse>();
+        var registrationNumbersResponse = await response.DeserializeAsType<RegistrationNumbersResponse>(TestContext.Current.CancellationToken);
 
         var actualRegistrationNumbers = registrationNumbersResponse.RegistrationNumbers.ToArray();
 

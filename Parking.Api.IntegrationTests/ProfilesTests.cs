@@ -13,9 +13,9 @@ public class ProfilesTests(CustomWebApplicationFactory<Startup> factory) : IAsyn
 {
     private readonly WebApplicationFactory<Startup> factory = factory;
 
-    public async Task InitializeAsync() => await DatabaseHelpers.ResetDatabase();
+    public async ValueTask InitializeAsync() => await DatabaseHelpers.ResetDatabase();
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => default;
 
     [Fact]
     public async Task Returns_existing_profile()
@@ -32,11 +32,11 @@ public class ProfilesTests(CustomWebApplicationFactory<Startup> factory) : IAsyn
 
         AddAuthorizationHeader(client, UserType.Normal);
 
-        var response = await client.GetAsync("/profiles");
+        var response = await client.GetAsync("/profiles", TestContext.Current.CancellationToken);
 
         response.EnsureSuccessStatusCode();
 
-        var multipleUsersResponse = await response.DeserializeAsType<ProfileResponse>();
+        var multipleUsersResponse = await response.DeserializeAsType<ProfileResponse>(TestContext.Current.CancellationToken);
 
         var actualProfile = multipleUsersResponse.Profile;
 
@@ -68,7 +68,7 @@ public class ProfilesTests(CustomWebApplicationFactory<Startup> factory) : IAsyn
             requestReminderEnabled: false,
             reservationReminderEnabled: true);
 
-        var response = await client.PatchAsJsonAsync("/profiles", request);
+        var response = await client.PatchAsJsonAsync("/profiles", request, TestContext.Current.CancellationToken);
 
         response.EnsureSuccessStatusCode();
 

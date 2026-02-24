@@ -16,9 +16,9 @@ public class UsersTests(CustomWebApplicationFactory<Startup> factory) : IAsyncLi
 {
     private readonly WebApplicationFactory<Startup> factory = factory;
 
-    public async Task InitializeAsync() => await DatabaseHelpers.ResetDatabase();
+    public async ValueTask InitializeAsync() => await DatabaseHelpers.ResetDatabase();
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => default;
 
     [Theory]
     [InlineData(UserType.Normal)]
@@ -31,7 +31,7 @@ public class UsersTests(CustomWebApplicationFactory<Startup> factory) : IAsyncLi
 
         AddAuthorizationHeader(client, userType);
 
-        var response = await client.GetAsync("/users");
+        var response = await client.GetAsync("/users", TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -61,11 +61,11 @@ public class UsersTests(CustomWebApplicationFactory<Startup> factory) : IAsyncLi
 
         AddAuthorizationHeader(client, UserType.UserAdmin);
 
-        var response = await client.GetAsync("/users");
+        var response = await client.GetAsync("/users", TestContext.Current.CancellationToken);
 
         response.EnsureSuccessStatusCode();
 
-        var multipleUsersResponse = await response.DeserializeAsType<MultipleUsersResponse>();
+        var multipleUsersResponse = await response.DeserializeAsType<MultipleUsersResponse>(TestContext.Current.CancellationToken);
 
         var actualUsers = multipleUsersResponse.Users.ToArray();
 
@@ -91,11 +91,11 @@ public class UsersTests(CustomWebApplicationFactory<Startup> factory) : IAsyncLi
 
         AddAuthorizationHeader(client, UserType.UserAdmin);
 
-        var response = await client.GetAsync("/users/User2");
+        var response = await client.GetAsync("/users/User2", TestContext.Current.CancellationToken);
 
         response.EnsureSuccessStatusCode();
 
-        var multipleUsersResponse = await response.DeserializeAsType<SingleUserResponse>();
+        var multipleUsersResponse = await response.DeserializeAsType<SingleUserResponse>(TestContext.Current.CancellationToken);
 
         var actualUser = multipleUsersResponse.User;
 
@@ -117,7 +117,7 @@ public class UsersTests(CustomWebApplicationFactory<Startup> factory) : IAsyncLi
             "__LAST_NAME__",
             "__REG__");
 
-        var response = await client.PostAsJsonAsync("/users", request);
+        var response = await client.PostAsJsonAsync("/users", request, TestContext.Current.CancellationToken);
 
         response.EnsureSuccessStatusCode();
 
@@ -154,7 +154,7 @@ public class UsersTests(CustomWebApplicationFactory<Startup> factory) : IAsyncLi
             "__LAST_NAME__",
             "__REG__");
 
-        var response = await client.PatchAsJsonAsync("/users/User2", request);
+        var response = await client.PatchAsJsonAsync("/users/User2", request, TestContext.Current.CancellationToken);
 
         response.EnsureSuccessStatusCode();
 

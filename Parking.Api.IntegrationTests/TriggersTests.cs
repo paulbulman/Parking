@@ -9,9 +9,9 @@ using static Helpers.HttpClientHelpers;
 [Collection("Database tests")]
 public class TriggersTests(CustomWebApplicationFactory<Startup> factory) : IAsyncLifetime
 {
-    public async Task InitializeAsync() => await DatabaseHelpers.ResetDatabase();
+    public async ValueTask InitializeAsync() => await DatabaseHelpers.ResetDatabase();
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => default;
 
     [Fact]
     public async Task Creates_recalculation_trigger()
@@ -22,7 +22,7 @@ public class TriggersTests(CustomWebApplicationFactory<Startup> factory) : IAsyn
 
         AddAuthorizationHeader(client, UserType.Normal);
 
-        await client.PostAsync("/triggers", new StringContent(string.Empty));
+        await client.PostAsync("/triggers", new StringContent(string.Empty), TestContext.Current.CancellationToken);
 
         var subsequentTriggerFileCount = await DatabaseHelpers.GetTriggerCount();
 

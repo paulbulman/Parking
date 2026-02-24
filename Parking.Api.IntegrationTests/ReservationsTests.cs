@@ -16,13 +16,13 @@ using static Helpers.HttpClientHelpers;
 [Collection("Database tests")]
 public class ReservationsTests(CustomWebApplicationFactory<Startup> factory) : IAsyncLifetime
 {
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         await DatabaseHelpers.ResetDatabase();
         await NotificationHelpers.ResetNotifications();
     }
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => default;
 
     [Theory]
     [InlineData(UserType.Normal)]
@@ -33,7 +33,7 @@ public class ReservationsTests(CustomWebApplicationFactory<Startup> factory) : I
 
         AddAuthorizationHeader(client, userType);
 
-        var response = await client.GetAsync("/reservations");
+        var response = await client.GetAsync("/reservations", TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -49,7 +49,7 @@ public class ReservationsTests(CustomWebApplicationFactory<Startup> factory) : I
 
         var request = new ReservationsPatchRequest([]);
 
-        var response = await client.PatchAsJsonAsync("/reservations", request);
+        var response = await client.PatchAsJsonAsync("/reservations", request, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -79,11 +79,11 @@ public class ReservationsTests(CustomWebApplicationFactory<Startup> factory) : I
 
         AddAuthorizationHeader(client, UserType.TeamLeader);
 
-        var response = await client.GetAsync("/reservations");
+        var response = await client.GetAsync("/reservations", TestContext.Current.CancellationToken);
 
         response.EnsureSuccessStatusCode();
 
-        var reservationsResponse = await response.DeserializeAsType<ReservationsResponse>();
+        var reservationsResponse = await response.DeserializeAsType<ReservationsResponse>(TestContext.Current.CancellationToken);
 
         var day1Data = CalendarHelpers.GetDailyData(reservationsResponse.Reservations, 1.March(2021));
         var day2Data = CalendarHelpers.GetDailyData(reservationsResponse.Reservations, 2.March(2021));
@@ -117,7 +117,7 @@ public class ReservationsTests(CustomWebApplicationFactory<Startup> factory) : I
             new ReservationsPatchRequestDailyData(2.March(2021), ["User4", "User5"])
         ]);
 
-        await client.PatchAsJsonAsync("/reservations", request);
+        await client.PatchAsJsonAsync("/reservations", request, TestContext.Current.CancellationToken);
 
         var savedReservations = await DatabaseHelpers.ReadReservations("2021-03");
 

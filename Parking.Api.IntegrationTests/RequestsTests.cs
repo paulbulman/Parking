@@ -15,13 +15,13 @@ using static Helpers.HttpClientHelpers;
 [Collection("Database tests")]
 public class RequestsTests(CustomWebApplicationFactory<Startup> factory) : IAsyncLifetime
 {
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         await DatabaseHelpers.ResetDatabase();
         await NotificationHelpers.ResetNotifications();
     }
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => default;
 
     [Theory]
     [InlineData(UserType.Normal)]
@@ -32,7 +32,7 @@ public class RequestsTests(CustomWebApplicationFactory<Startup> factory) : IAsyn
 
         AddAuthorizationHeader(client, userType);
 
-        var response = await client.GetAsync("/requests/User1");
+        var response = await client.GetAsync("/requests/User1", TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -48,7 +48,7 @@ public class RequestsTests(CustomWebApplicationFactory<Startup> factory) : IAsyn
 
         var request = new RequestsPatchRequest([]);
 
-        var response = await client.PatchAsJsonAsync("/requests/User1", request);
+        var response = await client.PatchAsJsonAsync("/requests/User1", request, TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -69,11 +69,11 @@ public class RequestsTests(CustomWebApplicationFactory<Startup> factory) : IAsyn
 
         AddAuthorizationHeader(client, UserType.Normal);
 
-        var response = await client.GetAsync("/requests");
+        var response = await client.GetAsync("/requests", TestContext.Current.CancellationToken);
 
         response.EnsureSuccessStatusCode();
 
-        var requestsResponse = await response.DeserializeAsType<RequestsResponse>();
+        var requestsResponse = await response.DeserializeAsType<RequestsResponse>(TestContext.Current.CancellationToken);
 
         CheckReturnedRequest(requestsResponse, 01.March(2021), true);
         CheckReturnedRequest(requestsResponse, 02.March(2021), true);
@@ -97,11 +97,11 @@ public class RequestsTests(CustomWebApplicationFactory<Startup> factory) : IAsyn
 
         AddAuthorizationHeader(client, UserType.TeamLeader);
 
-        var response = await client.GetAsync("/requests/User2");
+        var response = await client.GetAsync("/requests/User2", TestContext.Current.CancellationToken);
 
         response.EnsureSuccessStatusCode();
 
-        var requestsResponse = await response.DeserializeAsType<RequestsResponse>();
+        var requestsResponse = await response.DeserializeAsType<RequestsResponse>(TestContext.Current.CancellationToken);
 
         CheckReturnedRequest(requestsResponse, 01.March(2021), true);
         CheckReturnedRequest(requestsResponse, 02.March(2021), true);
@@ -121,7 +121,7 @@ public class RequestsTests(CustomWebApplicationFactory<Startup> factory) : IAsyn
             new RequestsPatchRequestDailyData(03.March(2021), false)
         ]);
 
-        await client.PatchAsJsonAsync("/requests", request);
+        await client.PatchAsJsonAsync("/requests", request, TestContext.Current.CancellationToken);
 
         var savedRequests = await DatabaseHelpers.ReadRequests("User1", "2021-03");
 
@@ -146,7 +146,7 @@ public class RequestsTests(CustomWebApplicationFactory<Startup> factory) : IAsyn
             new RequestsPatchRequestDailyData(03.March(2021), false)
         ]);
 
-        await client.PatchAsJsonAsync("/requests/User2", request);
+        await client.PatchAsJsonAsync("/requests/User2", request, TestContext.Current.CancellationToken);
 
         var savedRequests = await DatabaseHelpers.ReadRequests("User2", "2021-03");
 
@@ -167,7 +167,7 @@ public class RequestsTests(CustomWebApplicationFactory<Startup> factory) : IAsyn
 
         var request = new RequestsPatchRequest([]);
 
-        await client.PatchAsJsonAsync("/requests", request);
+        await client.PatchAsJsonAsync("/requests", request, TestContext.Current.CancellationToken);
 
         var subsequentTriggerFileCount = await DatabaseHelpers.GetTriggerCount();
 

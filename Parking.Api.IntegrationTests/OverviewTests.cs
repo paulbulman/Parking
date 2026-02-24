@@ -18,9 +18,9 @@ public class OverviewTests(CustomWebApplicationFactory<Startup> factory) : IAsyn
 {
     private readonly WebApplicationFactory<Startup> factory = factory;
 
-    public async Task InitializeAsync() => await DatabaseHelpers.ResetDatabase();
+    public async ValueTask InitializeAsync() => await DatabaseHelpers.ResetDatabase();
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => default;
 
     [Fact]
     public async Task Returns_users_with_requests()
@@ -31,11 +31,11 @@ public class OverviewTests(CustomWebApplicationFactory<Startup> factory) : IAsyn
 
         AddAuthorizationHeader(client, UserType.Normal);
 
-        var response = await client.GetAsync("/overview");
+        var response = await client.GetAsync("/overview", TestContext.Current.CancellationToken);
 
         response.EnsureSuccessStatusCode();
 
-        var overviewResponse = await response.DeserializeAsType<OverviewResponse>();
+        var overviewResponse = await response.DeserializeAsType<OverviewResponse>(TestContext.Current.CancellationToken);
 
         var day1Data = CalendarHelpers.GetDailyData(overviewResponse.Overview, 1.March(2021));
         var day2Data = CalendarHelpers.GetDailyData(overviewResponse.Overview, 2.March(2021));

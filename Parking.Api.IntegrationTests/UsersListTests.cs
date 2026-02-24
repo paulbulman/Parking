@@ -12,9 +12,9 @@ using static Helpers.HttpClientHelpers;
 [Collection("Database tests")]
 public class UsersListTests(CustomWebApplicationFactory<Startup> factory) : IAsyncLifetime
 {
-    public async Task InitializeAsync() => await DatabaseHelpers.ResetDatabase();
+    public async ValueTask InitializeAsync() => await DatabaseHelpers.ResetDatabase();
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => default;
 
     [Theory]
     [InlineData(UserType.Normal)]
@@ -27,7 +27,7 @@ public class UsersListTests(CustomWebApplicationFactory<Startup> factory) : IAsy
 
         AddAuthorizationHeader(client, userType);
 
-        var response = await client.GetAsync("/usersList");
+        var response = await client.GetAsync("/usersList", TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -44,11 +44,11 @@ public class UsersListTests(CustomWebApplicationFactory<Startup> factory) : IAsy
 
         AddAuthorizationHeader(client, UserType.TeamLeader);
 
-        var response = await client.GetAsync("/usersList");
+        var response = await client.GetAsync("/usersList", TestContext.Current.CancellationToken);
 
         response.EnsureSuccessStatusCode();
 
-        var multipleUsersResponse = await response.DeserializeAsType<UsersListResponse>();
+        var multipleUsersResponse = await response.DeserializeAsType<UsersListResponse>(TestContext.Current.CancellationToken);
 
         var actualUsers = multipleUsersResponse.Users.ToArray();
 

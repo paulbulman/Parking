@@ -19,7 +19,7 @@
         {
             var credentials = new BasicAWSCredentials("__ACCESS_KEY__", "__SECRET_KEY__");
 
-            var config = new AmazonDynamoDBConfig { ServiceURL = "http://localhost:4566" };
+            var config = new AmazonDynamoDBConfig { ServiceURL = LocalStackFixture.ServiceUrl };
 
             return new AmazonDynamoDBClient(credentials, config);
         }

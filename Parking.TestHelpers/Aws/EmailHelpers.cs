@@ -12,16 +12,11 @@
 
     public static class EmailHelpers
     {
-        private const string ServiceUrl = "http://localhost:4566";
-
         private const string SesEndpoint = "_aws/ses";
 
-        private static string FromEmailAddress => Helpers.GetRequiredEnvironmentVariable("FROM_EMAIL_ADDRESS");
+        private static string ServiceUrl => LocalStackFixture.ServiceUrl;
 
-        private static readonly HttpClient SesHttpClient = new HttpClient
-        {
-            BaseAddress = new Uri(ServiceUrl),
-        };
+        private static string FromEmailAddress => Helpers.GetRequiredEnvironmentVariable("FROM_EMAIL_ADDRESS");
 
         public static IAmazonSimpleEmailService CreateClient()
         {
@@ -34,7 +29,9 @@
 
         public static async Task<IReadOnlyCollection<SentEmail>> GetSentEmails()
         {
-            var httpResponseMessage = await SesHttpClient.GetAsync(SesEndpoint);
+            using var httpClient = CreateHttpClient();
+
+            var httpResponseMessage = await httpClient.GetAsync(SesEndpoint);
 
             var httpResponseContent = await httpResponseMessage.Content.ReadAsStringAsync();
 
@@ -59,8 +56,13 @@
 
             await client.VerifyEmailIdentityAsync(new VerifyEmailIdentityRequest { EmailAddress = FromEmailAddress });
 
-            await SesHttpClient.DeleteAsync(SesEndpoint);
+            using var httpClient = CreateHttpClient();
+
+            await httpClient.DeleteAsync(SesEndpoint);
         }
+
+        private static HttpClient CreateHttpClient() =>
+            new HttpClient { BaseAddress = new Uri(ServiceUrl) };
 
         public class SentEmails
         {

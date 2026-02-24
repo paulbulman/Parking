@@ -16,7 +16,7 @@
         {
             var credentials = new BasicAWSCredentials("__ACCESS_KEY__", "__SECRET_KEY__");
 
-            var config = new AmazonSimpleNotificationServiceConfig { ServiceURL = "http://localhost:4566" };
+            var config = new AmazonSimpleNotificationServiceConfig { ServiceURL = LocalStackFixture.ServiceUrl };
 
             return new AmazonSimpleNotificationServiceClient(credentials, config);
         }

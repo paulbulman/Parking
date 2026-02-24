@@ -7,9 +7,9 @@ using TestHelpers;
 using TestHelpers.Aws;
 using Xunit;
 
-public class TaskRunnerTests : IAsyncLifetime
+public class TaskRunnerTests : IClassFixture<LocalStackFixture>, IAsyncLifetime
 {
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         await DatabaseHelpers.ResetDatabase();
         await EmailHelpers.ResetEmail();
@@ -17,7 +17,7 @@ public class TaskRunnerTests : IAsyncLifetime
         await SetupConfiguration();
     }
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => default;
 
     [Fact]
     public async Task PreProcesses_requests()
