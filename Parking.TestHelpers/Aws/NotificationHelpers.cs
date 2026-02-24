@@ -52,7 +52,7 @@
         {
             var topics = await client.ListTopicsAsync();
 
-            return topics.Topics.SingleOrDefault(t => t.TopicArn.Contains(topicName));
+            return topics.Topics?.SingleOrDefault(t => t.TopicArn.Contains(topicName));
         }
 
         private static async Task OverrideConfigWithFakeArn(IAmazonSimpleNotificationService client, string topicName)
