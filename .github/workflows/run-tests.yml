@@ -2,9 +2,9 @@ name: Run tests
 
 on:
   push:
-    branches: ["*"]
+    branches-ignore: [main, develop]
   pull_request:
-    branches: ["*"]
+    branches-ignore: [main, develop]
 
 jobs:
   run-tests:

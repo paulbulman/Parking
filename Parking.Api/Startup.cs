@@ -1,5 +1,6 @@
 namespace Parking.Api;
 
+using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Amazon.CognitoIdentityProvider;
@@ -37,16 +38,16 @@ public class Startup
                     .CreateLogger(),
                 dispose: true));
 
-        var corsOrigins = Helpers.GetRequiredEnvironmentVariable("CORS_ORIGIN").Split(",");
+        var corsOrigins = Helpers.GetRequiredEnvironmentVariable("CORS_ORIGIN")
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
         services.AddCors(options =>
-            options.AddDefaultPolicy(
-                builder => builder
-                    .WithOrigins(corsOrigins)
-                    .SetIsOriginAllowedToAllowWildcardSubdomains()
-                    .AllowCredentials()
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()));
+            options.AddDefaultPolicy(policy => policy
+                .WithOrigins(corsOrigins)
+                .SetIsOriginAllowedToAllowWildcardSubdomains()
+                .AllowCredentials()
+                .WithHeaders("Authorization", "Content-Type")
+                .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")));
 
         services
             .AddControllers()

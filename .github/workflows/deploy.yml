@@ -1,0 +1,107 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  actions: write
+  contents: read
+  id-token: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+          cache: true
+          cache-dependency-path: "**/*.csproj"
+
+      - name: Run tests
+        run: dotnet test
+
+  build:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+          cache: true
+          cache-dependency-path: "**/*.csproj"
+
+      - name: Build Lambda packages
+        run: |
+          dotnet publish Parking.Api -c Release -r linux-x64 -o publish-api
+          dotnet publish Parking.Service -c Release -r linux-x64 -o publish-service
+          (cd publish-api && zip -r ../infrastructure/api-lambda.zip .)
+          (cd publish-service && zip -r ../infrastructure/service-lambda.zip .)
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lambda-packages
+          path: |
+            infrastructure/api-lambda.zip
+            infrastructure/service-lambda.zip
+
+  deploy:
+    if: github.event_name == 'push'
+    needs: [test, build]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set environment
+        id: env
+        run: |
+          if [ "${GITHUB_REF#refs/heads/}" = "main" ]; then
+            echo "environment=prod" >> "$GITHUB_OUTPUT"
+          else
+            echo "environment=develop" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: lambda-packages
+          path: infrastructure
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ steps.env.outputs.environment == 'prod' && secrets.AWS_DEPLOY_ROLE_ARN_PROD || secrets.AWS_DEPLOY_ROLE_ARN_DEVELOP }}
+          aws-region: eu-west-2
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: infrastructure
+        run: terraform init -backend-config="key=parking/${{ steps.env.outputs.environment }}/terraform.tfstate"
+
+      - name: Terraform Apply
+        working-directory: infrastructure
+        env:
+          TF_VAR_environment: ${{ steps.env.outputs.environment }}
+          TF_VAR_github_repository: ${{ github.repository }}
+          TF_VAR_cors_allowed_origins: ${{ steps.env.outputs.environment == 'prod' && secrets.CORS_ALLOWED_ORIGINS_PROD || secrets.CORS_ALLOWED_ORIGINS_DEVELOP }}
+          TF_VAR_ses_from_address: ${{ steps.env.outputs.environment == 'prod' && secrets.SES_FROM_ADDRESS_PROD || secrets.SES_FROM_ADDRESS_DEVELOP }}
+          TF_VAR_ses_domain: ${{ secrets.SES_DOMAIN }}
+          TF_VAR_sns_email_subscription: ${{ secrets.SNS_EMAIL_SUBSCRIPTION }}
+          TF_VAR_slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          TF_VAR_cognito_invite_url: ${{ steps.env.outputs.environment == 'prod' && secrets.COGNITO_INVITE_URL_PROD || secrets.COGNITO_INVITE_URL_DEVELOP }}
+        run: terraform apply -auto-approve
+
+      - name: Delete artifacts
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts --jq '.artifacts[].id' | xargs -I{} gh api -X DELETE repos/${{ github.repository }}/actions/artifacts/{}
