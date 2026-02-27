@@ -187,7 +187,8 @@ resource "aws_iam_role_policy" "trigger_lambda" {
       {
         Effect = "Allow"
         Action = [
-          "dynamodb:PutItem"
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem"
         ]
         Resource = aws_dynamodb_table.main.arn
       }

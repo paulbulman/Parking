@@ -286,7 +286,7 @@ resource "aws_iam_role_policy" "github_deploy" {
         Resource = "arn:aws:sns:${var.aws_region}:${data.aws_caller_identity.current.account_id}:${var.project_name}-${var.environment}"
       },
       {
-        Sid    = "EventBridge"
+        Sid    = "EventBridgeLegacy"
         Effect = "Allow"
         Action = [
           "events:PutRule",
@@ -300,6 +300,26 @@ resource "aws_iam_role_policy" "github_deploy" {
           "events:UntagResource"
         ]
         Resource = "arn:aws:events:${var.aws_region}:${data.aws_caller_identity.current.account_id}:rule/${var.project_name}-${var.environment}-*"
+      },
+      {
+        Sid    = "Scheduler"
+        Effect = "Allow"
+        Action = [
+          "scheduler:CreateSchedule",
+          "scheduler:GetSchedule",
+          "scheduler:UpdateSchedule",
+          "scheduler:DeleteSchedule",
+          "scheduler:CreateScheduleGroup",
+          "scheduler:GetScheduleGroup",
+          "scheduler:DeleteScheduleGroup",
+          "scheduler:ListTagsForResource",
+          "scheduler:TagResource",
+          "scheduler:UntagResource"
+        ]
+        Resource = [
+          "arn:aws:scheduler:${var.aws_region}:${data.aws_caller_identity.current.account_id}:schedule/${var.project_name}-${var.environment}/*",
+          "arn:aws:scheduler:${var.aws_region}:${data.aws_caller_identity.current.account_id}:schedule-group/${var.project_name}-${var.environment}"
+        ]
       },
       {
         Sid    = "SES"
