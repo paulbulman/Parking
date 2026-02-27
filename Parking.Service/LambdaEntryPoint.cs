@@ -3,6 +3,7 @@ namespace Parking.Service;
 using System;
 using System.Threading.Tasks;
 using Amazon.Lambda.Core;
+using Business.Data;
 using Microsoft.Extensions.DependencyInjection;
 
 public class LambdaEntryPoint
@@ -16,5 +17,14 @@ public class LambdaEntryPoint
         using var scope = this.serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
 
         await TaskRunner.RunTasksAsync(scope.ServiceProvider);
+    }
+
+    public async Task AddTrigger(ILambdaContext context)
+    {
+        using var scope = this.serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
+
+        var triggerRepository = scope.ServiceProvider.GetRequiredService<ITriggerRepository>();
+
+        await triggerRepository.AddTrigger();
     }
 }

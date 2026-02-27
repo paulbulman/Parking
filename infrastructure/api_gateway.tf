@@ -71,13 +71,6 @@ resource "aws_apigatewayv2_route" "options" {
   authorization_type = "NONE"
 }
 
-resource "aws_apigatewayv2_route" "triggers" {
-  api_id             = aws_apigatewayv2_api.api.id
-  route_key          = "POST /triggers"
-  target             = "integrations/${aws_apigatewayv2_integration.lambda.id}"
-  authorization_type = "AWS_IAM"
-}
-
 resource "aws_lambda_permission" "api_gateway" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.api.function_name

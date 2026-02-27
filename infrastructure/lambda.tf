@@ -49,6 +49,27 @@ resource "aws_lambda_function" "service" {
   depends_on = [aws_cloudwatch_log_group.service_lambda]
 }
 
+resource "aws_lambda_function" "trigger" {
+  function_name = "${var.project_name}-${var.environment}-trigger"
+  role          = aws_iam_role.trigger_lambda.arn
+  handler       = "Parking.Service::Parking.Service.LambdaEntryPoint::AddTrigger"
+  runtime       = "dotnet10"
+  architectures = ["x86_64"]
+  memory_size   = 256
+  timeout       = 10
+
+  filename         = var.service_lambda_package_path
+  source_code_hash = filebase64sha256(var.service_lambda_package_path)
+
+  environment {
+    variables = {
+      TABLE_NAME = aws_dynamodb_table.main.name
+    }
+  }
+
+  depends_on = [aws_cloudwatch_log_group.trigger_lambda]
+}
+
 data "archive_file" "slack" {
   type        = "zip"
   source_dir  = "${path.module}/slack-lambda"

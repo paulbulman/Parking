@@ -8,6 +8,11 @@ resource "aws_cloudwatch_log_group" "service_lambda" {
   retention_in_days = 14
 }
 
+resource "aws_cloudwatch_log_group" "trigger_lambda" {
+  name              = "/aws/lambda/${var.project_name}-${var.environment}-trigger"
+  retention_in_days = 14
+}
+
 resource "aws_cloudwatch_log_group" "slack_lambda" {
   name              = "/aws/lambda/${var.project_name}-${var.environment}-slack"
   retention_in_days = 14

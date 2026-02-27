@@ -152,6 +152,49 @@ resource "aws_iam_role" "slack_lambda" {
   })
 }
 
+# Trigger Lambda role
+
+resource "aws_iam_role" "trigger_lambda" {
+  name = "${var.project_name}-${var.environment}-trigger-lambda-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "lambda.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "trigger_lambda" {
+  name = "${var.project_name}-${var.environment}-trigger-lambda-policy"
+  role = aws_iam_role.trigger_lambda.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "${aws_cloudwatch_log_group.trigger_lambda.arn}:*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:PutItem"
+        ]
+        Resource = aws_dynamodb_table.main.arn
+      }
+    ]
+  })
+}
+
 resource "aws_iam_role_policy" "slack_lambda" {
   name = "${var.project_name}-${var.environment}-slack-lambda-policy"
   role = aws_iam_role.slack_lambda.id
