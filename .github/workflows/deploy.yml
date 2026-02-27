@@ -96,7 +96,7 @@ jobs:
           TF_VAR_ses_from_address: ${{ steps.env.outputs.environment == 'prod' && secrets.SES_FROM_ADDRESS_PROD || secrets.SES_FROM_ADDRESS_DEVELOP }}
           TF_VAR_ses_domain: ${{ secrets.SES_DOMAIN }}
           TF_VAR_sns_email_subscription: ${{ secrets.SNS_EMAIL_SUBSCRIPTION }}
-          TF_VAR_slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          TF_VAR_slack_webhook_url: ${{ steps.env.outputs.environment == 'prod' && secrets.SLACK_WEBHOOK_URL_PROD || secrets.SLACK_WEBHOOK_URL_DEVELOP }}
           TF_VAR_cognito_invite_url: ${{ steps.env.outputs.environment == 'prod' && secrets.COGNITO_INVITE_URL_PROD || secrets.COGNITO_INVITE_URL_DEVELOP }}
         run: terraform apply -auto-approve
 
