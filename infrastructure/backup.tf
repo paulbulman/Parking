@@ -1,10 +1,5 @@
 resource "aws_backup_vault" "main" {
   name = "${var.project_name}-${var.environment}"
-
-  tags = {
-    Name        = "${var.project_name}-${var.environment}"
-    Environment = var.environment
-  }
 }
 
 resource "aws_backup_plan" "main" {
@@ -20,10 +15,6 @@ resource "aws_backup_plan" "main" {
     }
   }
 
-  tags = {
-    Name        = "${var.project_name}-${var.environment}"
-    Environment = var.environment
-  }
 }
 
 resource "aws_iam_role" "backup" {

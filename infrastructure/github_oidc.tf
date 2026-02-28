@@ -98,7 +98,8 @@ resource "aws_iam_role_policy" "github_deploy" {
         ]
         Resource = [
           "arn:aws:apigateway:${var.aws_region}::/apis",
-          "arn:aws:apigateway:${var.aws_region}::/apis/*"
+          "arn:aws:apigateway:${var.aws_region}::/apis/*",
+          "arn:aws:apigateway:${var.aws_region}::/tags/*"
         ]
       },
       {
@@ -148,6 +149,8 @@ resource "aws_iam_role_policy" "github_deploy" {
           "iam:ListAttachedRolePolicies",
           "iam:ListInstanceProfilesForRole",
           "iam:ListRoleTags",
+          "iam:TagRole",
+          "iam:UntagRole",
           "iam:UpdateAssumeRolePolicy"
         ]
         Resource = [

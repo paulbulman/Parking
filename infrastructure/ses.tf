@@ -45,8 +45,4 @@ resource "aws_sns_topic" "email" {
   provider     = aws.ses
   name         = "${var.project_name}-email"
   display_name = "Parking email"
-
-  tags = {
-    Name = "${var.project_name}-email"
-  }
 }

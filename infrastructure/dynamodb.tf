@@ -33,8 +33,4 @@ resource "aws_dynamodb_table" "main" {
 
   deletion_protection_enabled = true
 
-  tags = {
-    Name        = "${var.project_name}-${var.environment}"
-    Environment = var.environment
-  }
 }

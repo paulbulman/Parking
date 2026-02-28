@@ -1,10 +1,5 @@
 resource "aws_sns_topic" "main" {
   name = "${var.project_name}-${var.environment}"
-
-  tags = {
-    Name        = "${var.project_name}-${var.environment}"
-    Environment = var.environment
-  }
 }
 
 resource "aws_sns_topic_subscription" "email" {
