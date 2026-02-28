@@ -1,6 +1,7 @@
 resource "aws_cognito_user_pool" "pool" {
   name = "${var.project_name}-${var.environment}"
 
+  deletion_protection      = "ACTIVE"
   username_attributes      = ["email"]
   auto_verified_attributes = ["email"]
   sms_authentication_message = "Your authentication code is {####}. "
