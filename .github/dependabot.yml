@@ -4,7 +4,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "wednesday"
-      time: "07:00"
+      day: "thursday"
+      time: "08:00"
       timezone: "Europe/London"
+    target-branch: "dependency-updates"
     open-pull-requests-limit: 20
