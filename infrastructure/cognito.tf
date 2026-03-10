@@ -8,12 +8,10 @@ resource "aws_cognito_user_pool" "pool" {
 
   admin_create_user_config {
     allow_admin_create_user_only = true
+  }
 
-    invite_message_template {
-      email_subject = "Your new parking rota account"
-      email_message = "An new parking rota account has been created for you. If you were not expecting this, please email help@${var.ses_domain}<br /> <br /> To activate your new account, you need to log in within the next 7 days.<br /> <br /> You can log in at ${var.cognito_invite_url} using the username and temporary password below:<br /> {username}<br /> {####}<br /> <br /> When you first log in, you will need to set a new password. This must be at least 10 characters long, and not in the database of known-compromised passwords at https://haveibeenpwned.com/Passwords.<br /> <br /> A good way of generating a unique strong password is to use a password manager such as KeePass, 1Password or Bitwarden.<br /> <br /> If you have any questions, or need any help, please email help@${var.ses_domain}"
-      sms_message   = "Your username is {username} and temporary password is {####}"
-    }
+  lambda_config {
+    custom_message = aws_lambda_function.cognito_email.arn
   }
 
   password_policy {

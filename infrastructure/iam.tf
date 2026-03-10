@@ -135,6 +135,42 @@ resource "aws_iam_role_policy" "service_lambda" {
   })
 }
 
+# Cognito email Lambda role
+
+resource "aws_iam_role" "cognito_email_lambda" {
+  name = "${var.project_name}-${var.environment}-cognito-email-lambda-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "lambda.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "cognito_email_lambda" {
+  name = "${var.project_name}-${var.environment}-cognito-email-lambda-policy"
+  role = aws_iam_role.cognito_email_lambda.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "${aws_cloudwatch_log_group.cognito_email_lambda.arn}:*"
+      }
+    ]
+  })
+}
+
 # Slack Lambda role
 
 resource "aws_iam_role" "slack_lambda" {

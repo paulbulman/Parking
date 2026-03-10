@@ -70,6 +70,43 @@ resource "aws_lambda_function" "trigger" {
   depends_on = [aws_cloudwatch_log_group.trigger_lambda]
 }
 
+data "archive_file" "cognito_email" {
+  type        = "zip"
+  source_dir  = "${path.module}/../cognito-email"
+  output_path = "${path.module}/cognito-email.zip"
+}
+
+resource "aws_lambda_function" "cognito_email" {
+  function_name = "${var.project_name}-${var.environment}-cognito-email"
+  role          = aws_iam_role.cognito_email_lambda.arn
+  handler       = "index.handler"
+  runtime       = "nodejs22.x"
+  architectures = ["x86_64"]
+  memory_size   = 128
+  timeout       = 5
+
+  filename         = data.archive_file.cognito_email.output_path
+  source_code_hash = data.archive_file.cognito_email.output_base64sha256
+
+  environment {
+    variables = {
+      WEBSITE_URL = var.cognito_invite_url
+      HELP_EMAIL  = "help@${var.ses_domain}"
+      ENVIRONMENT = var.environment
+    }
+  }
+
+  depends_on = [aws_cloudwatch_log_group.cognito_email_lambda]
+}
+
+resource "aws_lambda_permission" "cognito_email" {
+  statement_id  = "AllowCognitoInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.cognito_email.function_name
+  principal     = "cognito-idp.amazonaws.com"
+  source_arn    = aws_cognito_user_pool.pool.arn
+}
+
 data "archive_file" "slack" {
   type        = "zip"
   source_dir  = "${path.module}/slack-lambda"
