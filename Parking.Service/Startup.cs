@@ -51,6 +51,7 @@ public class Startup
         services.AddScoped<IRequestRepository, RequestRepository>();
         services.AddScoped<IRequestSorter, RequestSorter>();
         services.AddScoped<RequestUpdater>();
+        services.AddScoped<IGuestRequestRepository, GuestRequestRepository>();
         services.AddScoped<IReservationRepository, ReservationRepository>();
         services.AddScoped<IScheduleRepository, ScheduleRepository>();
         services.AddScoped<ScheduledTaskRunner>();

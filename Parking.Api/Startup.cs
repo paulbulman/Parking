@@ -91,6 +91,7 @@ public class Startup
         services.AddScoped<IDateCalculator, DateCalculator>();
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<IRequestRepository, RequestRepository>();
+        services.AddScoped<IGuestRequestRepository, GuestRequestRepository>();
         services.AddScoped<IReservationRepository, ReservationRepository>();
         services.AddScoped<ITriggerRepository, TriggerRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
