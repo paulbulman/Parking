@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Model;
+using NodaTime;
+using NodaTime.Text;
 
 [Authorize(Policy = "IsTeamLeader")]
 [Route("guest-requests")]
@@ -67,6 +69,56 @@ public class GuestRequestsController(
         await guestRequestRepository.SaveGuestRequest(guestRequest);
 
         await triggerRepository.AddTrigger();
+
+        return this.Ok();
+    }
+
+    [HttpPut("{date}/{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> PutAsync(string date, string id, [FromBody] GuestRequestsPutRequest request)
+    {
+        var localDate = LocalDatePattern.Iso.Parse(date);
+
+        if (!localDate.Success)
+        {
+            return this.BadRequest();
+        }
+
+        var existingGuests = await guestRequestRepository.GetGuestRequests(localDate.Value.ToDateInterval());
+        var existingGuest = existingGuests.SingleOrDefault(g => g.Id == id);
+
+        if (existingGuest == null)
+        {
+            return this.NotFound();
+        }
+
+        var users = await userRepository.GetUsers();
+        var visitingUser = users.SingleOrDefault(u => u.UserId == request.VisitingUserId);
+
+        if (visitingUser == null)
+        {
+            return this.BadRequest();
+        }
+
+        if (!string.Equals(existingGuest.Name, request.Name, StringComparison.OrdinalIgnoreCase) &&
+            existingGuests.Any(g =>
+                string.Equals(g.Name, request.Name, StringComparison.OrdinalIgnoreCase)))
+        {
+            return this.Conflict();
+        }
+
+        var updatedGuestRequest = new GuestRequest(
+            id: existingGuest.Id,
+            date: existingGuest.Date,
+            name: request.Name,
+            visitingUserId: request.VisitingUserId,
+            registrationNumber: request.RegistrationNumber,
+            status: existingGuest.Status);
+
+        await guestRequestRepository.UpdateGuestRequest(updatedGuestRequest);
 
         return this.Ok();
     }

@@ -213,4 +213,214 @@ public static class GuestRequestsControllerTests
                 userRepository ?? Mock.Of<IUserRepository>());
         }
     }
+
+    public static class Put
+    {
+        [Fact]
+        public static async Task Updates_guest_request_successfully()
+        {
+            var existingGuest = new GuestRequest(
+                id: "guest-id-1",
+                date: 15.March(2026),
+                name: "Alice Smith",
+                visitingUserId: "user1",
+                registrationNumber: null,
+                status: GuestRequestStatus.Allocated);
+
+            var mockGuestRequestRepository = new Mock<IGuestRequestRepository>(MockBehavior.Strict);
+            mockGuestRequestRepository
+                .Setup(r => r.GetGuestRequests(It.IsAny<DateInterval>()))
+                .ReturnsAsync([existingGuest]);
+            mockGuestRequestRepository
+                .Setup(r => r.UpdateGuestRequest(It.Is<GuestRequest>(g =>
+                    g.Id == "guest-id-1" &&
+                    g.Date == 15.March(2026) &&
+                    g.Name == "Alice Jones" &&
+                    g.VisitingUserId == "user2" &&
+                    g.RegistrationNumber == "XY99ZZZ" &&
+                    g.Status == GuestRequestStatus.Allocated)))
+                .Returns(Task.CompletedTask);
+
+            var users = new[]
+            {
+                CreateUser.With(userId: "user1", firstName: "John", lastName: "Doe"),
+                CreateUser.With(userId: "user2", firstName: "Jane", lastName: "Doe"),
+            };
+
+            var controller = CreateController(
+                guestRequestRepository: mockGuestRequestRepository.Object,
+                userRepository: CreateUserRepository.WithUsers(users));
+
+            var request = new GuestRequestsPutRequest("Alice Jones", "user2", "XY99ZZZ");
+
+            var result = await controller.PutAsync("2026-03-15", "guest-id-1", request);
+
+            Assert.IsType<OkResult>(result);
+            mockGuestRequestRepository.VerifyAll();
+        }
+
+        [Fact]
+        public static async Task Returns_not_found_for_nonexistent_guest()
+        {
+            var mockGuestRequestRepository = new Mock<IGuestRequestRepository>(MockBehavior.Strict);
+            mockGuestRequestRepository
+                .Setup(r => r.GetGuestRequests(It.IsAny<DateInterval>()))
+                .ReturnsAsync([]);
+
+            var controller = CreateController(guestRequestRepository: mockGuestRequestRepository.Object);
+
+            var request = new GuestRequestsPutRequest("Alice Smith", "user1", null);
+
+            var result = await controller.PutAsync("2026-03-15", "nonexistent-id", request);
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public static async Task Rejects_nonexistent_visiting_user()
+        {
+            var existingGuest = new GuestRequest(
+                id: "guest-id-1",
+                date: 15.March(2026),
+                name: "Alice Smith",
+                visitingUserId: "user1",
+                registrationNumber: null,
+                status: GuestRequestStatus.Pending);
+
+            var mockGuestRequestRepository = new Mock<IGuestRequestRepository>(MockBehavior.Strict);
+            mockGuestRequestRepository
+                .Setup(r => r.GetGuestRequests(It.IsAny<DateInterval>()))
+                .ReturnsAsync([existingGuest]);
+
+            var users = new[] { CreateUser.With(userId: "user1") };
+
+            var controller = CreateController(
+                guestRequestRepository: mockGuestRequestRepository.Object,
+                userRepository: CreateUserRepository.WithUsers(users));
+
+            var request = new GuestRequestsPutRequest("Alice Smith", "nonexistent-user", null);
+
+            var result = await controller.PutAsync("2026-03-15", "guest-id-1", request);
+
+            Assert.IsType<BadRequestResult>(result);
+        }
+
+        [Fact]
+        public static async Task Rejects_duplicate_name_on_same_date()
+        {
+            var existingGuest = new GuestRequest(
+                id: "guest-id-1",
+                date: 15.March(2026),
+                name: "Alice Smith",
+                visitingUserId: "user1",
+                registrationNumber: null,
+                status: GuestRequestStatus.Pending);
+
+            var otherGuest = new GuestRequest(
+                id: "guest-id-2",
+                date: 15.March(2026),
+                name: "bob jones",
+                visitingUserId: "user1",
+                registrationNumber: null,
+                status: GuestRequestStatus.Pending);
+
+            var mockGuestRequestRepository = new Mock<IGuestRequestRepository>(MockBehavior.Strict);
+            mockGuestRequestRepository
+                .Setup(r => r.GetGuestRequests(It.IsAny<DateInterval>()))
+                .ReturnsAsync([existingGuest, otherGuest]);
+
+            var users = new[] { CreateUser.With(userId: "user1") };
+
+            var controller = CreateController(
+                guestRequestRepository: mockGuestRequestRepository.Object,
+                userRepository: CreateUserRepository.WithUsers(users));
+
+            var request = new GuestRequestsPutRequest("Bob Jones", "user1", null);
+
+            var result = await controller.PutAsync("2026-03-15", "guest-id-1", request);
+
+            Assert.IsType<ConflictResult>(result);
+        }
+
+        [Fact]
+        public static async Task Allows_same_name_when_unchanged()
+        {
+            var existingGuest = new GuestRequest(
+                id: "guest-id-1",
+                date: 15.March(2026),
+                name: "Alice Smith",
+                visitingUserId: "user1",
+                registrationNumber: null,
+                status: GuestRequestStatus.Pending);
+
+            var mockGuestRequestRepository = new Mock<IGuestRequestRepository>(MockBehavior.Strict);
+            mockGuestRequestRepository
+                .Setup(r => r.GetGuestRequests(It.IsAny<DateInterval>()))
+                .ReturnsAsync([existingGuest]);
+            mockGuestRequestRepository
+                .Setup(r => r.UpdateGuestRequest(It.IsAny<GuestRequest>()))
+                .Returns(Task.CompletedTask);
+
+            var users = new[] { CreateUser.With(userId: "user1") };
+
+            var controller = CreateController(
+                guestRequestRepository: mockGuestRequestRepository.Object,
+                userRepository: CreateUserRepository.WithUsers(users));
+
+            var request = new GuestRequestsPutRequest("Alice Smith", "user1", null);
+
+            var result = await controller.PutAsync("2026-03-15", "guest-id-1", request);
+
+            Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
+        public static async Task Does_not_trigger_allocation_rerun()
+        {
+            var existingGuest = new GuestRequest(
+                id: "guest-id-1",
+                date: 15.March(2026),
+                name: "Alice Smith",
+                visitingUserId: "user1",
+                registrationNumber: null,
+                status: GuestRequestStatus.Pending);
+
+            var mockGuestRequestRepository = new Mock<IGuestRequestRepository>();
+            mockGuestRequestRepository
+                .Setup(r => r.GetGuestRequests(It.IsAny<DateInterval>()))
+                .ReturnsAsync([existingGuest]);
+            mockGuestRequestRepository
+                .Setup(r => r.UpdateGuestRequest(It.IsAny<GuestRequest>()))
+                .Returns(Task.CompletedTask);
+
+            var mockTriggerRepository = new Mock<ITriggerRepository>(MockBehavior.Strict);
+
+            var users = new[] { CreateUser.With(userId: "user1") };
+
+            var controller = CreateController(
+                guestRequestRepository: mockGuestRequestRepository.Object,
+                triggerRepository: mockTriggerRepository.Object,
+                userRepository: CreateUserRepository.WithUsers(users));
+
+            var request = new GuestRequestsPutRequest("Alice Smith", "user1", null);
+
+            await controller.PutAsync("2026-03-15", "guest-id-1", request);
+
+            mockTriggerRepository.VerifyAll();
+        }
+
+        private static GuestRequestsController CreateController(
+            IGuestRequestRepository? guestRequestRepository = null,
+            ITriggerRepository? triggerRepository = null,
+            IUserRepository? userRepository = null)
+        {
+            var dateCalculator = CreateDateCalculator.WithActiveDates([15.March(2026)]);
+
+            return new GuestRequestsController(
+                dateCalculator,
+                guestRequestRepository ?? Mock.Of<IGuestRequestRepository>(),
+                triggerRepository ?? Mock.Of<ITriggerRepository>(),
+                userRepository ?? Mock.Of<IUserRepository>());
+        }
+    }
 }
