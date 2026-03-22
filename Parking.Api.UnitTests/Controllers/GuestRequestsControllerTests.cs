@@ -1,6 +1,7 @@
 namespace Parking.Api.UnitTests.Controllers;
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Api.Controllers;
 using Api.Json.GuestRequests;
@@ -415,6 +416,130 @@ public static class GuestRequestsControllerTests
             IUserRepository? userRepository = null)
         {
             var dateCalculator = CreateDateCalculator.WithActiveDates([15.March(2026)]);
+
+            return new GuestRequestsController(
+                dateCalculator,
+                guestRequestRepository ?? Mock.Of<IGuestRequestRepository>(),
+                triggerRepository ?? Mock.Of<ITriggerRepository>(),
+                userRepository ?? Mock.Of<IUserRepository>());
+        }
+    }
+
+    public static class Get
+    {
+        [Fact]
+        public static async Task Returns_guest_requests_sorted_by_date_then_name()
+        {
+            var guestRequests = new[]
+            {
+                new GuestRequest("id1", 16.March(2026), "Bob", "user1", null, GuestRequestStatus.Allocated),
+                new GuestRequest("id2", 15.March(2026), "Charlie", "user1", null, GuestRequestStatus.Pending),
+                new GuestRequest("id3", 15.March(2026), "Alice", "user2", "AB12CDE", GuestRequestStatus.Interrupted),
+            };
+
+            var mockGuestRequestRepository = new Mock<IGuestRequestRepository>(MockBehavior.Strict);
+            mockGuestRequestRepository
+                .Setup(r => r.GetGuestRequests(It.IsAny<DateInterval>()))
+                .ReturnsAsync(guestRequests);
+
+            var users = new[]
+            {
+                CreateUser.With(userId: "user1", firstName: "John", lastName: "Doe"),
+                CreateUser.With(userId: "user2", firstName: "Jane", lastName: "Smith"),
+            };
+
+            var activeDates = new[] { 15.March(2026), 16.March(2026) };
+
+            var controller = CreateController(
+                guestRequestRepository: mockGuestRequestRepository.Object,
+                userRepository: CreateUserRepository.WithUsers(users),
+                activeDates: activeDates);
+
+            var result = await controller.GetAsync();
+
+            var response = ControllerHelpers.GetResultValue<GuestRequestsResponse>(result);
+            var data = response.GuestRequests.ToList();
+
+            Assert.Equal(3, data.Count);
+
+            Assert.Equal("id3", data[0].Id);
+            Assert.Equal("2026-03-15", data[0].Date);
+            Assert.Equal("Alice", data[0].Name);
+            Assert.Equal("user2", data[0].VisitingUserId);
+            Assert.Equal("Jane Smith", data[0].VisitingUserDisplayName);
+            Assert.Equal("AB12CDE", data[0].RegistrationNumber);
+            Assert.Equal(GuestRequestStatus.Interrupted, data[0].Status);
+
+            Assert.Equal("id2", data[1].Id);
+            Assert.Equal("2026-03-15", data[1].Date);
+            Assert.Equal("Charlie", data[1].Name);
+            Assert.Null(data[1].RegistrationNumber);
+            Assert.Equal(GuestRequestStatus.Pending, data[1].Status);
+
+            Assert.Equal("id1", data[2].Id);
+            Assert.Equal("2026-03-16", data[2].Date);
+            Assert.Equal("Bob", data[2].Name);
+            Assert.Equal(GuestRequestStatus.Allocated, data[2].Status);
+        }
+
+        [Fact]
+        public static async Task Shows_deleted_user_display_name()
+        {
+            var guestRequests = new[]
+            {
+                new GuestRequest("id1", 15.March(2026), "Alice", "deleted-user-id", null, GuestRequestStatus.Pending),
+            };
+
+            var mockGuestRequestRepository = new Mock<IGuestRequestRepository>(MockBehavior.Strict);
+            mockGuestRequestRepository
+                .Setup(r => r.GetGuestRequests(It.IsAny<DateInterval>()))
+                .ReturnsAsync(guestRequests);
+
+            var users = new[]
+            {
+                CreateUser.With(userId: "user1", firstName: "John", lastName: "Doe"),
+            };
+
+            var controller = CreateController(
+                guestRequestRepository: mockGuestRequestRepository.Object,
+                userRepository: CreateUserRepository.WithUsers(users));
+
+            var result = await controller.GetAsync();
+
+            var response = ControllerHelpers.GetResultValue<GuestRequestsResponse>(result);
+            var data = response.GuestRequests.ToList();
+
+            Assert.Single(data);
+            Assert.Equal("deleted user", data[0].VisitingUserDisplayName);
+        }
+
+        [Fact]
+        public static async Task Returns_empty_list_when_no_guests()
+        {
+            var mockGuestRequestRepository = new Mock<IGuestRequestRepository>(MockBehavior.Strict);
+            mockGuestRequestRepository
+                .Setup(r => r.GetGuestRequests(It.IsAny<DateInterval>()))
+                .ReturnsAsync([]);
+
+            var controller = CreateController(
+                guestRequestRepository: mockGuestRequestRepository.Object,
+                userRepository: CreateUserRepository.WithUsers([]));
+
+            var result = await controller.GetAsync();
+
+            var response = ControllerHelpers.GetResultValue<GuestRequestsResponse>(result);
+
+            Assert.Empty(response.GuestRequests);
+        }
+
+        private static GuestRequestsController CreateController(
+            IGuestRequestRepository? guestRequestRepository = null,
+            ITriggerRepository? triggerRepository = null,
+            IUserRepository? userRepository = null,
+            IReadOnlyCollection<LocalDate>? activeDates = null)
+        {
+            var dateCalculator = CreateDateCalculator.WithActiveDates(
+                activeDates ?? [15.March(2026)]);
 
             return new GuestRequestsController(
                 dateCalculator,

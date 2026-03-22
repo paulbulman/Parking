@@ -1,6 +1,7 @@
 namespace Parking.Api.Controllers;
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Business;
@@ -23,6 +24,44 @@ public class GuestRequestsController(
     IUserRepository userRepository)
     : ControllerBase
 {
+    [HttpGet]
+    [ProducesResponseType(typeof(GuestRequestsResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAsync()
+    {
+        var activeDates = dateCalculator.GetActiveDates();
+        var firstDate = activeDates.First().PlusDays(-60);
+        var lastDate = activeDates.Last();
+        var dateInterval = new DateInterval(firstDate, lastDate);
+
+        var guestRequests = await guestRequestRepository.GetGuestRequests(dateInterval);
+
+        var users = await userRepository.GetUsers();
+        var userLookup = users.ToDictionary(u => u.UserId);
+
+        var data = guestRequests
+            .Where(g => dateInterval.Contains(g.Date))
+            .OrderBy(g => g.Date)
+            .ThenBy(g => g.Name, StringComparer.OrdinalIgnoreCase)
+            .Select(g => new GuestRequestsData(
+                id: g.Id,
+                date: LocalDatePattern.Iso.Format(g.Date),
+                name: g.Name,
+                visitingUserId: g.VisitingUserId,
+                visitingUserDisplayName: GetVisitingUserDisplayName(userLookup, g.VisitingUserId),
+                registrationNumber: g.RegistrationNumber,
+                status: g.Status))
+            .ToArray();
+
+        return this.Ok(new GuestRequestsResponse(data));
+    }
+
+    private static string GetVisitingUserDisplayName(
+        IReadOnlyDictionary<string, User> userLookup,
+        string visitingUserId) =>
+        userLookup.TryGetValue(visitingUserId, out var user)
+            ? user.DisplayName()
+            : "deleted user";
+
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
