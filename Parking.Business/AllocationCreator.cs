@@ -1,4 +1,4 @@
-﻿namespace Parking.Business
+namespace Parking.Business
 {
     using System;
     using System.Collections.Generic;
@@ -9,13 +9,14 @@
 
     public interface IAllocationCreator
     {
-        IReadOnlyCollection<Request> Create(
+        AllocationResult Create(
             LocalDate date,
             IReadOnlyCollection<Request> requests,
             IReadOnlyCollection<Reservation> reservations,
             IReadOnlyCollection<User> users,
             Configuration configuration,
-            LeadTimeType leadTimeType);
+            LeadTimeType leadTimeType,
+            IReadOnlyCollection<GuestRequest> guestRequests);
     }
 
     public class AllocationCreator : IAllocationCreator
@@ -31,28 +32,42 @@
             this.requestSorter = requestSorter;
         }
 
-        public IReadOnlyCollection<Request> Create(
+        public AllocationResult Create(
             LocalDate date,
             IReadOnlyCollection<Request> requests,
             IReadOnlyCollection<Reservation> reservations,
             IReadOnlyCollection<User> users,
             Configuration configuration,
-            LeadTimeType leadTimeType)
+            LeadTimeType leadTimeType,
+            IReadOnlyCollection<GuestRequest> guestRequests)
         {
             var spacesToReserve = leadTimeType == LeadTimeType.Short ? 0 : configuration.ShortLeadTimeSpaces;
             var allocatableSpaces = configuration.TotalSpaces - spacesToReserve;
-            var alreadyAllocatedSpaces = requests.Count(r => r.Date == date && r.Status == RequestStatus.Allocated);
+
+            var alreadyAllocatedRegular = requests.Count(r => r.Date == date && r.Status == RequestStatus.Allocated);
+            var alreadyAllocatedGuests = guestRequests.Count(g => g.Date == date && g.Status == GuestRequestStatus.Allocated);
+            var alreadyAllocatedSpaces = alreadyAllocatedRegular + alreadyAllocatedGuests;
+
             var freeSpaces = allocatableSpaces - alreadyAllocatedSpaces;
 
-            if (freeSpaces < 0)
+            // Allocate pending/interrupted guest requests first
+            var pendingGuests = guestRequests
+                .Where(g => g.Date == date && g.Status is GuestRequestStatus.Pending or GuestRequestStatus.Interrupted)
+                .ToArray();
+
+            var guestsToAllocate = Math.Min(pendingGuests.Length, Math.Max(0, freeSpaces));
+
+            var updatedGuestRequests = pendingGuests
+                .Select((g, i) => new GuestRequest(
+                    g.Id, g.Date, g.Name, g.VisitingUserId, g.RegistrationNumber,
+                    i < guestsToAllocate ? GuestRequestStatus.Allocated : GuestRequestStatus.Interrupted))
+                .ToArray();
+
+            freeSpaces = Math.Max(0, freeSpaces - guestsToAllocate);
+
+            if (freeSpaces <= 0)
             {
-                this.logger.LogWarning("{freeSpaces} free spaces for {@date}.", freeSpaces, date);
-                return new List<Request>();
-            }
-            
-            if (freeSpaces == 0)
-            {
-                return new List<Request>();
+                return new AllocationResult(new List<Request>(), updatedGuestRequests);
             }
 
             var sortedRequests = this.requestSorter
@@ -73,7 +88,7 @@
                     date);
             }
 
-            return allocatedRequests;
+            return new AllocationResult(allocatedRequests, updatedGuestRequests);
         }
     }
 }

@@ -67,20 +67,20 @@
 
             foreach (var allocationDate in shortLeadTimeAllocationDates)
             {
-                var allocatedRequests = this.allocationCreator.Create(
-                    allocationDate, requestsCache, reservations, users, configuration, LeadTimeType.Short);
+                var allocationResult = this.allocationCreator.Create(
+                    allocationDate, requestsCache, reservations, users, configuration, LeadTimeType.Short, []);
 
-                UpdateRequests(newRequests, allocatedRequests);
-                UpdateRequests(requestsCache, allocatedRequests);
+                UpdateRequests(newRequests, allocationResult.AllocatedRequests);
+                UpdateRequests(requestsCache, allocationResult.AllocatedRequests);
             }
 
             foreach (var allocationDate in longLeadTimeAllocationDates)
             {
-                var allocatedRequests = this.allocationCreator.Create(
-                    allocationDate, requestsCache, reservations, users, configuration, LeadTimeType.Long);
+                var allocationResult = this.allocationCreator.Create(
+                    allocationDate, requestsCache, reservations, users, configuration, LeadTimeType.Long, []);
 
-                UpdateRequests(newRequests, allocatedRequests);
-                UpdateRequests(requestsCache, allocatedRequests);
+                UpdateRequests(newRequests, allocationResult.AllocatedRequests);
+                UpdateRequests(requestsCache, allocationResult.AllocatedRequests);
             }
 
             await this.requestRepository.SaveRequests(newRequests);

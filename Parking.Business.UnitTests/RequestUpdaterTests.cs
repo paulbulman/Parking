@@ -77,8 +77,9 @@ public static class RequestUpdaterTests
                     It.IsAny<IReadOnlyCollection<Reservation>>(),
                     It.IsAny<IReadOnlyList<User>>(),
                     It.IsAny<Configuration>(),
-                    expectedLeadTimeType))
-                .Returns(NewlyAllocatedRequests.Where(r => r.Date == date).ToArray());
+                    expectedLeadTimeType,
+                    It.IsAny<IReadOnlyCollection<GuestRequest>>()))
+                .Returns(new AllocationResult(NewlyAllocatedRequests.Where(r => r.Date == date).ToArray(), []));
         }
 
         var mockRequestRepository = CreateMockRequestRepository();
@@ -116,8 +117,9 @@ public static class RequestUpdaterTests
                     It.IsAny<IReadOnlyCollection<Reservation>>(),
                     It.IsAny<IReadOnlyCollection<User>>(),
                     It.IsAny<Configuration>(),
-                    It.IsAny<LeadTimeType>()))
-                .Returns(NewlyAllocatedRequests.Where(r => r.Date == date).ToArray());
+                    It.IsAny<LeadTimeType>(),
+                    It.IsAny<IReadOnlyCollection<GuestRequest>>()))
+                .Returns(new AllocationResult(NewlyAllocatedRequests.Where(r => r.Date == date).ToArray(), []));
         }
 
         var requestUpdater = new RequestUpdater(
@@ -147,8 +149,9 @@ public static class RequestUpdaterTests
                     It.IsAny<IReadOnlyCollection<Reservation>>(),
                     It.IsAny<IReadOnlyCollection<User>>(),
                     It.IsAny<Configuration>(),
-                    It.IsAny<LeadTimeType>()))
-                .Returns(NewlyAllocatedRequests.Where(r => r.Date == date).ToArray());
+                    It.IsAny<LeadTimeType>(),
+                    It.IsAny<IReadOnlyCollection<GuestRequest>>()))
+                .Returns(new AllocationResult(NewlyAllocatedRequests.Where(r => r.Date == date).ToArray(), []));
         }
 
         var requestUpdater = new RequestUpdater(
@@ -203,8 +206,9 @@ public static class RequestUpdaterTests
                     reservations,
                     users,
                     arbitraryConfiguration,
-                    It.IsAny<LeadTimeType>()))
-                .Returns(NewlyAllocatedRequests.Where(r => r.Date == date).ToArray());
+                    It.IsAny<LeadTimeType>(),
+                    It.IsAny<IReadOnlyCollection<GuestRequest>>()))
+                .Returns(new AllocationResult(NewlyAllocatedRequests.Where(r => r.Date == date).ToArray(), []));
         }
 
         var requestUpdater = new RequestUpdater(

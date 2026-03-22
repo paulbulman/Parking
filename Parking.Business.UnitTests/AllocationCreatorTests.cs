@@ -19,6 +19,9 @@ public static class AllocationCreatorTests
     // ReSharper disable once CollectionNeverUpdated.Local
     private static readonly List<Reservation> Reservations = [];
 
+    // ReSharper disable once CollectionNeverUpdated.Local
+    private static readonly List<GuestRequest> GuestRequests = [];
+
     private static readonly Configuration Configuration =
         new Configuration(nearbyDistance: 1, shortLeadTimeSpaces: 1, totalSpaces: 3);
 
@@ -36,8 +39,8 @@ public static class AllocationCreatorTests
         var existingRequests = new List<Request>();
 
         var actual = CreateAllocationCreator(existingRequests)
-            .Create(AllocationDate, existingRequests, Reservations, Users, Configuration, LeadTimeType.Short)
-            .ToList();
+            .Create(AllocationDate, existingRequests, Reservations, Users, Configuration, LeadTimeType.Short, GuestRequests)
+            .AllocatedRequests.ToList();
 
         var expected = RequestSorterResult.ToList();
 
@@ -51,8 +54,8 @@ public static class AllocationCreatorTests
         var existingRequests = new List<Request>();
 
         var actual = CreateAllocationCreator(existingRequests)
-            .Create(AllocationDate, existingRequests, Reservations, Users, Configuration, LeadTimeType.Long)
-            .ToList();
+            .Create(AllocationDate, existingRequests, Reservations, Users, Configuration, LeadTimeType.Long, GuestRequests)
+            .AllocatedRequests.ToList();
 
         var expected = RequestSorterResult.Take(2).ToList();
 
@@ -71,8 +74,8 @@ public static class AllocationCreatorTests
         };
 
         var actual = CreateAllocationCreator(existingRequests)
-            .Create(AllocationDate, existingRequests, Reservations, Users, Configuration, LeadTimeType.Short)
-            .ToList();
+            .Create(AllocationDate, existingRequests, Reservations, Users, Configuration, LeadTimeType.Short, GuestRequests)
+            .AllocatedRequests.ToList();
 
         var expected = RequestSorterResult.Take(1).ToList();
 
@@ -93,8 +96,8 @@ public static class AllocationCreatorTests
         };
 
         var actual = CreateAllocationCreator(existingRequests)
-            .Create(AllocationDate, existingRequests, Reservations, Users, Configuration, LeadTimeType.Short)
-            .ToList();
+            .Create(AllocationDate, existingRequests, Reservations, Users, Configuration, LeadTimeType.Short, GuestRequests)
+            .AllocatedRequests.ToList();
 
         var expected = RequestSorterResult.Take(1).ToList();
 
