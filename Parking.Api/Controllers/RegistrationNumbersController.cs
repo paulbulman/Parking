@@ -1,4 +1,4 @@
-﻿namespace Parking.Api.Controllers;
+namespace Parking.Api.Controllers;
 
 using System;
 using System.Collections.Generic;
@@ -6,15 +6,20 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Business;
 using Business.Data;
 using Json.RegistrationNumbers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Model;
+using NodaTime;
 
 [Route("[controller]")]
 [ApiController]
-public class RegistrationNumbersController(IUserRepository userRepository) : ControllerBase
+public class RegistrationNumbersController(
+    IDateCalculator dateCalculator,
+    IGuestRequestRepository guestRequestRepository,
+    IUserRepository userRepository) : ControllerBase
 {
     [HttpGet("{searchString}")]
     [ProducesResponseType(typeof(RegistrationNumbersResponse), StatusCodes.Status200OK)]
@@ -22,9 +27,24 @@ public class RegistrationNumbersController(IUserRepository userRepository) : Con
     {
         var users = await userRepository.GetUsers();
 
-        var data = users
+        var userData = users
             .Select(CreateRegistrationNumbersData)
-            .SelectMany(d => d)
+            .SelectMany(d => d);
+
+        var activeDates = dateCalculator.GetActiveDates();
+        var guestDateInterval = new DateInterval(activeDates.First().PlusDays(-60), activeDates.Last());
+
+        var guestRequests = await guestRequestRepository.GetGuestRequests(guestDateInterval);
+
+        var userLookup = users.ToDictionary(u => u.UserId);
+
+        var guestData = guestRequests
+            .Where(g => !string.IsNullOrEmpty(g.RegistrationNumber))
+            .Select(g => new RegistrationNumbersData(
+                FormatRegistrationNumber(g.RegistrationNumber!),
+                FormatGuestName(g, userLookup)));
+
+        var data = userData.Concat(guestData)
             .Where(d =>
                 !string.IsNullOrEmpty(d.RegistrationNumber) &&
                 NormalizeRegistrationNumber(d.RegistrationNumber) == NormalizeRegistrationNumber(searchString))
@@ -54,4 +74,11 @@ public class RegistrationNumbersController(IUserRepository userRepository) : Con
     private static string FormatRegistrationNumber(string rawRegistrationNumber) =>
         Regex.Replace(rawRegistrationNumber, "[^a-zA-Z0-9]", string.Empty)
             .ToUpper(CultureInfo.InvariantCulture);
+
+    private static string FormatGuestName(
+        GuestRequest guest,
+        IReadOnlyDictionary<string, User> userLookup) =>
+        userLookup.TryGetValue(guest.VisitingUserId, out var user)
+            ? $"{guest.Name} (visiting {user.DisplayName()})"
+            : $"{guest.Name} (visiting deleted user)";
 }
