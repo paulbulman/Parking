@@ -1,4 +1,4 @@
-﻿namespace Parking.Business
+namespace Parking.Business
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -15,6 +15,8 @@
 
         private readonly IDateCalculator dateCalculator;
 
+        private readonly IGuestRequestRepository guestRequestRepository;
+
         private readonly IRequestRepository requestRepository;
 
         private readonly IReservationRepository reservationRepository;
@@ -25,6 +27,7 @@
             IAllocationCreator allocationCreator,
             IConfigurationRepository configurationRepository,
             IDateCalculator dateCalculator,
+            IGuestRequestRepository guestRequestRepository,
             IRequestRepository requestRepository,
             IReservationRepository reservationRepository,
             IUserRepository userRepository)
@@ -32,6 +35,7 @@
             this.allocationCreator = allocationCreator;
             this.configurationRepository = configurationRepository;
             this.dateCalculator = dateCalculator;
+            this.guestRequestRepository = guestRequestRepository;
             this.requestRepository = requestRepository;
             this.reservationRepository = reservationRepository;
             this.userRepository = userRepository;
@@ -54,6 +58,10 @@
             var users = await this.userRepository.GetUsers();
             var configuration = await this.configurationRepository.GetConfiguration();
 
+            var guestRequests = await this.guestRequestRepository.GetGuestRequests(cacheInterval);
+            var guestRequestsCache = guestRequests.ToList();
+            var newGuestRequests = new List<GuestRequest>();
+
             var newRequests = new List<Request>();
             var requestsCache = requests.ToList();
 
@@ -68,22 +76,27 @@
             foreach (var allocationDate in shortLeadTimeAllocationDates)
             {
                 var allocationResult = this.allocationCreator.Create(
-                    allocationDate, requestsCache, reservations, users, configuration, LeadTimeType.Short, []);
+                    allocationDate, requestsCache, reservations, users, configuration, LeadTimeType.Short, guestRequestsCache);
 
                 UpdateRequests(newRequests, allocationResult.AllocatedRequests);
                 UpdateRequests(requestsCache, allocationResult.AllocatedRequests);
+                newGuestRequests.AddRange(allocationResult.UpdatedGuestRequests);
+                UpdateGuestRequests(guestRequestsCache, allocationResult.UpdatedGuestRequests);
             }
 
             foreach (var allocationDate in longLeadTimeAllocationDates)
             {
                 var allocationResult = this.allocationCreator.Create(
-                    allocationDate, requestsCache, reservations, users, configuration, LeadTimeType.Long, []);
+                    allocationDate, requestsCache, reservations, users, configuration, LeadTimeType.Long, guestRequestsCache);
 
                 UpdateRequests(newRequests, allocationResult.AllocatedRequests);
                 UpdateRequests(requestsCache, allocationResult.AllocatedRequests);
+                newGuestRequests.AddRange(allocationResult.UpdatedGuestRequests);
+                UpdateGuestRequests(guestRequestsCache, allocationResult.UpdatedGuestRequests);
             }
 
             await this.requestRepository.SaveRequests(newRequests);
+            await this.guestRequestRepository.SaveGuestRequests(newGuestRequests);
 
             return newRequests;
         }
@@ -103,6 +116,23 @@
                 }
 
                 existingRequests.Add(updatedRequest);
+            }
+        }
+
+        private static void UpdateGuestRequests(
+            ICollection<GuestRequest> existingGuests,
+            IEnumerable<GuestRequest> updatedGuests)
+        {
+            foreach (var updated in updatedGuests)
+            {
+                var previous = existingGuests.SingleOrDefault(g => g.Id == updated.Id);
+
+                if (previous != null)
+                {
+                    existingGuests.Remove(previous);
+                }
+
+                existingGuests.Add(updated);
             }
         }
     }

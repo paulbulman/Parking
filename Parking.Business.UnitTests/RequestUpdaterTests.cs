@@ -62,6 +62,64 @@ public static class RequestUpdaterTests
     ];
 
     [Fact]
+    public static async Task Fetches_and_saves_guest_requests()
+    {
+        var guestRequests = new[]
+        {
+            new GuestRequest("g1", 3.December(2020), "Guest1", "user1", null, GuestRequestStatus.Pending),
+        };
+
+        var updatedGuestRequests = new[]
+        {
+            new GuestRequest("g1", 3.December(2020), "Guest1", "user1", null, GuestRequestStatus.Allocated),
+        };
+
+        var mockGuestRequestRepository = new Mock<IGuestRequestRepository>(MockBehavior.Strict);
+        mockGuestRequestRepository
+            .Setup(r => r.GetGuestRequests(CacheInterval))
+            .ReturnsAsync(guestRequests);
+        mockGuestRequestRepository
+            .Setup(r => r.SaveGuestRequests(It.Is<IReadOnlyCollection<GuestRequest>>(g =>
+                g.Count == 1 && g.First().Id == "g1" && g.First().Status == GuestRequestStatus.Allocated)))
+            .Returns(Task.CompletedTask);
+
+        var mockAllocationCreator = new Mock<IAllocationCreator>(MockBehavior.Strict);
+
+        foreach (var date in AllocationDates)
+        {
+            mockAllocationCreator
+                .Setup(a => a.Create(
+                    date,
+                    It.IsAny<IReadOnlyCollection<Request>>(),
+                    It.IsAny<IReadOnlyCollection<Reservation>>(),
+                    It.IsAny<IReadOnlyCollection<User>>(),
+                    It.IsAny<Configuration>(),
+                    It.IsAny<LeadTimeType>(),
+                    It.IsAny<IReadOnlyCollection<GuestRequest>>()))
+                .Returns(date == 3.December(2020)
+                    ? new AllocationResult(
+                        NewlyAllocatedRequests.Where(r => r.Date == date).ToArray(),
+                        updatedGuestRequests)
+                    : new AllocationResult(
+                        NewlyAllocatedRequests.Where(r => r.Date == date).ToArray(),
+                        []));
+        }
+
+        var requestUpdater = new RequestUpdater(
+            mockAllocationCreator.Object,
+            Mock.Of<IConfigurationRepository>(),
+            CreateMockDateCalculator().Object,
+            mockGuestRequestRepository.Object,
+            CreateMockRequestRepository().Object,
+            Mock.Of<IReservationRepository>(),
+            CreateUserRepository.WithUsers(DefaultUsers));
+
+        await requestUpdater.Update();
+
+        mockGuestRequestRepository.VerifyAll();
+    }
+
+    [Fact]
     public static async Task Updates_requests_for_long_lead_time_and_short_lead_time()
     {
         var mockAllocationCreator = new Mock<IAllocationCreator>(MockBehavior.Strict);
@@ -88,6 +146,7 @@ public static class RequestUpdaterTests
             mockAllocationCreator.Object,
             Mock.Of<IConfigurationRepository>(),
             CreateMockDateCalculator().Object,
+            CreateMockGuestRequestRepository().Object,
             mockRequestRepository.Object,
             Mock.Of<IReservationRepository>(),
             CreateUserRepository.WithUsers(DefaultUsers));
@@ -126,6 +185,7 @@ public static class RequestUpdaterTests
             mockAllocationCreator.Object,
             Mock.Of<IConfigurationRepository>(),
             CreateMockDateCalculator().Object,
+            CreateMockGuestRequestRepository().Object,
             CreateMockRequestRepository().Object,
             Mock.Of<IReservationRepository>(),
             CreateUserRepository.WithUsers(DefaultUsers));
@@ -158,6 +218,7 @@ public static class RequestUpdaterTests
             mockAllocationCreator.Object,
             Mock.Of<IConfigurationRepository>(),
             CreateMockDateCalculator().Object,
+            CreateMockGuestRequestRepository().Object,
             CreateMockRequestRepository().Object,
             Mock.Of<IReservationRepository>(),
             CreateUserRepository.WithUsers(DefaultUsers));
@@ -215,6 +276,7 @@ public static class RequestUpdaterTests
             mockAllocationCreator.Object,
             mockConfigurationRepository.Object,
             CreateMockDateCalculator().Object,
+            CreateMockGuestRequestRepository().Object,
             CreateMockRequestRepository().Object,
             mockReservationRepository.Object,
             mockUserRepository.Object);
@@ -222,6 +284,14 @@ public static class RequestUpdaterTests
         await requestUpdater.Update();
 
         mockAllocationCreator.VerifyAll();
+    }
+
+    private static Mock<IGuestRequestRepository> CreateMockGuestRequestRepository()
+    {
+        var mock = new Mock<IGuestRequestRepository>();
+        mock.Setup(r => r.GetGuestRequests(CacheInterval)).ReturnsAsync([]);
+        mock.Setup(r => r.SaveGuestRequests(It.IsAny<IReadOnlyCollection<GuestRequest>>())).Returns(Task.CompletedTask);
+        return mock;
     }
 
     private static Mock<IDateCalculator> CreateMockDateCalculator()
