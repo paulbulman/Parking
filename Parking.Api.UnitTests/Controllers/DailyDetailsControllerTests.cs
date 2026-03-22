@@ -1,4 +1,4 @@
-﻿// ReSharper disable StringLiteralTypo
+// ReSharper disable StringLiteralTypo
 namespace Parking.Api.UnitTests.Controllers;
 
 using System.Collections.Generic;
@@ -31,8 +31,13 @@ public static class DailyDetailsControllerTests
             .WithGetRequests(activeDates.ToDateInterval(), [])
             .Build();
 
+        var guestRequestRepository = new GuestRequestRepositoryBuilder()
+            .WithGetGuestRequests(activeDates.ToDateInterval(), [])
+            .Build();
+
         var controller = new DailyDetailsController(
             dateCalculator,
+            guestRequestRepository,
             requestRepository,
             Mock.Of<ITriggerRepository>(),
             CreateUserRepository.WithUsers([]))
@@ -78,8 +83,13 @@ public static class DailyDetailsControllerTests
             .WithGetRequests(activeDates.ToDateInterval(), requests)
             .Build();
 
+        var guestRequestRepository = new GuestRequestRepositoryBuilder()
+            .WithGetGuestRequests(activeDates.ToDateInterval(), [])
+            .Build();
+
         var controller = new DailyDetailsController(
             dateCalculator,
+            guestRequestRepository,
             requestRepository,
             Mock.Of<ITriggerRepository>(),
             CreateUserRepository.WithUsers(users))
@@ -123,8 +133,13 @@ public static class DailyDetailsControllerTests
             .WithGetRequests(activeDates.ToDateInterval(), requests)
             .Build();
 
+        var guestRequestRepository = new GuestRequestRepositoryBuilder()
+            .WithGetGuestRequests(activeDates.ToDateInterval(), [])
+            .Build();
+
         var controller = new DailyDetailsController(
             dateCalculator,
+            guestRequestRepository,
             requestRepository,
             Mock.Of<ITriggerRepository>(),
             CreateUserRepository.WithUsers(users))
@@ -170,8 +185,13 @@ public static class DailyDetailsControllerTests
             .WithGetRequests(activeDates.ToDateInterval(), requests)
             .Build();
 
+        var guestRequestRepository = new GuestRequestRepositoryBuilder()
+            .WithGetGuestRequests(activeDates.ToDateInterval(), [])
+            .Build();
+
         var controller = new DailyDetailsController(
             dateCalculator,
+            guestRequestRepository,
             requestRepository,
             Mock.Of<ITriggerRepository>(),
             CreateUserRepository.WithUsers(users))
@@ -228,8 +248,13 @@ public static class DailyDetailsControllerTests
             .WithGetRequests(activeDates.ToDateInterval(), requests)
             .Build();
 
+        var guestRequestRepository = new GuestRequestRepositoryBuilder()
+            .WithGetGuestRequests(activeDates.ToDateInterval(), [])
+            .Build();
+
         var controller = new DailyDetailsController(
             dateCalculator,
+            guestRequestRepository,
             requestRepository,
             Mock.Of<ITriggerRepository>(),
             CreateUserRepository.WithUsers(users))
@@ -268,8 +293,13 @@ public static class DailyDetailsControllerTests
             .WithGetRequests(activeDates.ToDateInterval(), requests)
             .Build();
 
+        var guestRequestRepository = new GuestRequestRepositoryBuilder()
+            .WithGetGuestRequests(activeDates.ToDateInterval(), [])
+            .Build();
+
         var controller = new DailyDetailsController(
             dateCalculator,
+            guestRequestRepository,
             requestRepository,
             Mock.Of<ITriggerRepository>(),
             CreateUserRepository.WithUsers(users))
@@ -299,6 +329,7 @@ public static class DailyDetailsControllerTests
 
         var controller = new DailyDetailsController(
             Mock.Of<IDateCalculator>(),
+            Mock.Of<IGuestRequestRepository>(),
             requestRepository,
             Mock.Of<ITriggerRepository>(),
             Mock.Of<IUserRepository>())
@@ -328,6 +359,7 @@ public static class DailyDetailsControllerTests
 
         var controller = new DailyDetailsController(
             Mock.Of<IDateCalculator>(),
+            Mock.Of<IGuestRequestRepository>(),
             requestRepository,
             Mock.Of<ITriggerRepository>(),
             Mock.Of<IUserRepository>())
@@ -367,8 +399,13 @@ public static class DailyDetailsControllerTests
             CreateUser.With(userId: "user1", firstName: "Cathie", lastName: "Phoenix"),
         };
 
+        var guestRequestRepository = new GuestRequestRepositoryBuilder()
+            .WithGetGuestRequests(activeDates.ToDateInterval(), [])
+            .Build();
+
         var controller = new DailyDetailsController(
             dateCalculator,
+            guestRequestRepository,
             mockRequestRepository.Object,
             Mock.Of<ITriggerRepository>(),
             CreateUserRepository.WithUsers(users))
@@ -408,10 +445,15 @@ public static class DailyDetailsControllerTests
             CreateUser.With(userId: "user1", firstName: "Cathie", lastName: "Phoenix"),
         };
 
+        var guestRequestRepository = new GuestRequestRepositoryBuilder()
+            .WithGetGuestRequests(activeDates.ToDateInterval(), [])
+            .Build();
+
         var mockTriggerRepository = new Mock<ITriggerRepository>();
 
         var controller = new DailyDetailsController(
             dateCalculator,
+            guestRequestRepository,
             requestRepository,
             mockTriggerRepository.Object,
             CreateUserRepository.WithUsers(users))
@@ -454,8 +496,13 @@ public static class DailyDetailsControllerTests
             CreateUser.With(userId: "user1", firstName: "Cathie", lastName: "Phoenix"),
         };
 
+        var guestRequestRepository = new GuestRequestRepositoryBuilder()
+            .WithGetGuestRequests(activeDates.ToDateInterval(), [])
+            .Build();
+
         var controller = new DailyDetailsController(
             dateCalculator,
+            guestRequestRepository,
             requestRepository,
             Mock.Of<ITriggerRepository>(),
             CreateUserRepository.WithUsers(users))
@@ -472,6 +519,192 @@ public static class DailyDetailsControllerTests
 
         Assert.True(actual.IsAllowed);
         Assert.Equal(value, actual.IsSet);
+    }
+
+    [Fact]
+    public static async Task Shows_allocated_guest_in_allocated_users()
+    {
+        var activeDates = new[] { 12.July(2021) };
+        var dateCalculator = CreateDateCalculator.WithActiveDates(activeDates);
+
+        var users = new[]
+        {
+            CreateUser.With(userId: "user1", firstName: "John", lastName: "Doe"),
+        };
+
+        var requests = new[]
+        {
+            new Request("user1", 12.July(2021), RequestStatus.Allocated),
+        };
+
+        var guestRequests = new[]
+        {
+            new GuestRequest("g1", 12.July(2021), "Alice Smith", "user1", null, GuestRequestStatus.Allocated),
+        };
+
+        var requestRepository = new RequestRepositoryBuilder()
+            .WithGetRequests(activeDates.ToDateInterval(), requests)
+            .Build();
+
+        var guestRequestRepository = new GuestRequestRepositoryBuilder()
+            .WithGetGuestRequests(activeDates.ToDateInterval(), guestRequests)
+            .Build();
+
+        var controller = new DailyDetailsController(
+            dateCalculator,
+            guestRequestRepository,
+            requestRepository,
+            Mock.Of<ITriggerRepository>(),
+            CreateUserRepository.WithUsers(users))
+        {
+            ControllerContext = CreateControllerContext.WithUsername("user1")
+        };
+
+        var result = await controller.GetAsync();
+
+        var resultValue = GetResultValue<DailyDetailsResponse>(result);
+        var data = GetDailyData(resultValue.Details, 12.July(2021));
+
+        Assert.Equal(2, data.AllocatedUsers.Count());
+        Assert.Contains(data.AllocatedUsers, u => u.Name == "Alice Smith (visiting John Doe)");
+    }
+
+    [Fact]
+    public static async Task Shows_interrupted_guest_in_interrupted_users()
+    {
+        var activeDates = new[] { 12.July(2021) };
+        var dateCalculator = CreateDateCalculator.WithActiveDates(activeDates);
+
+        var users = new[]
+        {
+            CreateUser.With(userId: "user1", firstName: "John", lastName: "Doe"),
+        };
+
+        var requests = new[]
+        {
+            new Request("user1", 12.July(2021), RequestStatus.Interrupted),
+        };
+
+        var guestRequests = new[]
+        {
+            new GuestRequest("g1", 12.July(2021), "Alice Smith", "user1", null, GuestRequestStatus.Interrupted),
+        };
+
+        var requestRepository = new RequestRepositoryBuilder()
+            .WithGetRequests(activeDates.ToDateInterval(), requests)
+            .Build();
+
+        var guestRequestRepository = new GuestRequestRepositoryBuilder()
+            .WithGetGuestRequests(activeDates.ToDateInterval(), guestRequests)
+            .Build();
+
+        var controller = new DailyDetailsController(
+            dateCalculator,
+            guestRequestRepository,
+            requestRepository,
+            Mock.Of<ITriggerRepository>(),
+            CreateUserRepository.WithUsers(users))
+        {
+            ControllerContext = CreateControllerContext.WithUsername("user1")
+        };
+
+        var result = await controller.GetAsync();
+
+        var resultValue = GetResultValue<DailyDetailsResponse>(result);
+        var data = GetDailyData(resultValue.Details, 12.July(2021));
+
+        Assert.Equal(2, data.InterruptedUsers.Count());
+        Assert.Contains(data.InterruptedUsers, u => u.Name == "Alice Smith (visiting John Doe)");
+    }
+
+    [Fact]
+    public static async Task Shows_pending_guest_in_pending_users()
+    {
+        var activeDates = new[] { 12.July(2021) };
+        var dateCalculator = CreateDateCalculator.WithActiveDates(activeDates);
+
+        var users = new[]
+        {
+            CreateUser.With(userId: "user1", firstName: "John", lastName: "Doe"),
+        };
+
+        var requests = new[]
+        {
+            new Request("user1", 12.July(2021), RequestStatus.Pending),
+        };
+
+        var guestRequests = new[]
+        {
+            new GuestRequest("g1", 12.July(2021), "Alice Smith", "user1", null, GuestRequestStatus.Pending),
+        };
+
+        var requestRepository = new RequestRepositoryBuilder()
+            .WithGetRequests(activeDates.ToDateInterval(), requests)
+            .Build();
+
+        var guestRequestRepository = new GuestRequestRepositoryBuilder()
+            .WithGetGuestRequests(activeDates.ToDateInterval(), guestRequests)
+            .Build();
+
+        var controller = new DailyDetailsController(
+            dateCalculator,
+            guestRequestRepository,
+            requestRepository,
+            Mock.Of<ITriggerRepository>(),
+            CreateUserRepository.WithUsers(users))
+        {
+            ControllerContext = CreateControllerContext.WithUsername("user1")
+        };
+
+        var result = await controller.GetAsync();
+
+        var resultValue = GetResultValue<DailyDetailsResponse>(result);
+        var data = GetDailyData(resultValue.Details, 12.July(2021));
+
+        Assert.Equal(2, data.PendingUsers.Count());
+        Assert.Contains(data.PendingUsers, u => u.Name == "Alice Smith (visiting John Doe)");
+    }
+
+    [Fact]
+    public static async Task Shows_deleted_visiting_user_in_guest_name()
+    {
+        var activeDates = new[] { 12.July(2021) };
+        var dateCalculator = CreateDateCalculator.WithActiveDates(activeDates);
+
+        var users = new User[] { };
+
+        var requests = new Request[] { };
+
+        var guestRequests = new[]
+        {
+            new GuestRequest("g1", 12.July(2021), "Alice Smith", "deleted-user", null, GuestRequestStatus.Allocated),
+        };
+
+        var requestRepository = new RequestRepositoryBuilder()
+            .WithGetRequests(activeDates.ToDateInterval(), requests)
+            .Build();
+
+        var guestRequestRepository = new GuestRequestRepositoryBuilder()
+            .WithGetGuestRequests(activeDates.ToDateInterval(), guestRequests)
+            .Build();
+
+        var controller = new DailyDetailsController(
+            dateCalculator,
+            guestRequestRepository,
+            requestRepository,
+            Mock.Of<ITriggerRepository>(),
+            CreateUserRepository.WithUsers(users))
+        {
+            ControllerContext = CreateControllerContext.WithUsername("user1")
+        };
+
+        var result = await controller.GetAsync();
+
+        var resultValue = GetResultValue<DailyDetailsResponse>(result);
+        var data = GetDailyData(resultValue.Details, 12.July(2021));
+
+        Assert.Single(data.AllocatedUsers);
+        Assert.Contains(data.AllocatedUsers, u => u.Name == "Alice Smith (visiting deleted user)");
     }
 
     private static bool CheckRequests(

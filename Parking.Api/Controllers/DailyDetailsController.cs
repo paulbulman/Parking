@@ -1,4 +1,4 @@
-﻿namespace Parking.Api.Controllers;
+namespace Parking.Api.Controllers;
 
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +16,7 @@ using NodaTime;
 [ApiController]
 public class DailyDetailsController(
     IDateCalculator dateCalculator,
+    IGuestRequestRepository guestRequestRepository,
     IRequestRepository requestRepository,
     ITriggerRepository triggerRepository,
     IUserRepository userRepository)
@@ -35,10 +36,12 @@ public class DailyDetailsController(
 
         var requests = await requestRepository.GetRequests(activeDates.ToDateInterval());
 
+        var guestRequests = await guestRequestRepository.GetGuestRequests(activeDates.ToDateInterval());
+
         var users = await userRepository.GetUsers();
 
         var data = activeDates
-            .Select(d => CreateDailyData(d, this.GetCognitoUserId(), requests, users))
+            .Select(d => CreateDailyData(d, this.GetCognitoUserId(), requests, guestRequests, users))
             .ToArray();
 
         var response = new DailyDetailsResponse(data);
@@ -85,11 +88,18 @@ public class DailyDetailsController(
         LocalDate localDate,
         string currentUserId,
         IReadOnlyCollection<Request> requests,
+        IReadOnlyCollection<GuestRequest> guestRequests,
         IReadOnlyCollection<User> users)
     {
         var filteredRequests = requests
             .Where(r => r.Date == localDate)
             .ToArray();
+
+        var filteredGuests = guestRequests
+            .Where(g => g.Date == localDate)
+            .ToArray();
+
+        var userLookup = users.ToDictionary(u => u.UserId);
 
         var allocatedRequests = filteredRequests
             .Where(r => r.Status == RequestStatus.Allocated);
@@ -98,16 +108,44 @@ public class DailyDetailsController(
         var pendingRequests = filteredRequests
             .Where(r => r.Status == RequestStatus.Pending);
 
+        var allocatedUsers = CreateDailyDetailUsers(currentUserId, allocatedRequests, users)
+            .Concat(filteredGuests
+                .Where(g => g.Status == GuestRequestStatus.Allocated)
+                .Select(g => new DailyDetailsUser(
+                    name: FormatGuestName(g, userLookup),
+                    isHighlighted: false)));
+
+        var interruptedUsers = CreateDailyDetailUsers(currentUserId, interruptedRequests, users)
+            .Concat(filteredGuests
+                .Where(g => g.Status == GuestRequestStatus.Interrupted)
+                .Select(g => new DailyDetailsUser(
+                    name: FormatGuestName(g, userLookup),
+                    isHighlighted: false)));
+
+        var pendingUsers = CreateDailyDetailUsers(currentUserId, pendingRequests, users)
+            .Concat(filteredGuests
+                .Where(g => g.Status == GuestRequestStatus.Pending)
+                .Select(g => new DailyDetailsUser(
+                    name: FormatGuestName(g, userLookup),
+                    isHighlighted: false)));
+
         var stayInterruptedStatus = CreateStayInterruptedStatus(currentUserId, filteredRequests);
 
         var data = new DailyDetailsData(
-            allocatedUsers: CreateDailyDetailUsers(currentUserId, allocatedRequests, users),
-            interruptedUsers: CreateDailyDetailUsers(currentUserId, interruptedRequests, users),
-            pendingUsers: CreateDailyDetailUsers(currentUserId, pendingRequests, users),
+            allocatedUsers: allocatedUsers,
+            interruptedUsers: interruptedUsers,
+            pendingUsers: pendingUsers,
             stayInterruptedStatus: stayInterruptedStatus);
 
         return new Day<DailyDetailsData>(localDate, data);
     }
+
+    private static string FormatGuestName(
+        GuestRequest guest,
+        IReadOnlyDictionary<string, User> userLookup) =>
+        userLookup.TryGetValue(guest.VisitingUserId, out var user)
+            ? $"{guest.Name} (visiting {user.DisplayName()})"
+            : $"{guest.Name} (visiting deleted user)";
 
     private static IEnumerable<DailyDetailsUser> CreateDailyDetailUsers(
         string currentUserId,
