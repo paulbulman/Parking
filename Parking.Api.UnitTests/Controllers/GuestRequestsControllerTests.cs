@@ -423,4 +423,73 @@ public static class GuestRequestsControllerTests
                 userRepository ?? Mock.Of<IUserRepository>());
         }
     }
+
+    public static class Delete
+    {
+        [Fact]
+        public static async Task Deletes_guest_request_successfully()
+        {
+            var existingGuest = new GuestRequest(
+                id: "guest-id-1",
+                date: 15.March(2026),
+                name: "Alice Smith",
+                visitingUserId: "user1",
+                registrationNumber: null,
+                status: GuestRequestStatus.Pending);
+
+            var mockGuestRequestRepository = new Mock<IGuestRequestRepository>(MockBehavior.Strict);
+            mockGuestRequestRepository
+                .Setup(r => r.GetGuestRequests(It.IsAny<DateInterval>()))
+                .ReturnsAsync([existingGuest]);
+            mockGuestRequestRepository
+                .Setup(r => r.DeleteGuestRequest(15.March(2026), "guest-id-1"))
+                .Returns(Task.CompletedTask);
+
+            var mockTriggerRepository = new Mock<ITriggerRepository>(MockBehavior.Strict);
+            mockTriggerRepository
+                .Setup(r => r.AddTrigger())
+                .Returns(Task.CompletedTask);
+
+            var controller = CreateController(
+                guestRequestRepository: mockGuestRequestRepository.Object,
+                triggerRepository: mockTriggerRepository.Object);
+
+            var result = await controller.DeleteAsync("2026-03-15", "guest-id-1");
+
+            Assert.IsType<OkResult>(result);
+            mockGuestRequestRepository.VerifyAll();
+            mockTriggerRepository.VerifyAll();
+        }
+
+        [Fact]
+        public static async Task Returns_not_found_for_nonexistent_guest()
+        {
+            var mockGuestRequestRepository = new Mock<IGuestRequestRepository>(MockBehavior.Strict);
+            mockGuestRequestRepository
+                .Setup(r => r.GetGuestRequests(It.IsAny<DateInterval>()))
+                .ReturnsAsync([]);
+
+            var controller = CreateController(guestRequestRepository: mockGuestRequestRepository.Object);
+
+            var result = await controller.DeleteAsync("2026-03-15", "nonexistent-id");
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        private static GuestRequestsController CreateController(
+            IGuestRequestRepository? guestRequestRepository = null,
+            ITriggerRepository? triggerRepository = null,
+            IUserRepository? userRepository = null,
+            IReadOnlyCollection<LocalDate>? activeDates = null)
+        {
+            var dateCalculator = CreateDateCalculator.WithActiveDates(
+                activeDates ?? [15.March(2026)]);
+
+            return new GuestRequestsController(
+                dateCalculator,
+                guestRequestRepository ?? Mock.Of<IGuestRequestRepository>(),
+                triggerRepository ?? Mock.Of<ITriggerRepository>(),
+                userRepository ?? Mock.Of<IUserRepository>());
+        }
+    }
 }

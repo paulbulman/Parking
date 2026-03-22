@@ -122,4 +122,31 @@ public class GuestRequestsController(
 
         return this.Ok();
     }
+
+    [HttpDelete("{date}/{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteAsync(string date, string id)
+    {
+        var localDate = LocalDatePattern.Iso.Parse(date);
+
+        if (!localDate.Success)
+        {
+            return this.BadRequest();
+        }
+
+        var existingGuests = await guestRequestRepository.GetGuestRequests(localDate.Value.ToDateInterval());
+        var existingGuest = existingGuests.SingleOrDefault(g => g.Id == id);
+
+        if (existingGuest == null)
+        {
+            return this.NotFound();
+        }
+
+        await guestRequestRepository.DeleteGuestRequest(localDate.Value, id);
+
+        await triggerRepository.AddTrigger();
+
+        return this.Ok();
+    }
 }
