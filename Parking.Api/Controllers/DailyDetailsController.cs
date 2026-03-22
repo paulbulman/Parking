@@ -112,21 +112,21 @@ public class DailyDetailsController(
             .Concat(filteredGuests
                 .Where(g => g.Status == GuestRequestStatus.Allocated)
                 .Select(g => new DailyDetailsUser(
-                    name: FormatGuestName(g, userLookup),
+                    name: g.FormatGuestName(userLookup),
                     isHighlighted: false)));
 
         var interruptedUsers = CreateDailyDetailUsers(currentUserId, interruptedRequests, users)
             .Concat(filteredGuests
                 .Where(g => g.Status == GuestRequestStatus.Interrupted)
                 .Select(g => new DailyDetailsUser(
-                    name: FormatGuestName(g, userLookup),
+                    name: g.FormatGuestName(userLookup),
                     isHighlighted: false)));
 
         var pendingUsers = CreateDailyDetailUsers(currentUserId, pendingRequests, users)
             .Concat(filteredGuests
                 .Where(g => g.Status == GuestRequestStatus.Pending)
                 .Select(g => new DailyDetailsUser(
-                    name: FormatGuestName(g, userLookup),
+                    name: g.FormatGuestName(userLookup),
                     isHighlighted: false)));
 
         var stayInterruptedStatus = CreateStayInterruptedStatus(currentUserId, filteredRequests);
@@ -139,13 +139,6 @@ public class DailyDetailsController(
 
         return new Day<DailyDetailsData>(localDate, data);
     }
-
-    private static string FormatGuestName(
-        GuestRequest guest,
-        IReadOnlyDictionary<string, User> userLookup) =>
-        userLookup.TryGetValue(guest.VisitingUserId, out var user)
-            ? $"{guest.Name} (visiting {user.DisplayName()})"
-            : $"{guest.Name} (visiting deleted user)";
 
     private static IEnumerable<DailyDetailsUser> CreateDailyDetailUsers(
         string currentUserId,

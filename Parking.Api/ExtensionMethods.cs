@@ -8,7 +8,7 @@ using Model;
 
 public static class ExtensionMethods
 {
-    public static string GetCognitoUserId(this ControllerBase controller) => 
+    public static string GetCognitoUserId(this ControllerBase controller) =>
         controller.User.Claims.Single(c => c.Type == "cognito:username").Value;
 
     public static IOrderedEnumerable<User> OrderForDisplay(this IEnumerable<User> users) => users
@@ -16,4 +16,11 @@ public static class ExtensionMethods
         .ThenBy(u => u.FirstName, StringComparer.InvariantCultureIgnoreCase);
 
     public static string DisplayName(this User user) => $"{user.FirstName} {user.LastName}";
+
+    public static string FormatGuestName(
+        this GuestRequest guest,
+        IReadOnlyDictionary<string, User> userLookup) =>
+        userLookup.TryGetValue(guest.VisitingUserId, out var user)
+            ? $"{guest.Name} (visiting {user.DisplayName()})"
+            : $"{guest.Name} (visiting deleted user)";
 }

@@ -17,6 +17,22 @@ using Xunit;
 
 public static class GuestRequestsControllerTests
 {
+    private static GuestRequestsController CreateController(
+        IGuestRequestRepository? guestRequestRepository = null,
+        ITriggerRepository? triggerRepository = null,
+        IUserRepository? userRepository = null,
+        IReadOnlyCollection<LocalDate>? activeDates = null)
+    {
+        var dateCalculator = CreateDateCalculator.WithActiveDates(
+            activeDates ?? [15.March(2026)]);
+
+        return new GuestRequestsController(
+            dateCalculator,
+            guestRequestRepository ?? Mock.Of<IGuestRequestRepository>(),
+            triggerRepository ?? Mock.Of<ITriggerRepository>(),
+            userRepository ?? Mock.Of<IUserRepository>());
+    }
+
     public static class Post
     {
         [Fact]
@@ -197,26 +213,36 @@ public static class GuestRequestsControllerTests
 
             Assert.IsType<BadRequestResult>(result);
         }
-
-        private static GuestRequestsController CreateController(
-            IGuestRequestRepository? guestRequestRepository = null,
-            ITriggerRepository? triggerRepository = null,
-            IUserRepository? userRepository = null,
-            IReadOnlyCollection<LocalDate>? activeDates = null)
-        {
-            var dateCalculator = CreateDateCalculator.WithActiveDates(
-                activeDates ?? [15.March(2026)]);
-
-            return new GuestRequestsController(
-                dateCalculator,
-                guestRequestRepository ?? Mock.Of<IGuestRequestRepository>(),
-                triggerRepository ?? Mock.Of<ITriggerRepository>(),
-                userRepository ?? Mock.Of<IUserRepository>());
-        }
     }
 
     public static class Put
     {
+        [Fact]
+        public static async Task Rejects_empty_name()
+        {
+            var existingGuest = new GuestRequest(
+                id: "guest-id-1",
+                date: 15.March(2026),
+                name: "Alice Smith",
+                visitingUserId: "user1",
+                registrationNumber: null,
+                status: GuestRequestStatus.Pending);
+
+            var mockGuestRequestRepository = new Mock<IGuestRequestRepository>(MockBehavior.Strict);
+            mockGuestRequestRepository
+                .Setup(r => r.GetGuestRequests(It.IsAny<DateInterval>()))
+                .ReturnsAsync([existingGuest]);
+
+            var controller = CreateController(
+                guestRequestRepository: mockGuestRequestRepository.Object);
+
+            var request = new GuestRequestsPutRequest("", "user1", null);
+
+            var result = await controller.PutAsync("2026-03-15", "guest-id-1", request);
+
+            Assert.IsType<BadRequestResult>(result);
+        }
+
         [Fact]
         public static async Task Updates_guest_request_successfully()
         {
@@ -409,20 +435,6 @@ public static class GuestRequestsControllerTests
 
             mockTriggerRepository.VerifyAll();
         }
-
-        private static GuestRequestsController CreateController(
-            IGuestRequestRepository? guestRequestRepository = null,
-            ITriggerRepository? triggerRepository = null,
-            IUserRepository? userRepository = null)
-        {
-            var dateCalculator = CreateDateCalculator.WithActiveDates([15.March(2026)]);
-
-            return new GuestRequestsController(
-                dateCalculator,
-                guestRequestRepository ?? Mock.Of<IGuestRequestRepository>(),
-                triggerRepository ?? Mock.Of<ITriggerRepository>(),
-                userRepository ?? Mock.Of<IUserRepository>());
-        }
     }
 
     public static class Get
@@ -531,22 +543,6 @@ public static class GuestRequestsControllerTests
 
             Assert.Empty(response.GuestRequests);
         }
-
-        private static GuestRequestsController CreateController(
-            IGuestRequestRepository? guestRequestRepository = null,
-            ITriggerRepository? triggerRepository = null,
-            IUserRepository? userRepository = null,
-            IReadOnlyCollection<LocalDate>? activeDates = null)
-        {
-            var dateCalculator = CreateDateCalculator.WithActiveDates(
-                activeDates ?? [15.March(2026)]);
-
-            return new GuestRequestsController(
-                dateCalculator,
-                guestRequestRepository ?? Mock.Of<IGuestRequestRepository>(),
-                triggerRepository ?? Mock.Of<ITriggerRepository>(),
-                userRepository ?? Mock.Of<IUserRepository>());
-        }
     }
 
     public static class Delete
@@ -599,22 +595,6 @@ public static class GuestRequestsControllerTests
             var result = await controller.DeleteAsync("2026-03-15", "nonexistent-id");
 
             Assert.IsType<NotFoundResult>(result);
-        }
-
-        private static GuestRequestsController CreateController(
-            IGuestRequestRepository? guestRequestRepository = null,
-            ITriggerRepository? triggerRepository = null,
-            IUserRepository? userRepository = null,
-            IReadOnlyCollection<LocalDate>? activeDates = null)
-        {
-            var dateCalculator = CreateDateCalculator.WithActiveDates(
-                activeDates ?? [15.March(2026)]);
-
-            return new GuestRequestsController(
-                dateCalculator,
-                guestRequestRepository ?? Mock.Of<IGuestRequestRepository>(),
-                triggerRepository ?? Mock.Of<ITriggerRepository>(),
-                userRepository ?? Mock.Of<IUserRepository>());
         }
     }
 }

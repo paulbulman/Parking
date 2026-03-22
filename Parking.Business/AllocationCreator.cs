@@ -50,6 +50,11 @@ namespace Parking.Business
 
             var freeSpaces = allocatableSpaces - alreadyAllocatedSpaces;
 
+            if (freeSpaces < 0)
+            {
+                this.logger.LogWarning("{freeSpaces} free spaces for {@date}.", freeSpaces, date);
+            }
+
             // Allocate pending/interrupted guest requests first
             var pendingGuests = guestRequests
                 .Where(g => g.Date == date && g.Status is GuestRequestStatus.Pending or GuestRequestStatus.Interrupted)

@@ -119,6 +119,11 @@ public class GuestRequestsController(
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> PutAsync(string date, string id, [FromBody] GuestRequestsPutRequest request)
     {
+        if (string.IsNullOrWhiteSpace(request.Name))
+        {
+            return this.BadRequest();
+        }
+
         var localDate = LocalDatePattern.Iso.Parse(date);
 
         if (!localDate.Success)

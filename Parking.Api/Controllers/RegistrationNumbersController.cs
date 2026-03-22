@@ -42,7 +42,7 @@ public class RegistrationNumbersController(
             .Where(g => !string.IsNullOrEmpty(g.RegistrationNumber))
             .Select(g => new RegistrationNumbersData(
                 FormatRegistrationNumber(g.RegistrationNumber!),
-                FormatGuestName(g, userLookup)));
+                g.FormatGuestName(userLookup)));
 
         var data = userData.Concat(guestData)
             .Where(d =>
@@ -75,10 +75,4 @@ public class RegistrationNumbersController(
         Regex.Replace(rawRegistrationNumber, "[^a-zA-Z0-9]", string.Empty)
             .ToUpper(CultureInfo.InvariantCulture);
 
-    private static string FormatGuestName(
-        GuestRequest guest,
-        IReadOnlyDictionary<string, User> userLookup) =>
-        userLookup.TryGetValue(guest.VisitingUserId, out var user)
-            ? $"{guest.Name} (visiting {user.DisplayName()})"
-            : $"{guest.Name} (visiting deleted user)";
 }
