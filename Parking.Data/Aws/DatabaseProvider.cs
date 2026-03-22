@@ -17,6 +17,8 @@
 
         Task<IReadOnlyCollection<RawItem>> GetRequests(string userId, YearMonth yearMonth);
 
+        Task<IReadOnlyCollection<RawItem>> GetGuests(YearMonth yearMonth);
+
         Task<IReadOnlyCollection<RawItem>> GetReservations(YearMonth yearMonth);
 
         Task<RawItem> GetSchedules();
@@ -82,6 +84,14 @@
             const string HashKeyValue = "TRIGGER";
 
             return await this.QueryPartitionKey(HashKeyValue);
+        }
+
+        public async Task<IReadOnlyCollection<RawItem>> GetGuests(YearMonth yearMonth)
+        {
+            const string HashKeyValue = "GLOBAL";
+            var conditionValue = $"GUESTS#{YearMonthPattern.Iso.Format(yearMonth)}";
+
+            return await this.QueryPartitionKey(HashKeyValue, conditionValue);
         }
 
         public async Task<IReadOnlyCollection<RawItem>> GetReservations(YearMonth yearMonth)

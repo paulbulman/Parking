@@ -61,6 +61,14 @@
                 Trigger = key
             };
 
+        public static RawItem CreateGuests(
+            string primaryKey,
+            string sortKey,
+            Dictionary<string, List<GuestData>> guests) => new RawItem(primaryKey, sortKey)
+            {
+                Guests = guests
+            };
+
         public static RawItem CreateUser(
             string primaryKey,
             string sortKey,
@@ -136,6 +144,9 @@
 
         [DynamoDBProperty("trigger")]
         public string? Trigger { get; set; }
+
+        [DynamoDBProperty("guests", typeof(GuestsConverter))]
+        public Dictionary<string, List<GuestData>>? Guests { get; set; }
     }
 
     public class ReservationsConverter : IPropertyConverter
@@ -161,6 +172,64 @@
                 dailyData.ToDictionary(
                     day => day.Key,
                     day => (DynamoDBEntry)new DynamoDBList(day.Value.Select(userId => new Primitive(userId)))));
+        }
+    }
+
+    public class GuestData
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string VisitingUserId { get; set; } = string.Empty;
+        public string? RegistrationNumber { get; set; }
+        public string Status { get; set; } = string.Empty;
+    }
+
+    public class GuestsConverter : IPropertyConverter
+    {
+        public object FromEntry(DynamoDBEntry entry) =>
+            entry.AsDocument().ToDictionary(
+                dailyData => dailyData.Key,
+                dailyData => dailyData.Value
+                    .AsDynamoDBList()
+                    .Entries
+                    .Where(e => e is Document)
+                    .Select(e =>
+                    {
+                        var doc = e.AsDocument();
+                        return new GuestData
+                        {
+                            Id = doc.ContainsKey("id") ? doc["id"].AsString() : string.Empty,
+                            Name = doc.ContainsKey("name") ? doc["name"].AsString() : string.Empty,
+                            VisitingUserId = doc.ContainsKey("visitingUserId") ? doc["visitingUserId"].AsString() : string.Empty,
+                            RegistrationNumber = doc.ContainsKey("registrationNumber") ? doc["registrationNumber"].AsString() : null,
+                            Status = doc.ContainsKey("status") ? doc["status"].AsString() : string.Empty,
+                        };
+                    })
+                    .ToList());
+
+        public DynamoDBEntry ToEntry(object value)
+        {
+            if (value is not Dictionary<string, List<GuestData>> dailyData)
+            {
+                throw new ArgumentException("Could not convert raw value to dictionary", nameof(value));
+            }
+
+            return new Document(
+                dailyData.ToDictionary(
+                    day => day.Key,
+                    day => (DynamoDBEntry)new DynamoDBList(day.Value.Select(guest =>
+                    {
+                        var doc = new Document();
+                        doc["id"] = new Primitive(guest.Id);
+                        doc["name"] = new Primitive(guest.Name);
+                        doc["visitingUserId"] = new Primitive(guest.VisitingUserId);
+                        if (guest.RegistrationNumber != null)
+                        {
+                            doc["registrationNumber"] = new Primitive(guest.RegistrationNumber);
+                        }
+                        doc["status"] = new Primitive(guest.Status);
+                        return (DynamoDBEntry)doc;
+                    }))));
         }
     }
 
