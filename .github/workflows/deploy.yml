@@ -24,6 +24,8 @@ jobs:
           cache-dependency-path: "**/*.csproj"
 
       - name: Run tests
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
         run: dotnet test
 
   build:

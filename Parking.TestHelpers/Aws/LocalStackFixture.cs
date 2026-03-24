@@ -9,7 +9,9 @@ namespace Parking.TestHelpers.Aws
     {
         public static string ServiceUrl { get; private set; } = string.Empty;
 
-        private readonly LocalStackContainer container = new LocalStackBuilder("localstack/localstack").Build();
+        private readonly LocalStackContainer container = new LocalStackBuilder("localstack/localstack")
+            .WithEnvironment("LOCALSTACK_AUTH_TOKEN", Environment.GetEnvironmentVariable("LOCALSTACK_AUTH_TOKEN") ?? string.Empty)
+            .Build();
 
         public async ValueTask InitializeAsync()
         {
