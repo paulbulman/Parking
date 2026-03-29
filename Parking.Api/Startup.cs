@@ -74,6 +74,8 @@ public class Startup
                 builder => builder.RequireClaim("cognito:groups", Constants.UserAdminGroupName));
         });
 
+        services.AddOpenApiDocument(c => c.Title = "Parking");
+
         services.AddSingleton<IClock>(SystemClock.Instance);
 
         services.AddScoped<IAmazonCognitoIdentityProvider, AmazonCognitoIdentityProviderClient>();
@@ -101,6 +103,8 @@ public class Startup
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
+            app.UseOpenApi();
+            app.UseSwaggerUi();
         }
 
         app.UseSerilogRequestLogging();
