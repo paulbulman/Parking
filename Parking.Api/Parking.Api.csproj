@@ -22,7 +22,7 @@
     <PackageReference Include="NodaTime" Version="3.3.1" />
     <PackageReference Include="NSwag.AspNetCore" Version="14.6.3" />
     <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.17.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Parking.Business\Parking.Business.csproj" />
