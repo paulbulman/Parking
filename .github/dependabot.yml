@@ -6,3 +6,10 @@ updates:
       interval: "monthly"
     target-branch: "dependency-updates"
     open-pull-requests-limit: 50
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    target-branch: "dependency-updates"
+    open-pull-requests-limit: 50
